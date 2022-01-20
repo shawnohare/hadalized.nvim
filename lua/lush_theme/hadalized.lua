@@ -185,9 +185,82 @@ local p = {
     gray85 = hsluv('#d4d4d4'), -- l=85,
     gray90 = hsluv('#e2e2e2'), -- l=90,
     gray95 = hsluv('#f1f1f1'), -- l=95.
+
+    -- base values (saturation mostly 10)
+    -- -- base08 = hsluv('#051318'), -- s=50,
+    -- -- base10 = hsluv('#08191e'), -- s=50,
+    -- -- base15 = hsluv('#0f262d'), -- s=50,
+    -- -- base20 = hsluv('#16333b'), -- s=50,
+    -- base08 = hsluv('#00141b'), -- s=100,
+    -- base10 = hsluv('#001a22'), -- s=100,
+    -- base15 = hsluv('#002732'), -- s=100,
+    -- base20 = hsluv('#003441'), -- s=100,
+    -- -- base25 = hsluv('#1d3f4a'), -- s=50,
+    -- -- base25 = hsluv('#004151'), -- s=100,
+    -- -- base25 = hsluv('#2a3d43'), -- s=25,
+    -- base25 = hsluv('#333c3e'), -- s=10
+    -- base30 = hsluv('#3e484b'), -- s=10
+    -- base35 = hsluv('#495457'), -- s=10
+    -- base40 = hsluv('#556064'), -- s=10
+    -- base45 = hsluv('#606d71'), -- s=10
+    -- base50 = hsluv('#6c7a7e'), -- s=10
+    -- base55 = hsluv('#79878b'), -- s=10
+    -- base60 = hsluv('#859499'), -- s=10
+    -- base65 = hsluv('#93a1a6'), -- s=10
+    -- base70 = hsluv('#a1aeb3'), -- s=10,
+    -- base75 = hsluv('#afbbc0'), -- s=10
+    -- base80  = hsluv('#bec9cc'),  -- s=10
+    -- base85  = hsluv('#ced6d9'),  -- s=10,
+    -- base90  =  hsluv('#dee4e6'), -- s=10,
+    -- -- base92  =  hsluv('#e4e9eb'), -- s=10,
+    -- base95  =  hsluv('#eef1f2'), -- s=10,
+    -- base97  =  hsluv('#f5f7f7'), -- s=10,
+    -- base87  =  hsluv('#d4dcde'), -- l=87,
+    -- base82  =  hsluv('#c4ced1'), -- l=82
+    --
+    -- base (saturation mostly 5)
+    base05 = hsluv('#000b0f'),
+    base08 = hsluv('#00141b'), -- s=100,
+    base10 = hsluv('#001a22'), -- s=100,
+    base12 = hsluv('#001f28'), -- s=100,
+    base15 = hsluv('#002732'), -- s=100,
+    -- base20 = hsluv('#16333b'), -- s=50,
+    -- base20 = hsluv('#0b343f'), -- s=75, hsluv(221, 90, 19),
+    base20 = hsluv('#003441'), -- s=100,
+    -- base25 = hsluv('#2a3d43'), -- s=25,
+    base25 = hsluv('#363b3c'), -- s=05,
+    -- base25 = hsluv('#1d3f4a'), -- s=50,
+    base30 = hsluv('#424748'),
+    base35 = hsluv('#4d5355'),
+    base40 = hsluv('#595f61'),
+    base45 = hsluv('#656c6e'),
+    base50 = hsluv('#71787b'),
+    base55 = hsluv('#7e8588'),
+    base60 = hsluv('#8b9295'),
+    base65 = hsluv('#989fa2'),
+    base70 = hsluv('#a6adaf'),
+    base75 = hsluv('#b4babc'),
+    base80 = hsluv('#c2c8c9'),
+    base85 = hsluv('#d1d5d7'),
+    base90 = hsluv('#e0e3e4'),
+    base93 = hsluv('#e9ebec'), -- s=05
+    base95 = hsluv('#f0f1f1'),
+    base97 = hsluv('#f6f7f7'),
 }
 
 local contrasts = {
+    base97s10 = {
+        base25s10 = 10.51
+    },
+    base97s05 = {
+        base25s05 = 10.58,
+        base25s25 = 10.59,
+
+    },
+    base08 = {
+        base75s10 = 9.58,
+        base75s05 = 9.58,
+    },
     bgl08 = {
         gray45 = 3.47,
         gray50 = 4.2,
@@ -209,21 +282,22 @@ local contrasts = {
     },
 }
 
+
 p.light = {
     -- okhsl(220, 10, l)
     bg = {
-        hsluv('#f5f7f7'), -- l=97,
-        hsluv('#eef1f2'), -- l=95,
-        hsluv('#e4e9eb'), -- l=92,
-        hsluv('#d4dcde'), -- l=87,
-        hsluv('#c4ced1'), -- l=82
+        p.base97,
+        -- p.base95,
+        p.base93,
+        p.base90,
+        p.base85,
     },
     fg = {
-        p.gray50,
-        p.gray40,
-        p.gray30,
-        p.gray20,
-        p.gray05,
+        p.base55,
+        p.base45,
+        p.base30,
+        p.base25,
+        p.base08,
     },
     color = {
         dim = p.c55,
@@ -236,21 +310,26 @@ p.light = {
 p.dark = {
     -- okhsl(220, 100, l)
     bg = {
-
-        hsluv('#00141b'), -- l=8
-        hsluv('#001a22'), -- l=10,
-        -- hsluv('#00222b'), -- l=13,
-        hsluv('#002732'), -- l=15, hsluv(222, 100, 14),
-        hsluv('#003441'), -- l=20, hsluv(222, 100, 19)
-        hsluv('#004151'), -- l=25, hsluv(222, 100, 25)
-        -- hsluv('#004e60'), -- l=30,
+        p.base08,
+        -- p.base10,
+        p.base12,
+        p.base15,
+        -- p.base15,
+        -- p.base15,
+        p.base20,
     },
     fg = {
-        p.gray45,
-        p.gray55,
-        p.gray70,
-        p.gray75,
-        p.gray90,
+        p.base45,
+        p.base55,
+        p.base70,
+        p.base75,
+        p.base90,
+        -- min  = p.base45,
+        -- comm = p.base55,
+        -- ref  = p.base70,
+        -- main = p.base75,
+        -- max  = p.base90,
+
     },
     color = {
         dim = p.c55,
@@ -277,8 +356,11 @@ local br = p.mode.color.br
 
 -- local term = {
 --     color1 = c.red,     color9 = c.orange,
---     color3 = c.yellow,  color11 = c.ygreen,
+--     color2 = c.green,   color10 = c.spring,
+--     color3 = c.yellow,  color11 = br.yellow,
+--     color4 = c.blue,    color12 = c.violet,
 --     color5 = c.magenta, color13 = c.rose,
+--     color6 = c.cyan,    color14 = br.cyan
 
 -- }
 
@@ -337,7 +419,7 @@ local theme = lush(function()
         -- lCursor      { }, -- the character under the cursor when |language-mapping| is used (see 'guicursor')
         -- CursorIM     { }, -- like Cursor, but used when in IME mode |CursorIM|
         -- CursorColumn { }, -- Screen-column at the cursor, when 'cursorcolumn' is set.
-        CursorLine   { bg=bg[3] }, -- Screen-line at the cursor, when 'cursorline' is set.  Low-priority if foreground (ctermfg OR guifg) is not set.
+        CursorLine   { bg=bg[2] }, -- Screen-line at the cursor, when 'cursorline' is set.  Low-priority if foreground (ctermfg OR guifg) is not set.
         Directory    { fg=c.blue, Bold }, -- directory names (and other special names in listings)
         DiffAdd      { fg=c.green }, -- diff mode: Added line |diff.txt|
         DiffChange   { fg=c.yellow }, -- diff mode: Changed line |diff.txt|
@@ -348,13 +430,13 @@ local theme = lush(function()
         -- TermCursor   { }, -- cursor in a focused terminal
         -- TermCursorNC { }, -- cursor in an unfocused terminal
         ErrorMsg     { fg=c.red, Bold }, -- error messages on the command line
-        VertSplit    { fg=bg[5] }, -- the column separating vertically split windows
+        VertSplit    { fg=fg[1] }, -- the column separating vertically split windows
         Folded       { bg=bg[3] }, -- line used for closed folds
         -- FoldColumn   { }, -- 'foldcolumn'
         SignColumn   { bg=bg[1]}, -- column where |signs| are displayed
         -- GitSignsDelete { fg=c.red, bg=bg[2] },
         -- GitSignsDeleteNr { fg=c.red },
-        LineNr       { bg=bg[3], fg=fg[2]}, -- Line number for ":number" and ":#" commands, and when 'number' or 'relativenumber' option is set.
+        LineNr       { bg=bg[3], fg=fg[1]}, -- Line number for ":number" and ":#" commands, and when 'number' or 'relativenumber' option is set.
         CursorLineNr { bg=bg[3], fg=c.yellow }, -- Like LineNr when 'cursorline' or 'relativenumber' is set for the cursor line.
         MatchParen   { bg=p.c85.yellow }, -- The character under the cursor or just before it, if it is a paired bracket, and its match. |pi_paren.txt|
         -- ModeMsg      { bg=fg[1],  }, -- 'showmode' message (e.g., "-- INSERT -- ")
@@ -365,8 +447,8 @@ local theme = lush(function()
         Normal       {fg=fg[4], bg=bg[1] }, -- normal text
         NormalFloat  { fg=fg[4], bg=bg[2]}, -- Normal text in floating windows.
         -- NormalNC     {fg=fg[2], bg=bg[2]}, -- normal text in non-current windows
-        Pmenu        { bg=bg[2]}, -- Popup menu: normal item.
-        PmenuSel     { bg=bg[4]}, -- Popup menu: selected item.
+        Pmenu        { bg=bg[2] }, -- Popup menu: normal item.
+        PmenuSel     { bg=bg[4], fg=fg[5] }, -- Popup menu: selected item.
         -- PmenuSbar    { }, -- Popup menu: scrollbar.
         -- PmenuThumb   { }, -- Popup menu: Thumb of the scrollbar.
         Question     { fg=c.green }, -- |hit-enter| prompt and yes/no questions
@@ -379,7 +461,7 @@ local theme = lush(function()
         SpellCap     { fg=c.orange, Underline }, -- Word that should start with a capital. |spell| Combined with the highlighting used otherwise.
         SpellLocal   { fg=c.orange, Underline }, -- Word that is recognized by the spellchecker as one that is used in another region. |spell| Combined with the highlighting used otherwise.
         SpellRare    { fg=c.yellow, Underline }, -- Word that is recognized by the spellchecker as one that is hardly ever used.  |spell| Combined with the highlighting used otherwise.
-        StatusLine   { bg=bg[3], fg=fg[4], Bold}, -- status line of current window
+        StatusLine   { bg=bg[3], fg=fg[4], }, -- status line of current window
         StatusLineNC { bg=bg[1], fg=fg[2]}, -- status lines of not-current windows Note: if this is equal to "StatusLine" Vim will use "^^^" in the status line of the current window.
         -- TabLine      { }, -- tab pages line, not active tab page label
         -- TabLineFill  { }, -- tab pages line, where there are no labels
@@ -407,19 +489,19 @@ local theme = lush(function()
         Identifier     { fg=c.yellow}, -- (preferred) any variable name
         Function       { fg=c.blue}, -- function name (also: methods for classes)
 
-        Statement      { fg=c.green }, -- (preferred) any statement
+        Statement      { fg=c.yellow }, -- (preferred) any statement
         Conditional    { fg=c.rose }, --  if, then, else, endif, switch, etc.
         Repeat         { fg=c.orange }, --   for, do, while, etc.
-        Label          { fg=c.yellow }, --    case, default, etc.
-        Operator       { fg=c.blue, Bold }, -- "sizeof", "+", "*", etc.
+        Label          { fg=c.green }, --    case, default, etc.
+        Operator       { fg=c.blue }, -- "sizeof", "+", "*", etc.
         Keyword        { fg=c.violet }, --  any other keyword
-        Exception      { fg=c.magenta, Bold }, --  try, catch, throw
+        Exception      { fg=c.magenta }, --  try, catch, throw
 
         PreProc        { fg=c.orange }, -- (preferred) generic Preprocessor
-        Include        { fg=c.red, Italic }, --  preprocessor #include
+        Include        { fg=c.red }, --  preprocessor #include
         Define         { fg=c.violet, Italic }, --   preprocessor #define
-        Macro          { fg=c.violet, Italic }, --    same as Define
-        PreCondit      { Conditional }, --  preprocessor #if, #else, #endif, etc.
+        Macro          { Define }, --    same as Define
+        PreCondit      { fg=c.rose }, --  preprocessor #if, #else, #endif, etc.
 
         Type           { fg=c.yellow }, -- (preferred) int, long, char, etc.
         StorageClass   { fg=c.green }, -- static, register, volatile, etc.
@@ -448,16 +530,18 @@ local theme = lush(function()
         -- you explicitly want to support Treesitter's improved syntax awareness.
         -- -------------------------------------------------------------------
         TSComment            { Comment },    -- For comment blocks.
-        TSText               { fg=fg[4] },    -- For strings considered text in a markup language.
         TSTextReference      { fg=fg[3] }, -- footnote, citations, etc.
-        TSMath               { fg=c.yellow}, -- mathenv
+        TSText               { fg=fg[4] },    -- For strings considered text in a markup language.
         TSEmphasis           { fg=fg[5], Italic },    -- For text to be represented with emphasis.
+        TSTitle              { fg=fg[5] },    -- Text that is part of a title.
+        TSMath               { fg=c.yellow}, -- mathenv
+        --
         TSUnderline          { Underline },    -- For text to be represented with an underline.
         -- TSStrike             { gui='strikethrough' },    -- For strikethrough text.
-        TSTitle              { fg=fg[5] },    -- Text that is part of a title.
         TSLiteral            { fg=c.cyan },    -- Literal text.
         TSURI                { fg=c.blue, Underline },    -- Any URI like a link or email.
         TSAttribute          { fg=c.orange },
+
         -- types
         TSBoolean            { Boolean },    -- For booleans.
         TSCharacter          { Character },    -- For characters.
@@ -483,8 +567,8 @@ local theme = lush(function()
         TSInclude            { Include },    -- For includes: `#include` in C, `use` or `extern crate` in Rust, or `require` in Lua.
         TSKeyword            { fg=c.violet },    -- For keywords that don't fall in previous categories.
         TSKeywordFunction    { fg=c.violet, Italic },    -- For keywords used to define a fuction.
-        TSKeywordOperator { fg=c.orange, Italic }, -- unary and binary operators that are english words
-        TSKeywordReturn   { fg=c.red, Italic },
+        TSKeywordOperator    { fg=c.orange, Italic }, -- unary and binary operators that are english words
+        TSKeywordReturn      { fg=c.red, Italic },
         TSLabel              { fg=c.orange },    -- For labels: `label:` in C and `:label:` in Lua.
         TSNamespace          { fg=c.yellow, Bold },    -- For identifiers referring to modules and namespaces.
         -- TSNone               { },    -- per docs: Do not change
@@ -496,26 +580,27 @@ local theme = lush(function()
         TSPunctBracket       { fg=c.red },    -- For brackets and parens.
         TSPunctSpecial       { fg=c.magenta },    -- For special punctutation that does not fall in the catagories before.
         TSRepeat             { Repeat },    -- For keywords related to loops.
-        TSSymbol             { fg=c.red },    -- For identifiers referring to symbols or atoms.
+        TSSymbol             { fg=br.yellow },    -- For identifiers referring to symbols or atoms.
         TSType               { Type },    -- For types.
         TSTypeBuiltin        { fg=c.yellow, Italic },    -- For builtin types.
         TSVariable           { fg=fg[4] },    -- Any variable name that does not have another highlight.
         TSVariableBuiltin    { fg=c.orange, Italic},    -- Variable names that are defined by the languages, like `this` or `self`.
-
+        -- tags
         TSTag                { fg=c.violet },    -- Tags like html tag names.
         TSTagAttribute       { TSParameter },    -- html tag attribute
         TSTagDelimiter       { Delimiter },    -- Tag delimiter like `<` `>` `/`
-        --
-        TSEnvironment { fg=c.violet }, -- text environments in markup languages, e.g., \begin in LaTeX.
-        TSEnvironmentName { fg=c.yellow }, -- e.g., theorem in \begin{theorem} block in LaTeX.
-        --
-        -- NOTE: This is just a note.
-        -- TODO: Hellow
-        -- FIXME: Oh no!
-        -- WARNING: Error
-        TSNote { fg=c.green, Italic }, -- informational note
-        TSWarning { fg=c.orange, Italic}, -- warning note
-        TSDanger { fg=c.red, Italic }, -- danger note
+        -- envs
+        TSEnvironment        { fg=c.violet }, -- text environments in markup languages, e.g., \begin in LaTeX.
+        TSEnvironmentName    { fg=c.yellow }, -- e.g., theorem in \begin{theorem} block in LaTeX.
+        -- notes
+        TSNote               { fg=c.green, Italic }, -- informational note
+        TSWarning            { fg=c.orange, Italic}, -- warning note
+        TSDanger             { fg=c.red, Italic }, -- danger note
+
+        -- gui
+        -- Menu {},
+        -- Scrollbar {},
+        -- Tooltip {},
 
         -- -------------------------------------------------------------------
         -- LSP groups
@@ -524,38 +609,37 @@ local theme = lush(function()
         -- documentation.
         -- -------------------------------------------------------------------
 
+        -- LspReferenceText      { }, -- used for highlighting "text" references
+        -- LspReferenceRead      { }, -- used for highlighting "read" references
+        -- LspReferenceWrite     { }, -- used for highlighting "write" references
 
-        -- LspReferenceText                     { }, -- used for highlighting "text" references
-        -- LspReferenceRead                     { }, -- used for highlighting "read" references
-        -- LspReferenceWrite                    { }, -- used for highlighting "write" references
+        -- LspCodeLens           { }, -- Used to color the virtual text of the codelens
+        -- LspCodeLensSeparator  { }, -- Used to color the virtual text of the codelens
+        -- LspSignatureActiveParameter {},
 
-        -- LspDiagnosticsDefaultError           { }, -- Used as the base highlight grou Other LspDiagnostic highlights link to this by default (except Underline)
-        -- LspDiagnosticsDefaultWarning         { }, -- Used as the base highlight grou Other LspDiagnostic highlights link to this by default (except Underline)
-        -- LspDiagnosticsDefaultInformation     { }, -- Used as the base highlight grou Other LspDiagnostic highlights link to this by default (except Underline)
-        -- LspDiagnosticsDefaultHint            { }, -- Used as the base highlight grou Other LspDiagnostic highlights link to this by default (except Underline)
-
-        -- LspDiagnosticsVirtualTextError       { }, -- Used for "Error" diagnostic virtual text
-        -- LspDiagnosticsVirtualTextWarning     { }, -- Used for "Warning" diagnostic virtual text
-        -- LspDiagnosticsVirtualTextInformation { }, -- Used for "Information" diagnostic virtual text
-        -- LspDiagnosticsVirtualTextHint        { }, -- Used for "Hint" diagnostic virtual text
-
-        -- LspDiagnosticsUnderlineError         { }, -- Used to underline "Error" diagnostics
-        -- LspDiagnosticsUnderlineWarning       { }, -- Used to underline "Warning" diagnostics
-        -- LspDiagnosticsUnderlineInformation   { }, -- Used to underline "Information" diagnostics
-        -- LspDiagnosticsUnderlineHint          { }, -- Used to underline "Hint" diagnostics
-
-        -- LspDiagnosticsFloatingError          { }, -- Used to color "Error" diagnostic messages in diagnostics float
-        -- LspDiagnosticsFloatingWarning        { }, -- Used to color "Warning" diagnostic messages in diagnostics float
-        -- LspDiagnosticsFloatingInformation    { }, -- Used to color "Information" diagnostic messages in diagnostics float
-        -- LspDiagnosticsFloatingHint           { }, -- Used to color "Hint" diagnostic messages in diagnostics float
-
-        -- LspDiagnosticsSignError              { }, -- Used for "Error" signs in sign column
-        -- LspDiagnosticsSignWarning            { }, -- Used for "Warning" signs in sign column
-        -- LspDiagnosticsSignInformation        { }, -- Used for "Information" signs in sign column
-        -- LspDiagnosticsSignHint               { }, -- Used for "Hint" signs in sign column
-
-        -- LspCodeLens                          { }, -- Used to color the virtual text of the codelens
-
+        -- -------------------------------------------------------------------
+        -- Diagnostic groups
+        -- -------------------------------------------------------------------
+	    DiagnosticError { fg=dim.red },
+        DiagnosticWarn { fg=dim.orange },
+        DiagnosticInfo { fg=dim.spring },
+        DiagnosticHint { fg=dim.yellow },
+        -- DiagnosticVirtualTextError { }, -- Used for "Error" diagnostic virtual text
+        -- DiagnosticVirtualTextWarn  { }, -- Used for "Warning" diagnostic virtual text
+        -- DiagnosticVirtualTextInfo  { }, -- Used for "Information" diagnostic virtual text
+        -- DiagnosticVirtualTextHint  { }, -- Used for "Hint" diagnostic virtual text
+        -- DiagnosticUnderlineError   { }, -- Used for "Error" diagnostic virtual text
+        -- DiagnosticUnderlineWarn    { }, -- Used for "Warning" diagnostic virtual text
+        -- DiagnosticUnderlineInfo    { }, -- Used for "Information" diagnostic virtual text
+        -- DiagnosticUnderlineHint    { }, -- Used for "Hint" diagnostic virtual text
+        -- DiagnosticFloatingError    { }, -- Used for "Error" diagnostic virtual text
+        -- DiagnosticFloatingWarn     { }, -- Used for "Warning" diagnostic virtual text
+        -- DiagnosticFloatingInfo     { }, -- Used for "Information" diagnostic virtual text
+        -- DiagnosticFloatingHint     { }, -- Used for "Hint" diagnostic virtual text
+        -- DiagnosticSignError {},
+        -- DiagnosticSignWarn {},
+        -- DiagnosticSignInfo {},
+        -- DiagnosticSignHint {},
 
     }
 end)

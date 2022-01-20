@@ -13,6 +13,6 @@
 " lua package.loaded['lush_theme.lush_template'] = nil
 
 " include our theme file and pass it to lush to apply
-lua package.loaded['hadalized'] = nil
-lua require('lush')(require('hadalized'))
+lua package.loaded['lush_theme.hadalized'] = nil
+lua require('lush')(require('lush_theme.hadalized'))
 
