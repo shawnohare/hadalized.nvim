@@ -592,10 +592,10 @@ local theme = lush(function()
         -- envs
         TSEnvironment        { fg=c.violet }, -- text environments in markup languages, e.g., \begin in LaTeX.
         TSEnvironmentName    { fg=c.yellow }, -- e.g., theorem in \begin{theorem} block in LaTeX.
-        -- notes
-        TSNote               { fg=c.green, Italic }, -- informational note
-        TSWarning            { fg=c.orange, Italic}, -- warning note
-        TSDanger             { fg=c.red, Italic }, -- danger note
+        -- notes, but should match Diagnostic
+        TSNote               { fg=dim.yellow }, -- informational note
+        TSWarning            { fg=dim.orange }, -- warning note
+        TSDanger             { fg=dim.red }, -- danger note
 
         -- gui
         -- Menu {},
@@ -620,10 +620,10 @@ local theme = lush(function()
         -- -------------------------------------------------------------------
         -- Diagnostic groups
         -- -------------------------------------------------------------------
-	    DiagnosticError { fg=dim.red },
-        DiagnosticWarn { fg=dim.orange },
-        DiagnosticInfo { fg=dim.spring },
-        DiagnosticHint { fg=dim.yellow },
+	    DiagnosticError { TSDanger },
+        DiagnosticWarn { TSWarning },
+        DiagnosticInfo { TSNote },
+        DiagnosticHint { fg=dim.spring },
         -- DiagnosticVirtualTextError { }, -- Used for "Error" diagnostic virtual text
         -- DiagnosticVirtualTextWarn  { }, -- Used for "Warning" diagnostic virtual text
         -- DiagnosticVirtualTextInfo  { }, -- Used for "Information" diagnostic virtual text
