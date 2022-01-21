@@ -9,6 +9,8 @@
 -- TODO: [ ] Define LSP groups.
 -- TODO: [ ] Define package groups.
 -- TODO: [ ] Export non-Lush version?.
+-- TODO: Make palette definition non-dependent on lush itself (i.e., remove)
+--       calls to hsluv and then construct a lushified version?
 
 vim.cmd([[ highlight clear ]])
 vim.g.colors_name = 'hadalized'
@@ -46,8 +48,9 @@ local hsluv = lush.hsluv
 -- ---------------------------------------------------------------------------
 --
 -- okhsl(h, 100, l).
-local p = {
-    -- okhsl hue values for colors.
+-- Static colors used in both light and dark modes.
+local color = {
+    -- okhsl hue values for color.
     hues = {
         red     = 025,
         orange  = 055,
@@ -62,7 +65,7 @@ local p = {
         rose    = 360,
     },
     -- okhsl(h, 100, 55)
-    c55 = {
+    l55 = {
         red     = hsluv('#f60029'),
         orange  = hsluv('#c76600'),
         yellow  = hsluv('#898a00'),
@@ -79,7 +82,7 @@ local p = {
         -- violet  = hsluv('#716aff'),
     },
     -- okhsl(h, 100, 60)
-    c60 = {
+    l60 = {
         red     = hsluv('#ff3b41'),
         orange  = hsluv('#da7000'),
         yellow  = hsluv('#979700'),
@@ -96,7 +99,7 @@ local p = {
         -- green   = hsluv('#00ae50'), -- h=150
     },
     -- okhsl(h, 100, 65)
-    c65 = {
+    l65 = {
         red = hsluv('#ff625e'),
         orange = hsluv('#ed7b00'),
         yellow = hsluv('#a5a500'),
@@ -109,25 +112,25 @@ local p = {
         rose    = hsluv('#ff5699'),
     },
     -- okhsl(h, 100, 70)
-    c70 = {
-        red     = hsluv('#ff7f78'),
-        orange  = hsluv('#ff8610'),
-        yellow  = hsluv('#b3b300'),
-        green   = hsluv('#80c200'), -- h=130
-        spring  = hsluv('#00cc76'), -- h=155
-        cyan    = hsluv('#00c6b6'), -- h=185
-        blue    = hsluv('#52b3ff'),
-        violet  = hsluv('#ab9aff'), -- h=290
-        magenta = hsluv('#ff5cf6'),
-        cerise  = hsluv('#ff6ec8'),
-        rose    = hsluv('#ff77a7'), -- h=360,
-        -- green   = hsluv('#68c700'), -- h=135
-        -- green   = hsluv('#00cd5f'), -- h=150
-        -- cyan    = hsluv('#00c5bd'), -- h=190
-        -- cyan    = hsluv('#00c7af'), -- h=180
-    },
+    -- l70 = {
+    --     red     = hsluv('#ff7f78'),
+    --     orange  = hsluv('#ff8610'),
+    --     yellow  = hsluv('#b3b300'),
+    --     green   = hsluv('#80c200'), -- h=130
+    --     spring  = hsluv('#00cc76'), -- h=155
+    --     cyan    = hsluv('#00c6b6'), -- h=185
+    --     blue    = hsluv('#52b3ff'),
+    --     violet  = hsluv('#ab9aff'), -- h=290
+    --     magenta = hsluv('#ff5cf6'),
+    --     cerise  = hsluv('#ff6ec8'),
+    --     rose    = hsluv('#ff77a7'), -- h=360,
+    --     -- green   = hsluv('#68c700'), -- h=135
+    --     -- green   = hsluv('#00cd5f'), -- h=150
+    --     -- cyan    = hsluv('#00c5bd'), -- h=190
+    --     -- cyan    = hsluv('#00c7af'), -- h=180
+    -- },
     -- okhsl(h, 100, 75) for backgrounds
-    c75 = {
+    l75 = {
         red     = hsluv('#ff9890'),
         orange  = hsluv('#ff9e57'),
         yellow  = hsluv('#c1c100'),
@@ -141,20 +144,20 @@ local p = {
         rose    = hsluv('#ff92b5'),
     },
     -- okhsl(h, 100, 80) for backgrounds
-    c80 = {
-        red     = hsluv('#ffafa7'),
-        orange  = hsluv('#ffb37f'),
-        yellow  = hsluv('#cfd000'),
-        green   = hsluv('#95e100'),
-        spring  = hsluv('#00ec89'),
-        cyan    = hsluv('#00e5d3'),
-        blue    = hsluv('#94ceff'),
-        violet  = hsluv('#c5bdff'),
-        magenta = hsluv('#ff9ff7'),
-        rose    = hsluv('#ffaac4'),
-    },
+    -- l80 = {
+    --     red     = hsluv('#ffafa7'),
+    --     orange  = hsluv('#ffb37f'),
+    --     yellow  = hsluv('#cfd000'),
+    --     green   = hsluv('#95e100'),
+    --     spring  = hsluv('#00ec89'),
+    --     cyan    = hsluv('#00e5d3'),
+    --     blue    = hsluv('#94ceff'),
+    --     violet  = hsluv('#c5bdff'),
+    --     magenta = hsluv('#ff9ff7'),
+    --     rose    = hsluv('#ffaac4'),
+    -- },
     -- okhsl(h, 100, 85)
-    c85 = {
+    l85 = {
         red     = hsluv('#ffc4be'),
         orange  = hsluv('#ffc7a2'),
         yellow  = hsluv('#ddde00'),
@@ -166,25 +169,25 @@ local p = {
         magenta = hsluv('#ffbaf8'),
         rose    = hsluv('#ffc1d2'),
     },
-    gray05 = hsluv('#111111'), -- l=05,
-    gray10 = hsluv('#1b1b1b'), -- l=10,
-    gray15 = hsluv('#262626'), -- l=15,
-    gray20 = hsluv('#303030'), -- l=20,
-    gray25 = hsluv('#3b3b3b'), -- l=25,
-    gray30 = hsluv('#474747'), -- l=30,
-    gray35 = hsluv('#525252'), -- l=35,
-    gray40 = hsluv('#5e5e5e'), -- l=40,
-    gray45 = hsluv('#6a6a6a'), -- l=45,
-    gray50 = hsluv('#777777'), -- l=50,
-    gray55 = hsluv('#848484'), -- l=55,
-    gray60 = hsluv('#919191'), -- l=60,
-    gray65 = hsluv('#9e9e9e'), -- l=65,
-    gray70 = hsluv('#ababab'), -- l=70,
-    gray75 = hsluv('#b9b9b9'), -- l=75,
-    gray80 = hsluv('#c6c6c6'), -- l=80,
-    gray85 = hsluv('#d4d4d4'), -- l=85,
-    gray90 = hsluv('#e2e2e2'), -- l=90,
-    gray95 = hsluv('#f1f1f1'), -- l=95.
+    -- gray05 = hsluv('#111111'), -- l=05,
+    -- gray10 = hsluv('#1b1b1b'), -- l=10,
+    -- gray15 = hsluv('#262626'), -- l=15,
+    -- gray20 = hsluv('#303030'), -- l=20,
+    -- gray25 = hsluv('#3b3b3b'), -- l=25,
+    -- gray30 = hsluv('#474747'), -- l=30,
+    -- gray35 = hsluv('#525252'), -- l=35,
+    -- gray40 = hsluv('#5e5e5e'), -- l=40,
+    -- gray45 = hsluv('#6a6a6a'), -- l=45,
+    -- gray50 = hsluv('#777777'), -- l=50,
+    -- gray55 = hsluv('#848484'), -- l=55,
+    -- gray60 = hsluv('#919191'), -- l=60,
+    -- gray65 = hsluv('#9e9e9e'), -- l=65,
+    -- gray70 = hsluv('#ababab'), -- l=70,
+    -- gray75 = hsluv('#b9b9b9'), -- l=75,
+    -- gray80 = hsluv('#c6c6c6'), -- l=80,
+    -- gray85 = hsluv('#d4d4d4'), -- l=85,
+    -- gray90 = hsluv('#e2e2e2'), -- l=90,
+    -- gray95 = hsluv('#f1f1f1'), -- l=95.
 
     -- base values (saturation mostly 10)
     -- -- base08 = hsluv('#051318'), -- s=50,
@@ -248,6 +251,63 @@ local p = {
     base97 = hsluv('#f6f7f7'),
 }
 
+local p = {
+    light = {
+        -- okhsl(220, 10, l)
+        bg = {
+            color.base97,
+            -- color.base95,
+            color.base93,
+            color.base90,
+            color.base85,
+        },
+        fg = {
+            color.base55,
+            color.base45,
+            color.base30,
+            color.base25,
+            color.base08,
+        },
+        color = {
+            dim = color.l55,
+            main = color.l55,
+            br   = color.l65,
+        },
+    },
+    dark = {
+        -- okhsl(220, 100, l)
+        bg = {
+            color.base08,
+            -- color.base10,
+            color.base12,
+            color.base15,
+            -- color.base15,
+            -- color.base15,
+            color.base20,
+        },
+        fg = {
+            color.base45,
+            color.base55,
+            color.base70,
+            color.base75,
+            color.base90,
+            -- min  = color.base45,
+            -- comm = color.base55,
+            -- ref  = color.base70,
+            -- main = color.base75,
+            -- max  = color.base90,
+
+        },
+        color = {
+            dim = color.l55,
+            main = color.l60,
+            br   = color.l75,
+        },
+    },
+}
+
+
+
 local contrasts = {
     base97s10 = {
         base25s10 = 10.51
@@ -282,61 +342,6 @@ local contrasts = {
     },
 }
 
-
-p.light = {
-    -- okhsl(220, 10, l)
-    bg = {
-        p.base97,
-        -- p.base95,
-        p.base93,
-        p.base90,
-        p.base85,
-    },
-    fg = {
-        p.base55,
-        p.base45,
-        p.base30,
-        p.base25,
-        p.base08,
-    },
-    color = {
-        dim = p.c55,
-        main = p.c55,
-        br   = p.c65,
-    },
-
-}
-
-p.dark = {
-    -- okhsl(220, 100, l)
-    bg = {
-        p.base08,
-        -- p.base10,
-        p.base12,
-        p.base15,
-        -- p.base15,
-        -- p.base15,
-        p.base20,
-    },
-    fg = {
-        p.base45,
-        p.base55,
-        p.base70,
-        p.base75,
-        p.base90,
-        -- min  = p.base45,
-        -- comm = p.base55,
-        -- ref  = p.base70,
-        -- main = p.base75,
-        -- max  = p.base90,
-
-    },
-    color = {
-        dim = p.c55,
-        main = p.c60,
-        br   = p.c75,
-    },
-}
 
 
 if (vim.opt.bg:get() == 'light')
@@ -438,7 +443,7 @@ local theme = lush(function()
         -- GitSignsDeleteNr { fg=c.red },
         LineNr       { bg=bg[3], fg=fg[1]}, -- Line number for ":number" and ":#" commands, and when 'number' or 'relativenumber' option is set.
         CursorLineNr { bg=bg[3], fg=c.yellow }, -- Like LineNr when 'cursorline' or 'relativenumber' is set for the cursor line.
-        MatchParen   { bg=p.c85.yellow }, -- The character under the cursor or just before it, if it is a paired bracket, and its match. |pi_paren.txt|
+        MatchParen   { bg=color.l85.yellow }, -- The character under the cursor or just before it, if it is a paired bracket, and its match. |pi_paren.txt|
         -- ModeMsg      { bg=fg[1],  }, -- 'showmode' message (e.g., "-- INSERT -- ")
         -- MsgArea      { }, -- Area for messages and cmdline
         -- MsgSeparator { }, -- Separator for scrolled messages, `msgsep` flag of 'display'
@@ -453,9 +458,9 @@ local theme = lush(function()
         -- PmenuThumb   { }, -- Popup menu: Thumb of the scrollbar.
         Question     { fg=c.green }, -- |hit-enter| prompt and yes/no questions
         -- QuickFixLine { }, -- Current |quickfix| item in the quickfix window. Combined with |hl-CursorLine| when the cursor is there.
-        IncSearch    { fg=p.light.fg[4], bg=p.c85.blue }, -- 'incsearch' highlighting; also used for the text replaced with ":s///c"
-        Search       { fg=p.light.fg[4], bg=p.c85.yellow }, -- Last search pattern highlighting (see 'hlsearch').  Also used for similar items that need to stand out.
-        Substitute   { fg=c.red, bg=p.c85.yellow, Italic }, -- |:substitute| replacement text highlighting
+        IncSearch    { fg=p.light.fg[4], bg=color.l85.blue }, -- 'incsearch' highlighting; also used for the text replaced with ":s///c"
+        Search       { fg=p.light.fg[4], bg=color.l85.yellow }, -- Last search pattern highlighting (see 'hlsearch').  Also used for similar items that need to stand out.
+        Substitute   { fg=c.red, bg=color.l85.yellow, Italic }, -- |:substitute| replacement text highlighting
         SpecialKey   { fg=c.red, Bold }, -- Unprintable characters: text displayed differently from what it really is.  But not 'listchars' whitespace. |hl-Whitespace|
         SpellBad     { fg=c.red, Underline }, -- Word that is not recognized by the spellchecker. |spell| Combined with the highlighting used otherwise.
         SpellCap     { fg=c.orange, Underline }, -- Word that should start with a capital. |spell| Combined with the highlighting used otherwise.
