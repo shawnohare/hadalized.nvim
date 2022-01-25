@@ -11,9 +11,9 @@
 -- TODO: [ ] Export non-Lush version?.
 -- TODO: Make palette definition non-dependent on lush itself (i.e., remove)
 --       calls to hsluv and then construct a lushified version?
+-- TODO: [ ] Use same color base for light and dark?
 
-vim.cmd([[ highlight clear ]])
-vim.g.colors_name = 'hadalized'
+vim.cmd([[ highlight clear ]]) vim.g.colors_name = 'hadalized'
 local lush = require('lush')
 local hsluv = lush.hsluv
 
@@ -63,6 +63,19 @@ local color = {
         magenta = 330,
         cerise  = 345,
         rose    = 360,
+    },
+    -- okhsl(h, 100, 50)
+    l50 = {
+        red     = hsluv('#df0024'),
+        orange  = hsluv('#b45c00'),
+        yellow  = hsluv('#7c7d00'),
+        green   = hsluv('#588800'),
+        spring  = hsluv('#008e50'),
+        cyan    = hsluv('#008a7f'),
+        blue    = hsluv('#007dc5'),
+        violet  = hsluv('#7e43ff'),
+        magenta = hsluv('#c300bd'),
+        rose    = hsluv('#d70072'),
     },
     -- okhsl(h, 100, 55)
     l55 = {
@@ -144,18 +157,18 @@ local color = {
         rose    = hsluv('#ff92b5'),
     },
     -- okhsl(h, 100, 80) for backgrounds
-    -- l80 = {
-    --     red     = hsluv('#ffafa7'),
-    --     orange  = hsluv('#ffb37f'),
-    --     yellow  = hsluv('#cfd000'),
-    --     green   = hsluv('#95e100'),
-    --     spring  = hsluv('#00ec89'),
-    --     cyan    = hsluv('#00e5d3'),
-    --     blue    = hsluv('#94ceff'),
-    --     violet  = hsluv('#c5bdff'),
-    --     magenta = hsluv('#ff9ff7'),
-    --     rose    = hsluv('#ffaac4'),
-    -- },
+    l80 = {
+        red     = hsluv('#ffafa7'),
+        orange  = hsluv('#ffb37f'),
+        yellow  = hsluv('#cfd000'),
+        green   = hsluv('#95e100'),
+        spring  = hsluv('#00ec89'),
+        cyan    = hsluv('#00e5d3'),
+        blue    = hsluv('#94ceff'),
+        violet  = hsluv('#c5bdff'),
+        magenta = hsluv('#ff9ff7'),
+        rose    = hsluv('#ffaac4'),
+    },
     -- okhsl(h, 100, 85)
     l85 = {
         red     = hsluv('#ffc4be'),
@@ -222,7 +235,7 @@ local color = {
     -- base82  =  hsluv('#c4ced1'), -- l=82
     --
     -- base (saturation mostly 5)
-    base05 = hsluv('#000b0f'),
+    -- base05 = hsluv('#000b0f'),
     base08 = hsluv('#00141b'), -- s=100,
     base10 = hsluv('#001a22'), -- s=100,
     base12 = hsluv('#001f28'), -- s=100,
@@ -230,9 +243,12 @@ local color = {
     -- base20 = hsluv('#16333b'), -- s=50,
     -- base20 = hsluv('#0b343f'), -- s=75, hsluv(221, 90, 19),
     base20 = hsluv('#003441'), -- s=100,
-    -- base25 = hsluv('#2a3d43'), -- s=25,
-    base25 = hsluv('#363b3c'), -- s=05,
-    -- base25 = hsluv('#1d3f4a'), -- s=50,
+    base25 = hsluv('#004151'), -- s=100
+    -- base25s25 = hsluv('#2a3d43'), -- s=25,
+    -- base25s50 = hsluv('#1d3f4a'), -- s=50,
+    -- base25 = hsluv('#363b3c'), -- s=05,
+    base27 = hsluv('#3b4041'), -- s=05,
+    base28 = hsluv('#3d4243'),
     base30 = hsluv('#424748'),
     base35 = hsluv('#4d5355'),
     base40 = hsluv('#595f61'),
@@ -246,126 +262,134 @@ local color = {
     base80 = hsluv('#c2c8c9'),
     base85 = hsluv('#d1d5d7'),
     base90 = hsluv('#e0e3e4'),
-    base93 = hsluv('#e9ebec'), -- s=05
-    base95 = hsluv('#f0f1f1'),
+    -- base93 = hsluv('#e9ebec'), -- s=05
+    -- base95 = hsluv('#f0f1f1'),
     base97 = hsluv('#f6f7f7'),
 }
 
-local p = {
-    light = {
-        -- okhsl(220, 10, l)
-        bg = {
-            color.base97,
-            -- color.base95,
-            color.base93,
-            color.base90,
-            color.base85,
-        },
-        fg = {
-            color.base55,
-            color.base45,
-            color.base30,
-            color.base25,
-            color.base08,
-        },
-        color = {
-            dim = color.l55,
-            main = color.l55,
-            br   = color.l65,
-        },
-    },
-    dark = {
-        -- okhsl(220, 100, l)
-        bg = {
-            color.base08,
-            -- color.base10,
-            color.base12,
-            color.base15,
-            -- color.base15,
-            -- color.base15,
-            color.base20,
-        },
-        fg = {
-            color.base45,
-            color.base55,
-            color.base70,
-            color.base75,
-            color.base90,
-            -- min  = color.base45,
-            -- comm = color.base55,
-            -- ref  = color.base70,
-            -- main = color.base75,
-            -- max  = color.base90,
-
-        },
-        color = {
-            dim = color.l55,
-            main = color.l60,
-            br   = color.l75,
-        },
-    },
-}
-
-
-
+-- Compute some bg:fg contrast ratios.
 local contrasts = {
-    base97s10 = {
-        base25s10 = 10.51
+    base08 = {
+        base55 = 5.01,
+        base60 = 5.95,
+        base65 = 7,
+        base70 = 8.26,
+        base75 = 9.58,
+        base75s10 = 9.58,
     },
-    base97s05 = {
-        base25s05 = 10.58,
-        base25s25 = 10.59,
+    base10 = {
+        base75 = 9.13,
+        base70 = 7.87,
+        base65 = 6.67,
+        base60 = 5.67,
+        base55 = 4.02,
 
     },
-    base08 = {
-        base75s10 = 9.58,
-        base75s05 = 9.58,
-    },
-    bgl08 = {
-        gray45 = 3.47,
-        gray50 = 4.2,
-        gray55 = 5.07,
-        gray60 = 6.01,
-        gray65 = 7.07,
-        gray70 = 8.25,
-        gray75 = 9.66,
-        gray80 = 11.1,
-    },
-    bgl10 = {
-        gray45 = 3.31,
-        gray50 = 4,
-        gray55 = 4.79,
-        gray60 = 5.69,
-        gray65 = 6.69,
-        gray70 = 7.81,
-        gray75 = 9.14,
+    base97 = {
+        base25 = 10.58,
+        base27 = 9.8,
+        base28 = 9.5,
+        base30 = 8.78,
+        base35 = 7.28,
+        base40 = 6.04,
+        base45 = 4.98,
+        base55 = 3.49,
     },
 }
 
 
+local light = {
+    -- okhsl(220, 10, l)
+    bg = {
+        color.base97,
+        -- color.base95,
+        color.base93,
+        color.base90,
+        color.base85,
+        color.base80,
+    },
+    fg = {
+        color.base55,
+        color.base45,
+        color.base35,
+        color.base28,
+        color.base08,
+    },
+    bg0 = color.base97,
+    bg1 = color.base93,
+    bg2 = color.base90,
+    bg3 = color.base85,
+    bg4 = color.base80,
+    fg4 = color.base55,
+    fg3 = color.base45,
+    fg2 = color.base35,
+    fg1 = color.base28,
+    dim = color.l55,
+    hue = color.l55,
+    red = color.l55.red,
+    orange = color.l55.orange,
+    yellow = color.l55.yellow,
+    green = color.l55.green,
+    spring = color.l55.spring,
+    cyan = color.l55.cyan,
+    blue = color.l55.blue,
+    violet = color.l55.violet,
+    magenta = color.l55.magenta,
+    rose = color.l55.rose,
+    br = color.l65,
+    hl = color.l85,
+}
+
+local dark = {
+    -- okhsl(220, 100, l)
+    bg0 = color.base08,
+    bg1 = color.base12,
+    bg2 = color.base15,
+    bg3 = color.base20,
+    bg4 = color.base25,
+    fg4 = color.base45,
+    fg3 = color.base55,
+    fg2 = color.base65,
+    fg1 = color.base75,
+    fg0 = color.base90,
+    -- colors
+    dim = color.l55,
+    hue = color.l60,
+    red = color.l60.red,
+    orange = color.l60.orange,
+    yellow = color.l60.yellow,
+    green = color.l60.green,
+    spring = color.l60.spring,
+    cyan = color.l60.cyan,
+    blue = color.l60.blue,
+    violet = color.l60.violet,
+    magenta = color.l60.magenta,
+    rose = color.l60.rose,
+    br = color.l75,
+    hl = color.l85,
+}
+
+
+local p = dark
 
 if (vim.opt.bg:get() == 'light')
 then
-    p.mode = p.light
-    p.op   = p.dark
-else
-    p.mode = p.dark
-    p.op = p.light
+    p = light
 end
 
-local fg = p.mode.fg
-local bg = p.mode.bg
-local dim = p.mode.color.dim
-local c = p.mode.color.main
-local br = p.mode.color.br
+-- DEBUG: Explicitly define these keys.
+-- bump palette hues to top level
+-- for k, v in pairs(p.hue) do
+--     p[k] = v
+-- end
 
 -- local term = {
---     color1 = c.red,     color9 = c.orange,
---     color2 = c.green,   color10 = c.spring,
---     color3 = c.yellow,  color11 = br.yellow,
---     color4 = c.blue,    color12 = c.violet,
---     color5 = c.magenta, color13 = c.rose,
---     color6 = c.cyan,    color14 = br.cyan
+--     color1 = p.red,     color9 = p.orange,
+--     color2 = p.green,   color10 = p.spring,
+--     color3 = p.yellow,  color11 = p.br.yellow,
+--     color4 = p.blue,    color12 = p.violet,
+--     color5 = p.magenta, color13 = p.rose,
+--     color6 = p.cyan,    color14 = p.br.cyan
 
 -- }
 
@@ -398,7 +422,7 @@ local br = p.mode.color.br
 local theme = lush(function()
     return {
         -- The following are all the Neovim default highlight groups from the docs
-        -- as of 0.5.0-nightly-446, to aid your theme creation. Your themes should
+        -- as of v0.6.1, to aid your theme creation. Your themes should
         -- probably style all of these at a bare minimum.
         --
         -- Referenced/linked groups must come before being referenced/lined,
@@ -417,65 +441,66 @@ local theme = lush(function()
         Strikethrough { gui='strikethrough' },
 
 
-        Comment      { fg=fg[2] }, -- any comment
-        ColorColumn  { bg=bg[2] }, -- used for the columns set with 'colorcolumn'
+        Comment      { fg=p.fg3 }, -- any comment
+        ColorColumn  { bg=p.bg1 }, -- used for the columns set with 'colorcolumn'
         -- Conceal      { }, -- placeholder characters substituted for concealed text (see 'conceallevel')
         -- Cursor       { }, -- character under the cursor
         -- lCursor      { }, -- the character under the cursor when |language-mapping| is used (see 'guicursor')
         -- CursorIM     { }, -- like Cursor, but used when in IME mode |CursorIM|
         -- CursorColumn { }, -- Screen-column at the cursor, when 'cursorcolumn' is set.
-        CursorLine   { bg=bg[2] }, -- Screen-line at the cursor, when 'cursorline' is set.  Low-priority if foreground (ctermfg OR guifg) is not set.
-        Directory    { fg=c.blue, Bold }, -- directory names (and other special names in listings)
-        DiffAdd      { fg=c.green }, -- diff mode: Added line |diff.txt|
-        DiffChange   { fg=c.yellow }, -- diff mode: Changed line |diff.txt|
-        DiffDelete   { fg=c.red }, -- diff mode: Deleted line |diff.txt|
-        DiffText     { fg=c.blue, Underline }, -- diff mode: Changed text within a changed line |diff.txt|
+        CursorLine   { bg=p.bg1 }, -- Screen-line at the cursor, when 'cursorline' is set.  Low-priority if foreground (ctermfg OR guifg) is not set.
+        Directory    { fg=p.blue, Bold }, -- directory names (and other special names in listings)
+        DiffAdd      { fg=p.green }, -- diff mode: Added line |diff.txt|
+        DiffChange   { fg=p.yellow }, -- diff mode: Changed line |diff.txt|
+        DiffDelete   { fg=p.red }, -- diff mode: Deleted line |diff.txt|
+        DiffText     { fg=p.blue, Underline }, -- diff mode: Changed text within a changed line |diff.txt|
         -- GitSignsAdd   { fg=green},
-        EndOfBuffer  { fg=fg[1] }, -- filler lines (~) after the end of the buffer.  By default, this is highlighted like |hl-NonText|.
+        EndOfBuffer  { fg=p.fg4 }, -- filler lines (~) after the end of the buffer.  By default, this is highlighted like |hl-NonText|.
         -- TermCursor   { }, -- cursor in a focused terminal
         -- TermCursorNC { }, -- cursor in an unfocused terminal
-        ErrorMsg     { fg=c.red, Bold }, -- error messages on the command line
-        VertSplit    { fg=fg[1] }, -- the column separating vertically split windows
-        Folded       { bg=bg[3] }, -- line used for closed folds
+        ErrorMsg     { fg=p.red, Bold }, -- error messages on the command line
+        VertSplit    { fg=p.fg4 }, -- the column separating vertically split windows
+        Folded       { bg=p.bg2 }, -- line used for closed folds
         -- FoldColumn   { }, -- 'foldcolumn'
-        SignColumn   { bg=bg[1]}, -- column where |signs| are displayed
-        -- GitSignsDelete { fg=c.red, bg=bg[2] },
-        -- GitSignsDeleteNr { fg=c.red },
-        LineNr       { bg=bg[3], fg=fg[1]}, -- Line number for ":number" and ":#" commands, and when 'number' or 'relativenumber' option is set.
-        CursorLineNr { bg=bg[3], fg=c.yellow }, -- Like LineNr when 'cursorline' or 'relativenumber' is set for the cursor line.
-        MatchParen   { bg=color.l85.yellow }, -- The character under the cursor or just before it, if it is a paired bracket, and its match. |pi_paren.txt|
-        -- ModeMsg      { bg=fg[1],  }, -- 'showmode' message (e.g., "-- INSERT -- ")
+        SignColumn   { bg=p.bg0}, -- column where |signs| are displayed
+        -- GitSignsDelete { fg=p.red, bg=p.bg1 },
+        -- GitSignsDeleteNr { fg=p.red },
+        LineNr       { bg=p.bg1, fg=p.fg3}, -- Line number for ":number" and ":#" commands, and when 'number' or 'relativenumber' option is set.
+        CursorLineNr { bg=p.bg1, fg=p.yellow }, -- Like LineNr when 'cursorline' or 'relativenumber' is set for the cursor line.
+        MatchParen   { bg=p.hl.yellow }, -- The character under the cursor or just before it, if it is a paired bracket, and its match. |pi_paren.txt|
+        -- ModeMsg      { bg=p.fg4,  }, -- 'showmode' message (e.g., "-- INSERT -- ")
         -- MsgArea      { }, -- Area for messages and cmdline
         -- MsgSeparator { }, -- Separator for scrolled messages, `msgsep` flag of 'display'
-        MoreMsg      { fg=c.green }, -- |more-prompt|
-        NonText      { fg=fg[1] }, -- '@' at the end of the window, characters from 'showbreak' and other characters that do not really exist in the text (e.g., ">" displayed when a double-wide character doesn't fit at the end of the line). See also |hl-EndOfBuffer|.
-        Normal       {fg=fg[4], bg=bg[1] }, -- normal text
-        NormalFloat  { fg=fg[4], bg=bg[2]}, -- Normal text in floating windows.
-        -- NormalNC     {fg=fg[2], bg=bg[2]}, -- normal text in non-current windows
-        Pmenu        { bg=bg[2] }, -- Popup menu: normal item.
-        PmenuSel     { bg=bg[4], fg=fg[5] }, -- Popup menu: selected item.
+        MoreMsg      { fg=p.green }, -- |more-prompt|
+        NonText      { fg=p.fg4 }, -- '@' at the end of the window, characters from 'showbreak' and other characters that do not really exist in the text (e.g., ">" displayed when a double-wide character doesn't fit at the end of the line). See also |hl-EndOfBuffer|.
+        Normal       { fg=p.fg1, bg=p.bg0 }, -- normal text
+        NormalFloat  { fg=p.fg1, bg=p.bg1}, -- Normal text in floating windows.
+        -- NormalNC     {fg=p.fg3, bg=p.bg1}, -- normal text in non-current windows
+        Pmenu        { bg=p.bg1 }, -- Popup menu: normal item.
+        -- PmenuSel     { Swap }, -- Popup menu: selected item.
+        PmenuSel     { bg=p.bg4 }, -- Popup menu: selected item.
         -- PmenuSbar    { }, -- Popup menu: scrollbar.
         -- PmenuThumb   { }, -- Popup menu: Thumb of the scrollbar.
-        Question     { fg=c.green }, -- |hit-enter| prompt and yes/no questions
+        Question     { fg=p.green }, -- |hit-enter| prompt and yes/no questions
         -- QuickFixLine { }, -- Current |quickfix| item in the quickfix window. Combined with |hl-CursorLine| when the cursor is there.
-        IncSearch    { fg=p.light.fg[4], bg=color.l85.blue }, -- 'incsearch' highlighting; also used for the text replaced with ":s///c"
-        Search       { fg=p.light.fg[4], bg=color.l85.yellow }, -- Last search pattern highlighting (see 'hlsearch').  Also used for similar items that need to stand out.
-        Substitute   { fg=c.red, bg=color.l85.yellow, Italic }, -- |:substitute| replacement text highlighting
-        SpecialKey   { fg=c.red, Bold }, -- Unprintable characters: text displayed differently from what it really is.  But not 'listchars' whitespace. |hl-Whitespace|
-        SpellBad     { fg=c.red, Underline }, -- Word that is not recognized by the spellchecker. |spell| Combined with the highlighting used otherwise.
-        SpellCap     { fg=c.orange, Underline }, -- Word that should start with a capital. |spell| Combined with the highlighting used otherwise.
-        SpellLocal   { fg=c.orange, Underline }, -- Word that is recognized by the spellchecker as one that is used in another region. |spell| Combined with the highlighting used otherwise.
-        SpellRare    { fg=c.yellow, Underline }, -- Word that is recognized by the spellchecker as one that is hardly ever used.  |spell| Combined with the highlighting used otherwise.
-        StatusLine   { bg=bg[3], fg=fg[4], }, -- status line of current window
-        StatusLineNC { bg=bg[1], fg=fg[2]}, -- status lines of not-current windows Note: if this is equal to "StatusLine" Vim will use "^^^" in the status line of the current window.
+        IncSearch    { bg=p.hl.blue }, -- 'incsearch' highlighting; also used for the text replaced with ":s///c"
+        Search       { bg=p.hl.yellow }, -- Last search pattern highlighting (see 'hlsearch').  Also used for similar items that need to stand out.
+        Substitute   { fg=p.red, bg=p.hl.yellow, Italic }, -- |:substitute| replacement text highlighting
+        SpecialKey   { fg=p.red, Bold }, -- Unprintable characters: text displayed differently from what it really is.  But not 'listchars' whitespace. |hl-Whitespace|
+        SpellBad     { fg=p.red, Underline }, -- Word that is not recognized by the spellchecker. |spell| Combined with the highlighting used otherwise.
+        SpellCap     { fg=p.orange, Underline }, -- Word that should start with a capital. |spell| Combined with the highlighting used otherwise.
+        SpellLocal   { fg=p.orange, Underline }, -- Word that is recognized by the spellchecker as one that is used in another region. |spell| Combined with the highlighting used otherwise.
+        SpellRare    { fg=p.yellow, Underline }, -- Word that is recognized by the spellchecker as one that is hardly ever used.  |spell| Combined with the highlighting used otherwise.
+        StatusLine   { bg=p.bg2, fg=p.fg1, }, -- status line of current window
+        StatusLineNC { bg=p.bg0, fg=p.fg3}, -- status lines of not-current windows Note: if this is equal to "StatusLine" Vim will use "^^^" in the status line of the current window.
         -- TabLine      { }, -- tab pages line, not active tab page label
         -- TabLineFill  { }, -- tab pages line, where there are no labels
         -- TabLineSel   { }, -- tab pages line, active tab page label
-        Title        { fg=fg[5] }, -- titles for output from ":set all", ":autocmd" etc.
-        Visual       { bg=bg[4] }, -- Visual mode selection
-        VisualNOS    { bg=bg[3] }, -- Visual mode selection when vim is "Not Owning the Selection".
-        WarningMsg   { fg=c.red }, -- warning messages
-        Whitespace   { fg=fg[1]}, -- "nbsp", "space", "tab" and "trail" in 'listchars'
+        Title        { fg=p.fg0 }, -- titles for output from ":set all", ":autocmd" etp.
+        Visual       { bg=p.bg3 }, -- Visual mode selection
+        VisualNOS    { bg=p.bg2 }, -- Visual mode selection when vim is "Not Owning the Selection".
+        WarningMsg   { fg=p.red }, -- warning messages
+        Whitespace   { fg=p.fg4}, -- "nbsp", "space", "tab" and "trail" in 'listchars'
         -- WildMenu     { }, -- current match in 'wildmenu' completion
 
         -- These groups are not listed as default vim groups,
@@ -484,47 +509,47 @@ local theme = lush(function()
         -- default,
         -- Uncomment and edit if you want more specific syntax highlighting.
 
-        Constant       { fg=c.magenta }, -- (preferred) any constant
-        String         { fg=c.cyan }, --   a string constant: "this is a string"
-        Character      { fg=c.spring, }, --  a character constant: 'c', '\n'
-        Number         { fg=c.violet }, --   a number constant: 234, 0xff
-        Float          { fg=c.violet }, --    a floating point constant: 2.3e10
-        Boolean        { fg=c.rose }, --  a boolean constant: TRUE, false
+        Constant       { fg=p.magenta }, -- (preferred) any constant
+        String         { fg=p.cyan }, --   a string constant: "this is a string"
+        Character      { fg=p.spring, }, --  a character constant: 'c', '\n'
+        Number         { fg=p.violet }, --   a number constant: 234, 0xff
+        Float          { fg=p.violet }, --    a floating point constant: 2.3e10
+        Boolean        { fg=p.rose }, --  a boolean constant: TRUE, false
 
-        Identifier     { fg=c.yellow}, -- (preferred) any variable name
-        Function       { fg=c.blue}, -- function name (also: methods for classes)
+        Identifier     { fg=p.yellow}, -- (preferred) any variable name
+        Function       { fg=p.blue}, -- function name (also: methods for classes)
 
-        Statement      { fg=c.yellow }, -- (preferred) any statement
-        Conditional    { fg=c.rose }, --  if, then, else, endif, switch, etc.
-        Repeat         { fg=c.orange }, --   for, do, while, etc.
-        Label          { fg=c.green }, --    case, default, etc.
-        Operator       { fg=c.blue }, -- "sizeof", "+", "*", etc.
-        Keyword        { fg=c.violet }, --  any other keyword
-        Exception      { fg=c.magenta }, --  try, catch, throw
+        Statement      { fg=p.yellow }, -- (preferred) any statement
+        Conditional    { fg=p.rose }, --  if, then, else, endif, switch, etp.
+        Repeat         { fg=p.orange }, --   for, do, while, etp.
+        Label          { fg=p.green }, --    case, default, etp.
+        Operator       { fg=p.blue }, -- "sizeof", "+", "*", etp.
+        Keyword        { fg=p.violet }, --  any other keyword
+        Exception      { fg=p.magenta }, --  try, catch, throw
 
-        PreProc        { fg=c.orange }, -- (preferred) generic Preprocessor
-        Include        { fg=c.red }, --  preprocessor #include
-        Define         { fg=c.violet, Italic }, --   preprocessor #define
+        PreProc        { fg=p.orange }, -- (preferred) generic Preprocessor
+        Include        { fg=p.red }, --  preprocessor #include
+        Define         { fg=p.violet, Italic }, --   preprocessor #define
         Macro          { Define }, --    same as Define
-        PreCondit      { fg=c.rose }, --  preprocessor #if, #else, #endif, etc.
+        PreCondit      { fg=p.rose }, --  preprocessor #if, #else, #endif, etp.
 
-        Type           { fg=c.yellow }, -- (preferred) int, long, char, etc.
-        StorageClass   { fg=c.green }, -- static, register, volatile, etc.
-        Structure      { fg=c.spring }, --  struct, union, enum, etc.
-        -- Typedef        { fg=c.violet }, --  A typedef
+        Type           { fg=p.yellow }, -- (preferred) int, long, char, etp.
+        StorageClass   { fg=p.green }, -- static, register, volatile, etp.
+        Structure      { fg=p.spring }, --  struct, union, enum, etp.
+        -- Typedef        { fg=p.violet }, --  A typedef
 
-        Special        { fg=c.red }, -- (preferred) any special symbol
-        SpecialChar    { fg=c.red, Bold }, --  special character in a constant
-        Tag            { fg=c.blue, Underline }, --    you can use CTRL-] on this
-        Delimiter      { fg=c.red }, --  character that needs attention
-        SpecialComment { fg=c.orange }, -- special things inside a comment
-        Debug          { fg=c.rose }, --    debugging statements
+        Special        { fg=p.red }, -- (preferred) any special symbol
+        SpecialChar    { fg=p.red, Bold }, --  special character in a constant
+        Tag            { fg=p.blue, Underline }, --    you can use CTRL-] on this
+        Delimiter      { fg=p.red }, --  character that needs attention
+        SpecialComment { fg=p.orange }, -- special things inside a comment
+        Debug          { fg=p.rose }, --    debugging statements
 
         -- ("Ignore", below, may be invisible...)
-        Ignore         { fg=fg[1] }, -- (preferred) left blank, hidden  |hl-Ignore|
+        Ignore         { fg=p.fg4 }, -- (preferred) left blank, hidden  |hl-Ignore|
 
-        Error          { fg=c.red }, -- (preferred) any erroneous construct
-        Todo           { fg=c.yellow, Bold }, -- (preferred) anything that needs extra attention; mostly the keywords TODO FIXME and XXX
+        Error          { fg=p.red }, -- (preferred) any erroneous construct
+        Todo           { fg=p.yellow, Bold }, -- (preferred) anything that needs extra attention; mostly the keywords TODO FIXME and XXX
 
         -- -------------------------------------------------------------------
         -- Treesitter Groups
@@ -535,72 +560,72 @@ local theme = lush(function()
         -- you explicitly want to support Treesitter's improved syntax awareness.
         -- -------------------------------------------------------------------
         TSComment            { Comment },    -- For comment blocks.
-        TSTextReference      { fg=fg[3] }, -- footnote, citations, etc.
-        TSText               { fg=fg[4] },    -- For strings considered text in a markup language.
-        TSEmphasis           { fg=fg[5], Italic },    -- For text to be represented with emphasis.
-        TSTitle              { fg=fg[5] },    -- Text that is part of a title.
-        TSMath               { fg=c.yellow}, -- mathenv
+        TSTextReference      { fg=p.fg2 }, -- footnote, citations, etp.
+        TSText               { fg=p.fg1 },    -- For strings considered text in a markup language.
+        TSEmphasis           { fg=p.fg0, Italic },    -- For text to be represented with emphasis.
+        TSTitle              { fg=p.fg0 },    -- Text that is part of a title.
+        TSMath               { fg=p.yellow}, -- mathenv
         --
         TSUnderline          { Underline },    -- For text to be represented with an underline.
         -- TSStrike             { gui='strikethrough' },    -- For strikethrough text.
-        TSLiteral            { fg=c.cyan },    -- Literal text.
-        TSURI                { fg=c.blue, Underline },    -- Any URI like a link or email.
-        TSAttribute          { fg=c.orange },
+        TSLiteral            { fg=p.cyan },    -- Literal text.
+        TSURI                { fg=p.blue, Underline },    -- Any URI like a link or email.
+        TSAttribute          { fg=p.orange },
 
         -- types
         TSBoolean            { Boolean },    -- For booleans.
         TSCharacter          { Character },    -- For characters.
         TSString             { String },    -- For strings.
-        TSStringSpecial      { fg=c.yellow},
-        TSStringRegex        { fg=c.orange },    -- For regexes.
-        TSStringEscape       { fg=dim.red },    -- For escape characters within a string.
+        TSStringSpecial      { fg=p.yellow},
+        TSStringRegex        { fg=p.orange },    -- For regexes.
+        TSStringEscape       { fg=p.red },    -- For escape characters within a string.
         TSFloat              { Float },    -- For floats.
         TSNumber             { Number },    -- For all numbers
         --
-        TSConstructor        { fg=c.blue, Bold },    -- For constructor calls and definitions: ` { }` in Lua, and Java constructors.
+        TSConstructor        { fg=p.blue, Bold },    -- For constructor calls and definitions: ` { }` in Lua, and Java constructors.
         TSConditional        { Conditional },    -- For keywords related to conditionnals.
         TSConstant           { Constant };    -- For constants
-        TSConstBuiltin       { fg=c.rose, Italic },    -- For constant that are built in the language: `nil` in Lua.
-        TSConstMacro         { fg=c.rose, Bold },    -- For constants that are defined by macros: `NULL` in C.
-        TSError              { fg=dim.red },    -- For syntax/parser errors.
+        TSConstBuiltin       { fg=p.rose, Italic },    -- For constant that are built in the language: `nil` in Lua.
+        TSConstMacro         { fg=p.rose, Bold },    -- For constants that are defined by macros: `NULL` in p.
+        TSError              { fg=p.red },    -- For syntax/parser errors.
         TSException          { Exception },    -- For exception related keywords.
         TSFunction           { Function },    -- For function (calls and definitions).
-        TSFuncBuiltin        { fg=c.blue, Italic },    -- For builtin functions: `table.insert` in Lua.
-        TSFuncMacro          { fg=c.blue, Bold },    -- For macro defined fuctions (calls and definitions): each `macro_rules` in Rust.
-        TSMethod             { fg=c.blue },    -- For method calls and definitions.
-        TSOperator           { fg=c.orange},    -- For any operator: `+`, but also `->` and `*` in C.
+        TSFuncBuiltin        { fg=p.blue, Italic },    -- For builtin functions: `table.insert` in Lua.
+        TSFuncMacro          { fg=p.blue, Bold },    -- For macro defined fuctions (calls and definitions): each `macro_rules` in Rust.
+        TSMethod             { fg=p.blue },    -- For method calls and definitions.
+        TSOperator           { fg=p.orange},    -- For any operator: `+`, but also `->` and `*` in p.
         TSInclude            { Include },    -- For includes: `#include` in C, `use` or `extern crate` in Rust, or `require` in Lua.
-        TSKeyword            { fg=c.violet },    -- For keywords that don't fall in previous categories.
-        TSKeywordFunction    { fg=c.violet, Italic },    -- For keywords used to define a fuction.
-        TSKeywordOperator    { fg=c.orange, Italic }, -- unary and binary operators that are english words
-        TSKeywordReturn      { fg=c.red, Italic },
-        TSLabel              { fg=c.orange },    -- For labels: `label:` in C and `:label:` in Lua.
-        TSNamespace          { fg=c.yellow, Bold },    -- For identifiers referring to modules and namespaces.
+        TSKeyword            { fg=p.violet },    -- For keywords that don't fall in previous categories.
+        TSKeywordFunction    { fg=p.violet, Italic },    -- For keywords used to define a fuction.
+        TSKeywordOperator    { fg=p.orange, Italic }, -- unary and binary operators that are english words
+        TSKeywordReturn      { fg=p.red, Italic },
+        TSLabel              { fg=p.orange },    -- For labels: `label:` in C and `:label:` in Lua.
+        TSNamespace          { fg=p.yellow, Bold },    -- For identifiers referring to modules and namespaces.
         -- TSNone               { },    -- per docs: Do not change
-        TSParameter          { fg=c.green },    -- For parameters of a function.
-        TSParameterReference { fg=c.green },    -- For references to parameters of a function.
-        TSField              { fg=c.yellow },    -- For fields.
+        TSParameter          { fg=p.green },    -- For parameters of a function.
+        TSParameterReference { fg=p.green },    -- For references to parameters of a function.
+        TSField              { fg=p.yellow },    -- For fields.
         -- TSProperty           { },    -- Same as `TSField`.
-        TSPunctDelimiter     { fg=c.rose},    -- For delimiters ie: `.`
-        TSPunctBracket       { fg=c.red },    -- For brackets and parens.
-        TSPunctSpecial       { fg=c.magenta },    -- For special punctutation that does not fall in the catagories before.
+        TSPunctDelimiter     { fg=p.rose},    -- For delimiters ie: `.`
+        TSPunctBracket       { fg=p.red },    -- For brackets and parens.
+        TSPunctSpecial       { fg=p.magenta },    -- For special punctutation that does not fall in the catagories before.
         TSRepeat             { Repeat },    -- For keywords related to loops.
-        TSSymbol             { fg=br.yellow },    -- For identifiers referring to symbols or atoms.
+        TSSymbol             { fg=p.violet },    -- For identifiers referring to symbols or atoms.
         TSType               { Type },    -- For types.
-        TSTypeBuiltin        { fg=c.yellow, Italic },    -- For builtin types.
-        TSVariable           { fg=fg[4] },    -- Any variable name that does not have another highlight.
-        TSVariableBuiltin    { fg=c.orange, Italic},    -- Variable names that are defined by the languages, like `this` or `self`.
+        TSTypeBuiltin        { fg=p.yellow, Italic },    -- For builtin types.
+        TSVariable           { fg=p.fg1 },    -- Any variable name that does not have another highlight.
+        TSVariableBuiltin    { fg=p.orange, Italic},    -- Variable names that are defined by the languages, like `this` or `self`.
         -- tags
-        TSTag                { fg=c.violet },    -- Tags like html tag names.
+        TSTag                { fg=p.violet },    -- Tags like html tag names.
         TSTagAttribute       { TSParameter },    -- html tag attribute
         TSTagDelimiter       { Delimiter },    -- Tag delimiter like `<` `>` `/`
         -- envs
-        TSEnvironment        { fg=c.violet }, -- text environments in markup languages, e.g., \begin in LaTeX.
-        TSEnvironmentName    { fg=c.yellow }, -- e.g., theorem in \begin{theorem} block in LaTeX.
+        TSEnvironment        { fg=p.violet }, -- text environments in markup languages, e.g., \begin in LaTeX.
+        TSEnvironmentName    { fg=p.yellow }, -- e.g., theorem in \begin{theorem} block in LaTeX.
         -- notes, but should match Diagnostic
-        TSNote               { fg=dim.yellow }, -- informational note
-        TSWarning            { fg=dim.orange }, -- warning note
-        TSDanger             { fg=dim.red }, -- danger note
+        TSNote               { fg=p.yellow }, -- informational note
+        TSWarning            { fg=p.orange }, -- warning note
+        TSDanger             { fg=p.red }, -- danger note
 
         -- gui
         -- Menu {},
@@ -628,15 +653,15 @@ local theme = lush(function()
 	    DiagnosticError { TSDanger },
         DiagnosticWarn { TSWarning },
         DiagnosticInfo { TSNote },
-        DiagnosticHint { fg=dim.spring },
+        DiagnosticHint { fg=p.spring },
         -- DiagnosticVirtualTextError { }, -- Used for "Error" diagnostic virtual text
         -- DiagnosticVirtualTextWarn  { }, -- Used for "Warning" diagnostic virtual text
         -- DiagnosticVirtualTextInfo  { }, -- Used for "Information" diagnostic virtual text
         -- DiagnosticVirtualTextHint  { }, -- Used for "Hint" diagnostic virtual text
-        -- DiagnosticUnderlineError   { }, -- Used for "Error" diagnostic virtual text
-        -- DiagnosticUnderlineWarn    { }, -- Used for "Warning" diagnostic virtual text
-        -- DiagnosticUnderlineInfo    { }, -- Used for "Information" diagnostic virtual text
-        -- DiagnosticUnderlineHint    { }, -- Used for "Hint" diagnostic virtual text
+        DiagnosticUnderlineError   { fg=p.red, Underline  }, -- Used for "Error" diagnostic virtual text
+        DiagnosticUnderlineWarn    { fg=p.orange, Underline }, -- Used for "Warning" diagnostic virtual text
+        DiagnosticUnderlineInfo    { fg=p.yellow, Underline }, -- Used for "Information" diagnostic virtual text
+        DiagnosticUnderlineHint    { fg=p.spring, Underline }, -- Used for "Hint" diagnostic virtual text
         -- DiagnosticFloatingError    { }, -- Used for "Error" diagnostic virtual text
         -- DiagnosticFloatingWarn     { }, -- Used for "Warning" diagnostic virtual text
         -- DiagnosticFloatingInfo     { }, -- Used for "Information" diagnostic virtual text
