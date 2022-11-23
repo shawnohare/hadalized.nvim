@@ -1,6 +1,6 @@
 # Introduction
 
-hadalized.nvim: A darker Solarized-inspired Lush Theme for neovim that uses the
+hadalized.nvim: A darker Solarized-inspired Lush Theme for neovim 0.8+ that uses the
 okhsl color space. The name references the
 [oceanic hadopelagic zones](https://en.wikipedia.org/wiki/Hadal_zone)
 to emphasize our preference of a darker background and a homage to the
