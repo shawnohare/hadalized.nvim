@@ -9,7 +9,7 @@
 -- TODO: [ ] Define LSP groups.
 -- TODO: [ ] Define package groups.
 -- TODO: [ ] Export non-Lush version?.
--- TODO: Make palette definition non-dependent on lush itself (i.e., remove)
+-- TODO: [x] Make palette definition non-dependent on lush itself (i.e., remove)
 --       calls to hsluv and then construct a lushified version?
 -- TODO: [ ] Use same color base for light and dark?
 
@@ -419,7 +419,12 @@ end
 -- LSP/Linters mistakenly show `undefined global` errors in the spec, they may
 -- support an annotation like the following. Consult your server documentation.
 ---@diagnostic disable: undefined-global
-local theme = lush(function()
+local theme = lush(function(injected_functions)
+
+    -- NOTE: Current support for treesitter @x.y groups
+    -- https://github.com/rktjmp/lush.nvim/issues/109
+    local group = injected_functions.sym
+
     return {
         -- The following are all the Neovim default highlight groups from the docs
         -- as of v0.6.1, to aid your theme creation. Your themes should
@@ -429,236 +434,204 @@ local theme = lush(function()
         -- so the order shown ((mostly) alphabetical) is likely
         -- not the order you will end up with.
         --
-        -- You can uncomment these and leave them empty to disable any
-        -- styling for that group (meaning they mostly get styled as Normal)
-        -- or leave them commented to apply vims default colouring or linking.
-        Bold { fg=nil, bg=nil, gui='bold'},
-        Italic { fg=nil, bg=nil, gui='italic'},
-        Underline { fg=nil, bg=nil, gui='underline' },
-        Undercurl { fg=nil, bg=nil, gui='undercurl' },
-        Swap { gui='reverse' },
-        Standout { gui='standout' },
-        Strikethrough { gui='strikethrough' },
-
-
-        Comment      { fg=p.fg3 }, -- any comment
-        ColorColumn  { bg=p.bg1 }, -- used for the columns set with 'colorcolumn'
         -- Conceal      { }, -- placeholder characters substituted for concealed text (see 'conceallevel')
         -- Cursor       { }, -- character under the cursor
-        -- lCursor      { }, -- the character under the cursor when |language-mapping| is used (see 'guicursor')
-        -- CursorIM     { }, -- like Cursor, but used when in IME mode |CursorIM|
         -- CursorColumn { }, -- Screen-column at the cursor, when 'cursorcolumn' is set.
-        CursorLine   { bg=p.bg1 }, -- Screen-line at the cursor, when 'cursorline' is set.  Low-priority if foreground (ctermfg OR guifg) is not set.
-        Directory    { fg=p.blue, Bold }, -- directory names (and other special names in listings)
-        DiffAdd      { fg=p.green }, -- diff mode: Added line |diff.txt|
-        DiffChange   { fg=p.yellow }, -- diff mode: Changed line |diff.txt|
-        DiffDelete   { fg=p.red }, -- diff mode: Deleted line |diff.txt|
-        DiffText     { fg=p.blue, Underline }, -- diff mode: Changed text within a changed line |diff.txt|
-        -- GitSignsAdd   { fg=green},
-        EndOfBuffer  { fg=p.fg4 }, -- filler lines (~) after the end of the buffer.  By default, this is highlighted like |hl-NonText|.
-        -- TermCursor   { }, -- cursor in a focused terminal
-        -- TermCursorNC { }, -- cursor in an unfocused terminal
-        ErrorMsg     { fg=p.red, Bold }, -- error messages on the command line
-        VertSplit    { fg=p.fg4 }, -- the column separating vertically split windows
-        Folded       { bg=p.bg2 }, -- line used for closed folds
+        -- CursorIM     { }, -- like Cursor, but used when in IME mode |CursorIM|
         -- FoldColumn   { }, -- 'foldcolumn'
-        SignColumn   { bg=p.bg0}, -- column where |signs| are displayed
-        -- GitSignsDelete { fg=p.red, bg=p.bg1 },
-        -- GitSignsDeleteNr { fg=p.red },
-        LineNr       { bg=p.bg1, fg=p.fg3}, -- Line number for ":number" and ":#" commands, and when 'number' or 'relativenumber' option is set.
-        CursorLineNr { bg=p.bg1, fg=p.yellow }, -- Like LineNr when 'cursorline' or 'relativenumber' is set for the cursor line.
-        MatchParen   { bg=p.hl.yellow }, -- The character under the cursor or just before it, if it is a paired bracket, and its match. |pi_paren.txt|
         -- ModeMsg      { bg=p.fg4,  }, -- 'showmode' message (e.g., "-- INSERT -- ")
         -- MsgArea      { }, -- Area for messages and cmdline
         -- MsgSeparator { }, -- Separator for scrolled messages, `msgsep` flag of 'display'
-        MoreMsg      { fg=p.green }, -- |more-prompt|
-        NonText      { fg=p.fg4 }, -- '@' at the end of the window, characters from 'showbreak' and other characters that do not really exist in the text (e.g., ">" displayed when a double-wide character doesn't fit at the end of the line). See also |hl-EndOfBuffer|.
-        Normal       { fg=p.fg1, bg=p.bg0 }, -- normal text
-        NormalFloat  { fg=p.fg1, bg=p.bg1}, -- Normal text in floating windows.
         -- NormalNC     {fg=p.fg3, bg=p.bg1}, -- normal text in non-current windows
-        Pmenu        { bg=p.bg1 }, -- Popup menu: normal item.
-        -- PmenuSel     { Swap }, -- Popup menu: selected item.
-        PmenuSel     { bg=p.bg4 }, -- Popup menu: selected item.
         -- PmenuSbar    { }, -- Popup menu: scrollbar.
+        -- PmenuSel     { Swap }, -- Popup menu: selected item.
         -- PmenuThumb   { }, -- Popup menu: Thumb of the scrollbar.
-        Question     { fg=p.green }, -- |hit-enter| prompt and yes/no questions
         -- QuickFixLine { }, -- Current |quickfix| item in the quickfix window. Combined with |hl-CursorLine| when the cursor is there.
-        IncSearch    { bg=p.hl.blue }, -- 'incsearch' highlighting; also used for the text replaced with ":s///c"
-        Search       { bg=p.hl.yellow }, -- Last search pattern highlighting (see 'hlsearch').  Also used for similar items that need to stand out.
-        Substitute   { fg=p.red, bg=p.hl.yellow, Italic }, -- |:substitute| replacement text highlighting
-        SpecialKey   { fg=p.red, Bold }, -- Unprintable characters: text displayed differently from what it really is.  But not 'listchars' whitespace. |hl-Whitespace|
-        SpellBad     { fg=p.red, Underline }, -- Word that is not recognized by the spellchecker. |spell| Combined with the highlighting used otherwise.
-        SpellCap     { fg=p.orange, Underline }, -- Word that should start with a capital. |spell| Combined with the highlighting used otherwise.
-        SpellLocal   { fg=p.orange, Underline }, -- Word that is recognized by the spellchecker as one that is used in another region. |spell| Combined with the highlighting used otherwise.
-        SpellRare    { fg=p.yellow, Underline }, -- Word that is recognized by the spellchecker as one that is hardly ever used.  |spell| Combined with the highlighting used otherwise.
-        StatusLine   { bg=p.bg2, fg=p.fg1, }, -- status line of current window
-        StatusLineNC { bg=p.bg0, fg=p.fg3}, -- status lines of not-current windows Note: if this is equal to "StatusLine" Vim will use "^^^" in the status line of the current window.
         -- TabLine      { }, -- tab pages line, not active tab page label
         -- TabLineFill  { }, -- tab pages line, where there are no labels
         -- TabLineSel   { }, -- tab pages line, active tab page label
-        Title        { fg=p.fg0 }, -- titles for output from ":set all", ":autocmd" etp.
-        Visual       { bg=p.bg3 }, -- Visual mode selection
-        VisualNOS    { bg=p.bg2 }, -- Visual mode selection when vim is "Not Owning the Selection".
-        WarningMsg   { fg=p.red }, -- warning messages
-        Whitespace   { fg=p.fg4}, -- "nbsp", "space", "tab" and "trail" in 'listchars'
+        -- TermCursor   { }, -- cursor in a focused terminal
+        -- TermCursorNC { }, -- cursor in an unfocused terminal
         -- WildMenu     { }, -- current match in 'wildmenu' completion
-
-        -- These groups are not listed as default vim groups,
-        -- but they are defacto standard group names for syntax highlighting.
-        -- commented out groups should chain up to their "preferred" group by
-        -- default,
-        -- Uncomment and edit if you want more specific syntax highlighting.
-
-        Constant       { fg=p.magenta }, -- (preferred) any constant
-        String         { fg=p.cyan }, --   a string constant: "this is a string"
-        Character      { fg=p.spring, }, --  a character constant: 'c', '\n'
-        Number         { fg=p.violet }, --   a number constant: 234, 0xff
-        Float          { fg=p.violet }, --    a floating point constant: 2.3e10
+        -- lCursor      { }, -- the character under the cursor when |language-mapping| is used (see 'guicursor')
+        Bold           { fg=nil, bg=nil, gui='bold'},
         Boolean        { fg=p.rose }, --  a boolean constant: TRUE, false
-
-        Identifier     { fg=p.yellow}, -- (preferred) any variable name
-        Function       { fg=p.blue}, -- function name (also: methods for classes)
-
-        Statement      { fg=p.yellow }, -- (preferred) any statement
+        Character      { fg=p.spring, }, --  a character constant: 'c', '\n'
+        ColorColumn    { bg=p.bg1 }, -- used for the columns set with 'colorcolumn'
+        Comment        { fg=p.fg3 }, -- any comment
         Conditional    { fg=p.rose }, --  if, then, else, endif, switch, etp.
-        Repeat         { fg=p.orange }, --   for, do, while, etp.
-        Label          { fg=p.green }, --    case, default, etp.
-        Operator       { fg=p.blue }, -- "sizeof", "+", "*", etp.
-        Keyword        { fg=p.violet }, --  any other keyword
+        Constant       { fg=p.magenta }, -- (preferred) any constant
+        CursorLine     { bg=p.bg1 }, -- Screen-line at the cursor, when 'cursorline' is set.  Low-priority if foreground (ctermfg OR guifg) is not set.
+        CursorLineNr   { bg=p.bg1, fg=p.yellow }, -- Like LineNr when 'cursorline' or 'relativenumber' is set for the cursor line.
+        Debug          { fg=p.rose }, --    debugging statements
+        Define         { fg=p.violet, gui='italic' }, --   preprocessor #define
+        Delimiter      { fg=p.red }, --  character that needs attention
+        DiffAdd        { fg=p.green }, -- diff mode: Added line |diff.txt|
+        DiffChange     { fg=p.yellow }, -- diff mode: Changed line |diff.txt|
+        DiffDelete     { fg=p.red }, -- diff mode: Deleted line |diff.txt|
+        DiffText       { fg=p.blue, gui='underline' }, -- diff mode: Changed text within a changed line |diff.txt|
+        Directory      { fg=p.blue, gui='bold' }, -- directory names (and other special names in listings)
+        EndOfBuffer    { fg=p.fg4 }, -- filler lines (~) after the end of the buffer.  By default, this is highlighted like |hl-NonText|.
+        Error          { fg=p.red }, -- (preferred) any erroneous construct
+        ErrorMsg       { fg=p.red, gui='bold' }, -- error messages on the command line
         Exception      { fg=p.magenta }, --  try, catch, throw
-
-        PreProc        { fg=p.orange }, -- (preferred) generic Preprocessor
+        Float          { fg=p.violet }, --    a floating point constant: 2.3e10
+        Folded         { bg=p.bg2 }, -- line used for closed folds
+        Function       { fg=p.blue}, -- function name (also: methods for classes)
+        Identifier     { fg=p.yellow}, -- (preferred) any variable name
+        Ignore         { fg=p.fg4 }, -- (preferred) left blank, hidden  |hl-Ignore|
+        IncSearch      { bg=p.hl.blue }, -- 'incsearch' highlighting; also used for the text replaced with ":s///c"
         Include        { fg=p.red }, --  preprocessor #include
-        Define         { fg=p.violet, Italic }, --   preprocessor #define
+        Italic         { fg=nil, bg=nil, gui='italic'},
+        Keyword        { fg=p.violet }, --  any other keyword
+        Label          { fg=p.green }, --    case, default, etp.
+        LineNr         { bg=p.bg1, fg=p.fg3}, -- Line number for ":number" and ":#" commands, and when 'number' or 'relativenumber' option is set.
         Macro          { Define }, --    same as Define
+        MatchParen     { bg=p.hl.yellow }, -- The character under the cursor or just before it, if it is a paired bracket, and its match. |pi_paren.txt|
+        MoreMsg        { fg=p.green }, -- |more-prompt|
+        NonText        { fg=p.fg4 }, -- '@' at the end of the window, characters from 'showbreak' and other characters that do not really exist in the text (e.g., ">" displayed when a double-wide character doesn't fit at the end of the line). See also |hl-EndOfBuffer|.
+        Normal         { fg=p.fg1, bg=p.bg0 }, -- normal text
+        NormalFloat    { fg=p.fg1, bg=p.bg1}, -- Normal text in floating windows.
+        Number         { fg=p.violet }, --   a number constant: 234, 0xff
+        Operator       { fg=p.blue }, -- "sizeof", "+", "*", etp.
+        Pmenu          { bg=p.bg1 }, -- Popup menu: normal item.
+        PmenuSel       { bg=p.bg4 }, -- Popup menu: selected item.
         PreCondit      { fg=p.rose }, --  preprocessor #if, #else, #endif, etp.
-
-        Type           { fg=p.yellow }, -- (preferred) int, long, char, etp.
-        StorageClass   { fg=p.green }, -- static, register, volatile, etp.
-        Structure      { fg=p.spring }, --  struct, union, enum, etp.
-        -- Typedef        { fg=p.violet }, --  A typedef
-
+        PreProc        { fg=p.orange }, -- (preferred) generic Preprocessor
+        Question       { fg=p.green }, -- |hit-enter| prompt and yes/no questions
+        Repeat         { fg=p.orange }, --   for, do, while, etp.
+        Search         { bg=p.hl.yellow }, -- Last search pattern highlighting (see 'hlsearch').  Also used for similar items that need to stand out.
+        SignColumn     { bg=p.bg0}, -- column where |signs| are displayed
         Special        { fg=p.red }, -- (preferred) any special symbol
         SpecialChar    { fg=p.red, Bold }, --  special character in a constant
-        Tag            { fg=p.blue, Underline }, --    you can use CTRL-] on this
-        Delimiter      { fg=p.red }, --  character that needs attention
         SpecialComment { fg=p.orange }, -- special things inside a comment
-        Debug          { fg=p.rose }, --    debugging statements
-
-        -- ("Ignore", below, may be invisible...)
-        Ignore         { fg=p.fg4 }, -- (preferred) left blank, hidden  |hl-Ignore|
-
-        Error          { fg=p.red }, -- (preferred) any erroneous construct
-        Todo           { fg=p.yellow, Bold }, -- (preferred) anything that needs extra attention; mostly the keywords TODO FIXME and XXX
+        SpecialKey     { fg=p.red, Bold }, -- Unprintable characters: text displayed differently from what it really is.  But not 'listchars' whitespace. |hl-Whitespace|
+        SpellBad       { fg=p.red, gui='underdouble' }, -- Word that is not recognized by the spellchecker. |spell| Combined with the highlighting used otherwise.
+        SpellCap       { fg=p.orange, gui='underline'}, -- Word that should start with a capital. |spell| Combined with the highlighting used otherwise.
+        SpellLocal     { fg=p.orange, gui='underdotted' }, -- Word that is recognized by the spellchecker as one that is used in another region. |spell| Combined with the highlighting used otherwise.
+        SpellRare      { fg=p.yellow, gui='underdashed' }, -- Word that is recognized by the spellchecker as one that is hardly ever used.  |spell| Combined with the highlighting used otherwise.
+        Standout       { gui='standout' },
+        Statement      { fg=p.yellow }, -- (preferred) any statement
+        StatusLine     { bg=p.bg2, fg=p.fg1, }, -- status line of current window
+        StatusLineNC   { bg=p.bg0, fg=p.fg3}, -- status lines of not-current windows Note: if this is equal to "StatusLine" Vim will use "^^^" in the status line of the current window.
+        StorageClass   { fg=p.green }, -- static, register, volatile, etp.
+        Strikethrough  { gui='strikethrough' },
+        String         { fg=p.cyan }, --   a string constant: "this is a string"
+        Structure      { fg=p.spring }, --  struct, union, enum, etp.
+        Substitute     { fg=p.red, bg=p.hl.yellow, Italic }, -- |:substitute| replacement text highlighting
+        Swap           { gui='reverse' },
+        Tag            { fg=p.blue, gui='underline'}, --    you can use CTRL-] on this
+        Title          { fg=p.fg0 }, -- titles for output from ":set all", ":autocmd" etp.
+        Todo           { fg=p.yellow, gui='bold' }, -- (preferred) anything that needs extra attention; mostly the keywords TODO FIXME and XXX
+        Type           { fg=p.yellow }, -- (preferred) int, long, char, etp.
+        Typedef        { fg=p.violet }, --  A typedef
+        Undercurl      { fg=nil, bg=nil, gui='undercurl' },
+        Underdashed    { fg=nil, bg=nil, gui='underdashed' },
+        Underdotted    { fg=nil, bg=nil, gui='underdotted' },
+        Underdouble    { fg=nil, bg=nil, gui='underdouble' },
+        Underline      { fg=nil, bg=nil, gui='underline' },
+        VertSplit      { fg=p.fg4 }, -- the column separating vertically split windows
+        Visual         { bg=p.bg3 }, -- Visual mode selection
+        VisualNOS      { bg=p.bg2 }, -- Visual mode selection when vim is "Not Owning the Selection".
+        WarningMsg     { fg=p.red }, -- warning messages
+        Whitespace     { fg=p.fg4}, -- "nbsp", "space", "tab" and "trail" in 'listchars'
 
         -- -------------------------------------------------------------------
         -- Treesitter Groups
-        -- These groups are for the neovim tree-sitter highlights.
-        -- As of writing, tree-sitter support is a WIP, group names may change.
-        -- By default, most of these groups link to an appropriate Vim group,
-        -- TSError -> Error for example, so you do not have to define these unless
-        -- you explicitly want to support Treesitter's improved syntax awareness.
         -- -------------------------------------------------------------------
-        TSComment            { Comment },    -- For comment blocks.
-        TSTextReference      { fg=p.fg2 }, -- footnote, citations, etp.
-        TSText               { fg=p.fg1 },    -- For strings considered text in a markup language.
-        TSEmphasis           { fg=p.fg0, Italic },    -- For text to be represented with emphasis.
-        TSTitle              { fg=p.fg0 },    -- Text that is part of a title.
-        TSMath               { fg=p.yellow}, -- mathenv
-        --
-        TSUnderline          { Underline },    -- For text to be represented with an underline.
-        -- TSStrike             { gui='strikethrough' },    -- For strikethrough text.
-        TSLiteral            { fg=p.cyan },    -- Literal text.
-        TSURI                { fg=p.blue, Underline },    -- Any URI like a link or email.
-        TSAttribute          { fg=p.orange },
+        group('@annotation')  { fg=p.green },
+        group('@attribute')  { fg=p.orange },
+        group('@boolean')    { Boolean },    -- For booleans.
+        group('@character')  { Character },    -- For characters.
+        group('@comment')            { Comment },    -- For comment blocks.
+        group('@conditional')       { Conditional },    -- For keywords related to conditionnals.
+        group('@constant')          { Constant },    -- For constants
+        group('@constant.builtin')  { fg=p.rose, Italic },    -- For constant that are built in the language: `nil` in Lua.
+        group('@constant.macro')    { fg=p.rose, Bold },    -- For constants that are defined by macros: `NULL` in p.
+        group('@constructor')       { fg=p.blue, Bold },    -- For constructor calls and definitions: ` { }` in Lua, and Java constructors.
+        group('@danger')      { fg=p.red },
+        group('@emphasis')  { fg=p.fg0, Italic },    -- For text to be represented with emphasis.
+        group('@environment')      { fg=p.violet }, -- text environments in markup languages, e.g., \begin in LaTeX.
+        group('@environment.name') { fg=p.yellow }, -- e.g., theorem in \begin{theorem} block in LaTeX.
+        group('@error')             { fg=p.red },
+        group('@exception')         { Exception },
+        group('@field') { fg=p.yellow },    -- For fields.
+        group('@float')      { Float },    -- For floats.
+        group('@function')         { Function },    -- For function (calls and definitions).
+        group('@function.builtin') { fg=p.blue, Italic },    -- For builtin functions: `table.insert` in Lua.
+        group('@function.macro')   { fg=p.blue, Bold },    -- For macro defined fuctions (calls and definitions): each `macro_rules` in Rust.
+        group('@include')      { Include },    -- For includes: `#include` in C, `use` or `extern crate` in Rust, or `require` in Lua.
+        group('@keyword')             { fg=p.violet },    -- For keywords that don't fall in previous categories.
+        group('@keyword.function')    { fg=p.violet, Italic },    -- For keywords used to define a fuction.
+        group('@keyword.operator')    { fg=p.orange, Italic }, -- unary and binary operators that are english words
+        group('@keyword.return')      { fg=p.red, Italic },
+        group('@label')        { fg=p.orange },    -- For labels: `label:` in C and `:label:` in Lua.
+        group('@literal')    { fg=p.cyan },    -- Literal text.
+        group('@math')      { fg=p.yellow}, -- mathenv
+        group('@method')       { fg=p.blue },    -- For method calls and definitions.
+        group('@namespace')    { fg=p.yellow, Bold },    -- For identifiers referring to modules and namespaces.
+        group('@note')        { fg=p.yellow },
+        group('@number')     { Number },    -- For all numbers
+        group('@operator')     { fg=p.orange},    -- For any operator: `+`, but also `->` and `*` in p.
+        group('@parameter')           { fg=p.green },    -- For parameters of a function.
+        group('@parameter.reference')  { fg=p.green },    -- For references to parameters of a function.
+        group('@punctuation.bracket')      { fg=p.red },    -- For brackets and parens.
+        group('@punctuation.delimiter')    { fg=p.rose},    -- For delimiters ie: `.`
+        group('@punctuation.special')      { fg=p.magenta },    -- For special punctutation that does not fall in the catagories before.
+        group('@repeat')                   { Repeat },    -- For keywords related to loops.
+        group('@strikethrough')            { gui='strikethrough' },    -- For strikethrough text.
+        group('@string')                   { String },    -- For strings.
+        group('@string.escape')            { fg=p.red },    -- For escape characters within a string.
+        group('@string.regex')       { fg=p.orange },    -- For regexes.
+        group('@string.special')     { fg=p.yellow},
+        group('@symbol')             { fg=p.violet },    -- For identifiers referring to symbols or atoms.
+        group('@tag')                { fg=p.violet },    -- Tags like html tag names.
+        group('@tag.attribute')      { fg=p.magenta },    -- html tag attribute
+        group('@tag.delimter')       { Delimiter },    -- Tag delimiter like `<` `>` `/`
+        group('@text')               { fg=p.fg1 },    -- For strings considered text in a markup language.
+        group('@text.reference')     { fg=p.fg2 }, -- footnote, citations, etp.
+        group('@title')              { fg=p.fg0 },    -- Text that is part of a title.
+        group('@type')               { Type },    -- For types.
+        group('@type.builtin')       { fg=p.yellow, Italic },    -- For builtin types.
+        group('@underline')          { Underline },
+        group('@uri')                { fg=p.blue, Underline },
+        group('@variable')           { fg=p.fg1 },    -- Any variable name that does not have another highlight.
+        group('@variable.builtin')   { fg=p.orange, Italic},    -- Variable names that are defined by the languages, like `this` or `self`.
+        group('@warning')            { fg=p.orange },
 
-        -- types
-        TSBoolean            { Boolean },    -- For booleans.
-        TSCharacter          { Character },    -- For characters.
-        TSString             { String },    -- For strings.
-        TSStringSpecial      { fg=p.yellow},
-        TSStringRegex        { fg=p.orange },    -- For regexes.
-        TSStringEscape       { fg=p.red },    -- For escape characters within a string.
-        TSFloat              { Float },    -- For floats.
-        TSNumber             { Number },    -- For all numbers
-        --
-        TSConstructor        { fg=p.blue, Bold },    -- For constructor calls and definitions: ` { }` in Lua, and Java constructors.
-        TSConditional        { Conditional },    -- For keywords related to conditionnals.
-        TSConstant           { Constant };    -- For constants
-        TSConstBuiltin       { fg=p.rose, Italic },    -- For constant that are built in the language: `nil` in Lua.
-        TSConstMacro         { fg=p.rose, Bold },    -- For constants that are defined by macros: `NULL` in p.
-        TSError              { fg=p.red },    -- For syntax/parser errors.
-        TSException          { Exception },    -- For exception related keywords.
-        TSFunction           { Function },    -- For function (calls and definitions).
-        TSFuncBuiltin        { fg=p.blue, Italic },    -- For builtin functions: `table.insert` in Lua.
-        TSFuncMacro          { fg=p.blue, Bold },    -- For macro defined fuctions (calls and definitions): each `macro_rules` in Rust.
-        TSMethod             { fg=p.blue },    -- For method calls and definitions.
-        TSOperator           { fg=p.orange},    -- For any operator: `+`, but also `->` and `*` in p.
-        TSInclude            { Include },    -- For includes: `#include` in C, `use` or `extern crate` in Rust, or `require` in Lua.
-        TSKeyword            { fg=p.violet },    -- For keywords that don't fall in previous categories.
-        TSKeywordFunction    { fg=p.violet, Italic },    -- For keywords used to define a fuction.
-        TSKeywordOperator    { fg=p.orange, Italic }, -- unary and binary operators that are english words
-        TSKeywordReturn      { fg=p.red, Italic },
-        TSLabel              { fg=p.orange },    -- For labels: `label:` in C and `:label:` in Lua.
-        TSNamespace          { fg=p.yellow, Bold },    -- For identifiers referring to modules and namespaces.
-        -- TSNone               { },    -- per docs: Do not change
-        TSParameter          { fg=p.green },    -- For parameters of a function.
-        TSParameterReference { fg=p.green },    -- For references to parameters of a function.
-        TSField              { fg=p.yellow },    -- For fields.
-        -- TSProperty           { },    -- Same as `TSField`.
-        TSPunctDelimiter     { fg=p.rose},    -- For delimiters ie: `.`
-        TSPunctBracket       { fg=p.red },    -- For brackets and parens.
-        TSPunctSpecial       { fg=p.magenta },    -- For special punctutation that does not fall in the catagories before.
-        TSRepeat             { Repeat },    -- For keywords related to loops.
-        TSSymbol             { fg=p.violet },    -- For identifiers referring to symbols or atoms.
-        TSType               { Type },    -- For types.
-        TSTypeBuiltin        { fg=p.yellow, Italic },    -- For builtin types.
-        TSVariable           { fg=p.fg1 },    -- Any variable name that does not have another highlight.
-        TSVariableBuiltin    { fg=p.orange, Italic},    -- Variable names that are defined by the languages, like `this` or `self`.
-        -- tags
-        TSTag                { fg=p.violet },    -- Tags like html tag names.
-        TSTagAttribute       { TSParameter },    -- html tag attribute
-        TSTagDelimiter       { Delimiter },    -- Tag delimiter like `<` `>` `/`
-        -- envs
-        TSEnvironment        { fg=p.violet }, -- text environments in markup languages, e.g., \begin in LaTeX.
-        TSEnvironmentName    { fg=p.yellow }, -- e.g., theorem in \begin{theorem} block in LaTeX.
-        -- notes, but should match Diagnostic
-        TSNote               { fg=p.yellow }, -- informational note
-        TSWarning            { fg=p.orange }, -- warning note
-        TSDanger             { fg=p.red }, -- danger note
 
         -- gui
         -- Menu {},
         -- Scrollbar {},
         -- Tooltip {},
 
-        -- -------------------------------------------------------------------
-        -- LSP groups
-        -- These groups are for the native LSP client. Some other LSP clients may
-        -- use these groups, or use their own. Consult your LSP client's
-        -- documentation.
-        -- -------------------------------------------------------------------
+        ---- -------------------------------------------------------------------
+        ---- LSP groups
+        ---- These groups are for the native LSP client. Some other LSP clients may
+        ---- use these groups, or use their own. Consult your LSP client's
+        ---- documentation.
+        ---- -------------------------------------------------------------------
 
-        -- LspReferenceText      { }, -- used for highlighting "text" references
-        -- LspReferenceRead      { }, -- used for highlighting "read" references
-        -- LspReferenceWrite     { }, -- used for highlighting "write" references
+        ---- LspReferenceText      { }, -- used for highlighting "text" references
+        ---- LspReferenceRead      { }, -- used for highlighting "read" references
+        ---- LspReferenceWrite     { }, -- used for highlighting "write" references
 
-        -- LspCodeLens           { }, -- Used to color the virtual text of the codelens
-        -- LspCodeLensSeparator  { }, -- Used to color the virtual text of the codelens
-        -- LspSignatureActiveParameter {},
+        ---- LspCodeLens           { }, -- Used to color the virtual text of the codelens
+        ---- LspCodeLensSeparator  { }, -- Used to color the virtual text of the codelens
+        ---- LspSignatureActiveParameter {},
 
-        -- -------------------------------------------------------------------
-        -- Diagnostic groups
-        -- -------------------------------------------------------------------
-	    DiagnosticError { TSDanger },
-        DiagnosticWarn { TSWarning },
-        DiagnosticInfo { TSNote },
+        ---- -------------------------------------------------------------------
+        ---- Diagnostic groups
+        ---- -------------------------------------------------------------------
+	    DiagnosticError   { group('@danger') },
+        DiagnosticWarn    { group('@warning') },
+        DiagnosticInfo    { group('@note')    },
         DiagnosticHint { fg=p.spring },
         -- DiagnosticVirtualTextError { }, -- Used for "Error" diagnostic virtual text
         -- DiagnosticVirtualTextWarn  { }, -- Used for "Warning" diagnostic virtual text
         -- DiagnosticVirtualTextInfo  { }, -- Used for "Information" diagnostic virtual text
         -- DiagnosticVirtualTextHint  { }, -- Used for "Hint" diagnostic virtual text
-        DiagnosticUnderlineError   { fg=p.red, Underline  }, -- Used for "Error" diagnostic virtual text
+        DiagnosticUnderlineError   { fg=p.red, Underdouble }, -- Used for "Error" diagnostic virtual text
         DiagnosticUnderlineWarn    { fg=p.orange, Underline }, -- Used for "Warning" diagnostic virtual text
         DiagnosticUnderlineInfo    { fg=p.yellow, Underline }, -- Used for "Information" diagnostic virtual text
         DiagnosticUnderlineHint    { fg=p.spring, Underline }, -- Used for "Hint" diagnostic virtual text
