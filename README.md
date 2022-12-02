@@ -20,8 +20,7 @@ Hadalized takes Solarized as an inspiration for the basic choices but
 diverges in a number of ways.
 
 - Utilize the `okhsl` colorspace with fixed lightness for colors palettes.
-- All base colors are the same fixed hue, rather than shifting  from a
-  cooloer to warmer tones.
+- Dark bases have decreased lightness values.
 - Bases are generally less saturated.
 - Use 10 color palette with dim, bright, neutral and highlight variants.
 - Orange is made more distinct from red.
