@@ -26,3 +26,9 @@ diverges in a number of ways.
 - Orange is made more distinct from red.
 - Yellow is less brown.
 - Green is less yellow.
+
+# Building
+
+To build the explicit `hadalized_[dark|light]` pure vimscript theme variants
+open the `shipwright_build.lua` file and execute `:Shipwright`.
+
