@@ -181,16 +181,36 @@ local colors = {
 
 -- okhsl(220, *, *)
 local base = {
+    h285 = {
+        s20 = {
+            l08 = hsl('#101018'),
+            l10 = hsl('#14141d'),
+            l12 = hsl('#1a1a24'),
+            l15 = hsl('#21212c'),
+            l20 = hsl('#2d2d3b'),
+            l25 = hsl('#383849'),
+
+        },
+        s10 = {
+            l08 = hsl('#111114'),
+            l10 = hsl('#16161a'),
+            l12 = hsl('#1b1b20'),
+            l15 = hsl('#222227'),
+            l20 = hsl('#2d2d34'),
+            l25 = hsl('#393941'),
+
+        },
+    },
     h220 = {
         s100 = {
-            l050 = hsl('#000b0f'),
-            l070 = hsl('#041014'),
-            l080 = hsl('#00141b'),
-            l100 = hsl('#001a22'),
-            l120 = hsl('#001f28'),
-            l150 = hsl('#002732'),
-            l200 = hsl('#003441'),
-            l250 = hsl('#004151'),
+            l05 = hsl('#000b0f'),
+            l07 = hsl('#041014'),
+            l08 = hsl('#00141b'),
+            l10 = hsl('#001a22'),
+            l12 = hsl('#001f28'),
+            l15 = hsl('#002732'),
+            l20 = hsl('#003441'),
+            l25 = hsl('#004151'),
         },
         s50 = {
             l08 = hsl('#051318'),
@@ -461,7 +481,7 @@ local function generate(palette_name)
             NonText        { fg=p.fg4 }, -- '@' at the end of the window, characters from 'showbreak' and other characters that do not really exist in the text (e.g., ">" displayed when a double-wide character doesn't fit at the end of the line). See also |hl-EndOfBuffer|.
             Normal         { fg=p.fg1, bg=p.bg0 }, -- normal text
             NormalFloat    { fg=p.fg1, bg=p.bg1}, -- Normal text in floating windows.
-            NormalNC       { fg=p.fg3, bg=p.bg1}, -- normal text in non-current windows
+            NormalNC       { Normal }, -- normal text in non-current windows
             Number         { fg=p.color.violet }, --   a number constant: 234, 0xff
             Operator       { fg=p.color.blue }, -- "sizeof", "+", "*", etp.
             Pmenu          { bg=p.bg1 }, -- Popup menu: normal item.
