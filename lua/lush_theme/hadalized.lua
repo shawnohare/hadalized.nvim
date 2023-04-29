@@ -359,6 +359,7 @@ base.warm = base.h90.s05
 -- For now only light and dark variants are supported.
 local palettes = {
     light = {
+        black = base.neutral.l05,
         bg0 = base.warm.l97,
         bg1 = base.warm.l93,
         bg2 = base.warm.l90,
@@ -376,6 +377,7 @@ local palettes = {
         hl = colors.s100.l85,
     },
     dark = {
+        black = base.neutral.l05,
         bg0 = base.cool.l08,
         bg1 = base.cool.l12,
         bg2 = base.cool.l15,
@@ -438,7 +440,7 @@ local function generate(palette_name)
             --
             Boolean        { fg=p.color.rose }, --  a boolean constant: TRUE, false
             Character      { fg=p.color.spring, }, --  a character constant: 'c', '\n'
-            ColorColumn    { bg=p.bg1 }, -- used for the columns set with 'colorcolumn'
+            ColorColumn    { bg=p.bg2 }, -- used for the columns set with 'colorcolumn'
             Comment        { fg=p.fg3 }, -- any comment
             Conceal        { fg=p.fg5 }, -- placeholder characters substituted for concealed text (see 'conceallevel')
             Conditional    { fg=p.color.rose }, --  if, then, else, endif, switch, etp.
@@ -466,14 +468,14 @@ local function generate(palette_name)
             Function       { fg=p.color.blue}, -- function name (also: methods for classes)
             Identifier     { fg=p.color.yellow}, -- (preferred) any variable name
             Ignore         { fg=p.fg4 }, -- (preferred) left blank, hidden  |hl-Ignore|
-            IncSearch      { bg=p.hl.blue }, -- 'incsearch' highlighting; also used for the text replaced with ":s///c"
-            Include        { fg=p.color.red }, --  preprocessor #include
+            IncSearch      { bg=p.hl.blue, fg=p.black }, -- 'incsearch' highlighting; also used for the text replaced with ":s///c"
+            Include        { fg=p.color.red, gui="bold" }, --  preprocessor #include
             Italic         { fg=nil, bg=nil, gui='italic'},
             Keyword        { fg=p.color.violet }, --  any other keyword
             Label          { fg=p.color.green }, --    case, default, etp.
             LineNr         { bg=p.bg1, fg=p.fg3}, -- Line number for ":number" and ":#" commands, and when 'number' or 'relativenumber' option is set.
             Macro          { Define }, --    same as Define
-            MatchParen     { bg=p.hl.yellow }, -- The character under the cursor or just before it, if it is a paired bracket, and its match. |pi_paren.txt|
+            MatchParen     { fg=p.color.red, gui="bold" }, -- The character under the cursor or just before it, if it is a paired bracket, and its match. |pi_paren.txt|
             ModeMsg        { fg=p.color.orange, gui='bold' }, -- 'showmode' message (e.g., "-- INSERT -- ")
             MoreMsg        { fg=p.color.green }, -- |more-prompt|
             MsgArea        { }, -- Area for messages and cmdline
@@ -493,7 +495,7 @@ local function generate(palette_name)
             Question       { fg=p.color.green }, -- |hit-enter| prompt and yes/no questions
             QuickFixLine   { }, -- Current |quickfix| item in the quickfix window. Combined with |hl-CursorLine| when the cursor is there.
             Repeat         { fg=p.color.orange }, --   for, do, while, etp.
-            Search         { bg=p.hl.yellow }, -- Last search pattern highlighting (see 'hlsearch').  Also used for similar items that need to stand out.
+            Search         { bg=p.hl.yellow, fg=p.black }, -- Last search pattern highlighting (see 'hlsearch').  Also used for similar items that need to stand out.
             SignColumn     { bg=p.bg0}, -- column where |signs| are displayed
             Special        { fg=p.color.red }, -- (preferred) any special symbol
             SpecialChar    { fg=p.color.red, gui='bold' }, --  special character in a constant
