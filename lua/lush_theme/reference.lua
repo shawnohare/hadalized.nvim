@@ -25,379 +25,670 @@
 --
 local lush = require('lush')
 local hsluv = lush.hsluv
+local hsl = lush.hsl
 
- local okhsl9065 = {
-     red     = hsluv(014, 88, 63), -- 025, '#f66c66'
-     orange  = hsluv(033, 93, 64), -- 055, '#3e77f28'
-     yellow  = hsluv(086, 96, 66), -- 110, '#a4a51c'
-     green   = hsluv(128, 82, 67), -- 140, '#5ab743'
-     cyan    = hsluv(192, 96, 67), -- 195, '#20b4b4'
-     blue    = hsluv(244, 89, 65), -- 245, '#3ea5f2'
-     violet  = hsluv(265, 95, 64), -- 280, '#8d91fa'
-     magenta = hsluv(311, 80, 62), -- 330, '#ea58e2'
-     rose    = hsluv(353, 92, 62), -- 360, '#f85f99'
- }
-
- local okhsl9060 = {
-     red     = hsluv(013, 82, 57), -- 025, '#f05250'
-     orange  = hsluv(033, 95, 59), -- 055, '#d6731c'
-     yellow  = hsluv(086, 96, 61), -- 110, '#96971a'
-     green   = hsluv(124, 81, 62), -- 140, '#52a83e'
-     cyan    = hsluv(192, 96, 61), -- 195, '#1da5a5'
-     blue    = hsluv(245, 93, 60), -- 245, '#2b98e5'
-     violet  = hsluv(266, 95, 59), -- 280, '#7f80f9'
-     magenta = hsluv(311, 83, 56), -- 330, '#de41d7'
-     rose    = hsluv(353, 88, 57), -- 360, '#f43f8b'
- }
-
- -- main (neutral) colors, okhsl(*, 90, 65)
- local c2 = {
-     red     = hsluv(014, 88, 63), -- 025, '#f66c66'
-     orange  = hsluv(033, 93, 64), -- 055, '#3e77f28'
-     yellow  = hsluv(086, 96, 66), -- 110, '#a4a51c'
-     green   = hsluv(128, 82, 67), -- 140, '#5ab743'
-     cyan    = hsluv(192, 96, 67), -- 195, '#20b4b4'
-     blue    = hsluv(244, 89, 65), -- 245, '#3ea5f2'
-     violet  = hsluv(265, 95, 64), -- 280, '#8d91fa'
-     magenta = hsluv(311, 80, 62), -- 330, '#ea58e2'
-     rose    = hsluv(353, 92, 62), -- 360, '#f85f99'
- }
-
- dim colors, okhsl(*, 90, 45)
- local dim = {
-     red     = hsluv(012, 80, 42), -- 025 #bd2a2e
-     orange  = hsluv(032, 97, 44), -- 055 #a0530d
-     yellow  = hsluv(086, 95, 45), -- 110 #6f6f11
-     green   = hsluv(124, 80, 46), -- 140 #3c7c2d
-     cyan    = hsluv(192, 96, 46), -- 195 #14797a
-     blue    = hsluv(245, 97, 45), -- 245 #1170ae
-     violet  = hsluv(268, 87, 42), -- 280 #5a4ae7
-     magenta = hsluv(310, 95, 41), -- 330 #ac16a6
-     rose    = hsluv(353, 94, 42), -- 360 #bd1766
- }
-
-
- okhsl(*, 90, 50)
- local dim = {
-     red     = hsluv(016, 84, 52), -- #e04730
-     orange  = hsluv(032, 96, 49), -- #b25d10
-     yellow  = hsluv(086, 96, 50), -- #7c7c14
-     green   = hsluv(124, 80, 52), -- #448a33
-     cyan    = hsluv(192, 96, 51), -- #178888
-     blue    = hsluv(245, 97, 58), -- #167dc1
-     violet  = hsluv(267, 91, 48), -- #655bf0
-     magenta = hsluv(310, 93, 46), -- #be20b8
-     rose    = hsluv(353, 92, 47), -- #d11f72
- }
-
-
-
- okhsl(*, 90, 70)
- color2 = {
-     red     = hsluv(015, 92, 68), -- 025, '#fa847c'
-     orange  = hsluv(034, 87, 69), -- 055, '#f58d3b'
-     yellow  = hsluv(086, 96, 71), -- 110, '#b2b31e'
-     green   = hsluv(124, 83, 72), -- 140, '#61c748'
-     cyan    = hsluv(192, 96, 72), -- 195, '#23c3c3'
-     blue    = hsluv(242, 92, 70), -- 245, '#5cb3f8'
-     violet  = hsluv(264, 96, 69), -- 280, '#9ca1fb'
-     magenta = hsluv(312, 80, 67), -- 330, '#ed77e5'
-     rose    = hsluv(353, 94, 68), -- 360, '#fb7ba7'
- },
-
-
- bright colors, okhsl(*, 90, 75)
- local br = {
-     red     = hsluv(016, 94, 74), -- 025 #fb9b93
-     orange  = hsluv(036, 91, 74), -- 055 #faa060
-     yellow  = hsluv(086, 96, 76), -- 110 #c0c121
-     green   = hsluv(124, 83, 77), -- 140 #68d74d
-     cyan    = hsluv(192, 96, 77), -- 195 #28d2d2
-     blue    = hsluv(241, 94, 75), -- 245 #7ac0fb
-     violet  = hsluv(263, 96, 74), -- 280 #abb2fc
-     magenta = hsluv(312, 79, 73), -- 330 #f092e8
-     rose    = hsluv(353, 96, 73), -- 360 #fc94b6
- }
-
-
- -------------------------------------------------------------------------
- solarized reference
- -------------------------------------------------------------------------
- local sol = {
-     base03  = hsluv(222, 100, 15),
-     base02  = hsluv(221, 94, 20),
-     base01  = hsluv(215, 35, 45),
-     base00  = hsluv(218, 32, 50),
-     base10  = hsluv(201, 20, 60),
-     base11  = hsluv(192, 15, 65),
-     base12  = hsluv(73, 23, 92),
-     base13  = hsluv(71, 76, 97),
-     red     = hsluv(13, 82, 49),
-     orange  = hsluv(21, 95, 49),
-     yellow  = hsluv(59, 100, 60),
-     green   = hsluv(97, 100, 60),
-     cyan    = hsluv(182, 92, 60),
-     blue    = hsluv(245, 93, 56),
-     violet  = hsluv(264, 57, 51),
-     magenta = hsluv(348, 81, 50),
- }
-
-
- -------------------------------------------------------------------------
- Compute some bg:fg contrast ratios.
- -------------------------------------------------------------------------
- local contrasts = {
-     base08 = {
-         base55 = 5.01,
-         base60 = 5.95,
-         base65 = 7,
-         base70 = 8.26,
-         base75 = 9.58,
-         base75s10 = 9.58,
-     },
-     base10 = {
-         base75 = 9.13,
-         base70 = 7.87,
-         base65 = 6.67,
-         base60 = 5.67,
-         base55 = 4.02,
-
-     },
-     base97 = {
-         base25 = 10.58,
-         base27 = 9.8,
-         base28 = 9.5,
-         base30 = 8.78,
-         base35 = 7.28,
-         base40 = 6.04,
-         base45 = 4.98,
-         base55 = 3.49,
-     },
- }
-
- ---------------------------------------------------------------------------
- palette
- Colors are drawn from the okhsl(h, 100, l) color space
- ---------------------------------------------------------------------------
-
- okhsl(h, 100, l).
- Static colors used in both light and dark modes.
-local color = {
-    -- okhsl hue values for color.
-    hues = {
+local defs = {
+    hues8 = {
         red     = 025,
         orange  = 055,
         yellow  = 110,
-        green   = 130,
-        spring  = 155,
+        green   = 140,
         cyan    = 185,
         blue    = 245,
         violet  = 290,
-        magenta = 330,
-        cerise  = 345,
-        rose    = 360,
+        magenta = 340,
     },
-    -- okhsl(h, 100, 50)
-    l50 = {
-        red     = hsluv('#df0024'),
-        orange  = hsluv('#b45c00'),
-        yellow  = hsluv('#7c7d00'),
-        green   = hsluv('#588800'),
-        spring  = hsluv('#008e50'),
-        cyan    = hsluv('#008a7f'),
-        blue    = hsluv('#007dc5'),
-        violet  = hsluv('#7e43ff'),
-        magenta = hsluv('#c300bd'),
-        rose    = hsluv('#d70072'),
+    l55s75 = {
+        red = hsl('#d35450'),
+        orange = hsl('#bd6d2f'),
+        yellow = hsl('#88892f'),
+        green = hsl('#58964a'),
+        cyan = hsl('#33968b'),
+        blue = hsl('#388ac9'),
+        violet=hsl('#856ce3'),
+        magenta = hsl('#cb49a8'),
     },
-    -- okhsl(h, 100, 55)
-    l55 = {
-        red     = hsluv('#f60029'),
-        orange  = hsluv('#c76600'),
-        yellow  = hsluv('#898a00'),
-        green   = hsluv('#629600'), -- h=130
-        spring  = hsluv('#009d5a'), -- h=155
-        cyan    = hsluv('#00988c'),
-        blue    = hsluv('#008ad9'),
-        violet  = hsluv('#885eff'),
-        magenta = hsluv('#d700d0'), -- h=330
-        cerise  = hsluv('#e400a6'),
-        rose    = hsluv('#ed007e'), -- h=360
-        -- green   = hsluv('#4f9a00'),
-        -- green   = hsluv('#009e48'), -- h=150
-        -- violet  = hsluv('#716aff'),
-    },
-    -- okhsl(h, 100, 60)
-    l60 = {
-        red     = hsluv('#ff3b41'),
-        orange  = hsluv('#da7000'),
-        yellow  = hsluv('#979700'),
-        green   = hsluv('#6ca500'), -- h=130,
-        spring  = hsluv('#00ad63'), -- h=155,
-        cyan    = hsluv('#00a79a'),  -- h=185
-        blue    = hsluv('#0098ee'),
-        violet  = hsluv('#9374ff'),
-        magenta = hsluv('#eb00e4'),
-        cerise  = hsluv('#f900b7'), -- h=345
-        rose    = hsluv('#ff1f8b'),
-        -- green   = hsluv('#57a900'), -- h=135
-        -- green   = hsluv('#00af2f'), -- h=145,
-        -- green   = hsluv('#00ae50'), -- h=150
-    },
-    -- okhsl(h, 100, 65)
-    l65 = {
-        red = hsluv('#ff625e'),
-        orange = hsluv('#ed7b00'),
-        yellow = hsluv('#a5a500'),
-        green  = hsluv('#76b300'),
-        spring  = hsluv('#00bc6c'), -- h=155
-        cyan   = hsluv('#00b6a8'),
-        blue   = hsluv('#1aa5ff'),
-        violet = hsluv('#9e88ff'),
-        magenta = hsluv('#ff0bf7'),
-        rose    = hsluv('#ff5699'),
-    },
-    -- okhsl(h, 100, 70)
-    -- l70 = {
-    --     red     = hsluv('#ff7f78'),
-    --     orange  = hsluv('#ff8610'),
-    --     yellow  = hsluv('#b3b300'),
-    --     green   = hsluv('#80c200'), -- h=130
-    --     spring  = hsluv('#00cc76'), -- h=155
-    --     cyan    = hsluv('#00c6b6'), -- h=185
-    --     blue    = hsluv('#52b3ff'),
-    --     violet  = hsluv('#ab9aff'), -- h=290
-    --     magenta = hsluv('#ff5cf6'),
-    --     cerise  = hsluv('#ff6ec8'),
-    --     rose    = hsluv('#ff77a7'), -- h=360,
-    --     -- green   = hsluv('#68c700'), -- h=135
-    --     -- green   = hsluv('#00cd5f'), -- h=150
-    --     -- cyan    = hsluv('#00c5bd'), -- h=190
-    --     -- cyan    = hsluv('#00c7af'), -- h=180
-    -- },
-    -- okhsl(h, 100, 75) for backgrounds
-    l75 = {
-        red     = hsluv('#ff9890'),
-        orange  = hsluv('#ff9e57'),
-        yellow  = hsluv('#c1c100'),
-        green   = hsluv('#8ad200'), -- h=130
-        spring  = hsluv('#00dc7f'), -- h=155
-        cyan    = hsluv('#00d5c5'),
-        blue    = hsluv('#75c1ff'),
-        violet  = hsluv('#b8acff'),
-        magenta = hsluv('#ff82f6'),
-        cerise  = hsluv('#ff8cd0'),
-        rose    = hsluv('#ff92b5'),
-    },
-    -- okhsl(h, 100, 80) for backgrounds
-    l80 = {
-        red     = hsluv('#ffafa7'),
-        orange  = hsluv('#ffb37f'),
-        yellow  = hsluv('#cfd000'),
-        green   = hsluv('#95e100'),
-        spring  = hsluv('#00ec89'),
-        cyan    = hsluv('#00e5d3'),
-        blue    = hsluv('#94ceff'),
-        violet  = hsluv('#c5bdff'),
-        magenta = hsluv('#ff9ff7'),
-        rose    = hsluv('#ffaac4'),
-    },
-    -- okhsl(h, 100, 85)
-    l85 = {
-        red     = hsluv('#ffc4be'),
-        orange  = hsluv('#ffc7a2'),
-        yellow  = hsluv('#ddde00'),
-        green   = hsluv('#9ff100'),
-        spring  = hsluv('#00fc93'),
-        cyan    = hsluv('#00f3ea'),
-        blue    = hsluv('#b0daff'),
-        violet  = hsluv('#d3ceff'),
-        magenta = hsluv('#ffbaf8'),
-        rose    = hsluv('#ffc1d2'),
-    },
-    -- gray05 = hsluv('#111111'), -- l=05,
-    -- gray10 = hsluv('#1b1b1b'), -- l=10,
-    -- gray15 = hsluv('#262626'), -- l=15,
-    -- gray20 = hsluv('#303030'), -- l=20,
-    -- gray25 = hsluv('#3b3b3b'), -- l=25,
-    -- gray30 = hsluv('#474747'), -- l=30,
-    -- gray35 = hsluv('#525252'), -- l=35,
-    -- gray40 = hsluv('#5e5e5e'), -- l=40,
-    -- gray45 = hsluv('#6a6a6a'), -- l=45,
-    -- gray50 = hsluv('#777777'), -- l=50,
-    -- gray55 = hsluv('#848484'), -- l=55,
-    -- gray60 = hsluv('#919191'), -- l=60,
-    -- gray65 = hsluv('#9e9e9e'), -- l=65,
-    -- gray70 = hsluv('#ababab'), -- l=70,
-    -- gray75 = hsluv('#b9b9b9'), -- l=75,
-    -- gray80 = hsluv('#c6c6c6'), -- l=80,
-    -- gray85 = hsluv('#d4d4d4'), -- l=85,
-    -- gray90 = hsluv('#e2e2e2'), -- l=90,
-    -- gray95 = hsluv('#f1f1f1'), -- l=95.
+    l60s75 = {
+        red = hsl('#e0645e'),
+        orange = hsl('#cd7938'),
+        yellow = hsl('#969735'),
+        green = hsl('#61a452'),
+        cyan = hsl('#3aa499'),
+        blue = hsl('#4498d8'),
+        violet = hsl('#917cea'),
+        magenta = hsl('#d859b5'),
 
-    -- base values (saturation mostly 10)
-    -- -- base08 = hsluv('#051318'), -- s=50,
-    -- -- base10 = hsluv('#08191e'), -- s=50,
-    -- -- base15 = hsluv('#0f262d'), -- s=50,
-    -- -- base20 = hsluv('#16333b'), -- s=50,
-    -- base08 = hsluv('#00141b'), -- s=100,
-    -- base10 = hsluv('#001a22'), -- s=100,
-    -- base15 = hsluv('#002732'), -- s=100,
-    -- base20 = hsluv('#003441'), -- s=100,
-    -- -- base25 = hsluv('#1d3f4a'), -- s=50,
-    -- -- base25 = hsluv('#004151'), -- s=100,
-    -- -- base25 = hsluv('#2a3d43'), -- s=25,
-    -- base25 = hsluv('#333c3e'), -- s=10
-    -- base30 = hsluv('#3e484b'), -- s=10
-    -- base35 = hsluv('#495457'), -- s=10
-    -- base40 = hsluv('#556064'), -- s=10
-    -- base45 = hsluv('#606d71'), -- s=10
-    -- base50 = hsluv('#6c7a7e'), -- s=10
-    -- base55 = hsluv('#79878b'), -- s=10
-    -- base60 = hsluv('#859499'), -- s=10
-    -- base65 = hsluv('#93a1a6'), -- s=10
-    -- base70 = hsluv('#a1aeb3'), -- s=10,
-    -- base75 = hsluv('#afbbc0'), -- s=10
-    -- base80  = hsluv('#bec9cc'),  -- s=10
-    -- base85  = hsluv('#ced6d9'),  -- s=10,
-    -- base90  =  hsluv('#dee4e6'), -- s=10,
-    -- -- base92  =  hsluv('#e4e9eb'), -- s=10,
-    -- base95  =  hsluv('#eef1f2'), -- s=10,
-    -- base97  =  hsluv('#f5f7f7'), -- s=10,
-    -- base87  =  hsluv('#d4dcde'), -- l=87,
-    -- base82  =  hsluv('#c4ced1'), -- l=82
-    --
-    -- base (saturation mostly 5)
-    -- base05 = hsluv('#000b0f'),
-    base08 = hsluv('#00141b'), -- s=100,
-    base10 = hsluv('#001a22'), -- s=100,
-    base12 = hsluv('#001f28'), -- s=100,
-    base15 = hsluv('#002732'), -- s=100,
-    -- base20 = hsluv('#16333b'), -- s=50,
-    -- base20 = hsluv('#0b343f'), -- s=75, hsluv(221, 90, 19),
-    base20 = hsluv('#003441'), -- s=100,
-    base25 = hsluv('#004151'), -- s=100
-    -- base25s25 = hsluv('#2a3d43'), -- s=25,
-    -- base25s50 = hsluv('#1d3f4a'), -- s=50,
-    -- base25 = hsluv('#363b3c'), -- s=05,
-    base27 = hsluv('#3b4041'), -- s=05,
-    base28 = hsluv('#3d4243'),
-    base30 = hsluv('#424748'),
-    base35 = hsluv('#4d5355'),
-    base40 = hsluv('#595f61'),
-    base45 = hsluv('#656c6e'),
-    base50 = hsluv('#71787b'),
-    base55 = hsluv('#7e8588'),
-    base60 = hsluv('#8b9295'),
-    base65 = hsluv('#989fa2'),
-    base70 = hsluv('#a6adaf'),
-    base75 = hsluv('#b4babc'),
-    base80 = hsluv('#c2c8c9'),
-    base85 = hsluv('#d1d5d7'),
-    base90 = hsluv('#e0e3e4'),
-    base93 = hsluv('#e9ebec'), -- s=05
-    base95 = hsluv('#f0f1f1'),
-    base97 = hsluv('#f6f7f7'),
+    },
+    l65s75 = {
+        red = hsl('#e97770'),
+        orange = hsl('#dc8545'),
+        yellow = hsl('#a3a43c'),
+        green = hsl('#6bb35b'),
+        cyan = hsl('#41b3a6'),
+        blue = hsl('#55a5e5'),
+        violet = hsl('#9e8def'),
+        magenta = hsl('#e26dbf'),
+
+    },
+    l85s75 = {
+        red = hsl('#f8c7c2'),
+        orange = hsl('#f9caab'),
+        yellow = hsl('#dadc6c'),
+        green = hsl('#9fec8e'),
+        cyan = hsl('#77ecde'),
+        blue = hsl('#b6d9f9'),
+        violet = hsl('#d3cff9'),
+        magenta = hsl('#f4c4e3'),
+    },
+    h220s15 = {
+        l05 = hsl('#06090a'),
+        l07 = hsl('#0a0f11'),
+        l08 = hsl('#0d1214'),
+        l10 = hsl('#111719'),
+        l12 = hsl('#161d1f'),
+        l15 = hsl('#1c2427'),
+        l17 = hsl('#20292c'),
+        l18 = hsl('#222b2e'),
+        l20 = hsl('#263033'),
+        l25 = hsl('#303c40'),
+        l30 = hsl('#3b484d'),
+        l35 = hsl('#45555a'),
+        l40 = hsl('#506167'),
+        l45 = hsl('#5b6e74'),
+        l50 = hsl('#677b82'),
+        l55 = hsl('#73888f'),
+        l60 = hsl('#80959c'),
+        l65 = hsl('#8da2a9'),
+        l70 = hsl('#9bafb6'),
+        l75 = hsl('#aabdc3'),
+        l80 = hsl('#bacacf'),
+        l85 = hsl('#cad7db'),
+        l90 = hsl('#dce4e7'),
+        l92 = hsl('#e3eaec'),
+        l95 = hsl('#edf2f3'),
+    },
+    h220s100 = {
+        l05 = hsl('#000b0f'),
+        l07 = hsl('#041014'),
+        l08 = hsl('#00141b'),
+        l10 = hsl('#001a22'),
+        l12 = hsl('#001f28'),
+        l15 = hsl('#002732'),
+        l20 = hsl('#003441'),
+        l25 = hsl('#004151'),
+    },
+    h220s75 = {
+        l05 = hsl('#010a0f'),
+        l10 = hsl('#031a20'),
+        l15 = hsl('#062730'),
+        l20 = hsl('#0b343f'),
+        l25 = hsl('#10404e'),
+    },
+    h220s50 = {
+        l05 = hsl('#020a0d'),
+        l08 = hsl('#051318'),
+        l10 = hsl('#08191e'),
+        l12 = hsl('#0b1e24'),
+        l15 = hsl('#0f262d'),
+        l20 = hsl('#16333b'),
+        l25 = hsl('#1d3f4a'),
+    },
+    h220s33 = {
+        l05 = hsl('#040a0c'),
+        l06 = hsl('#050d10'),
+        l07 = hsl('#071013'),
+        l08 = hsl('#081316'),
+        l10 = hsl('#0c181c'),
+        l12 = hsl('#101e22'),
+        l15 = hsl('#132328'),
+        l20 = hsl('#1e3238'),
+        l25 = hsl('#263e46'),
+        l40 = hsl('#41646f'),
+        l45 = hsl('#4b717d'),
+        l50 = hsl('#557e8b'),
+        l55 = hsl('#608c9a'),
+        l60 = hsl('#6c99a8'),
+        l65 = hsl('#79a6b5'),
+        l70 = hsl('#87b4c2'),
+        l75 = hsl('#97c1cf'),
+        l80 = hsl('#aaceda'),
+        l85 = hsl('#bedae4'),
+        l90 = hsl('#d3e7ed'),
+        l97 = hsl('#f2f8fa'),
+    },
+    h220s25 = {
+        l05 = hsl('#05090b'),
+        l08 = hsl('#0a1315'),
+        l10 = hsl('#0e181b'),
+        l12 = hsl('#121d21'),
+        l15 = hsl('#182529'),
+        l20 = hsl('#213136'),
+        l25 = hsl('#2a3d43'),
+        l28 = hsl('#30454b'),
+        l30 = hsl('#344a51'),
+        l35 = hsl('#3e565e'),
+        l40 = hsl('#48636c'),
+        l45 = hsl('#52707a'),
+        l50 = hsl('#5d7d87'),
+        l55 = hsl('#698a95'),
+        l60 = hsl('#7597a3'),
+        l65 = hsl('#82a5b0'),
+        l70 = hsl('#90b2bd'),
+        l75 = hsl('#a0bfc9'),
+        l80 = hsl('#b1ccd5'),
+        l85 = hsl('#c4d9e0'),
+        l90 = hsl('#d7e6ea'),
+        l95 = hsl('#ebf2f5'),
+    },
+    h220s10 = {
+        l05 = hsl('#07090a'),
+        l08 = hsl('#0e1213'),
+        l10 = hsl('#131718'),
+        l12 = hsl('#171c1e'),
+        l15 = hsl('#1e2425'),
+        l20 = hsl('#293032'),
+        l25 = hsl('#333c3e'),
+        l30 = hsl('#3e484b'),
+        l35 = hsl('#495457'),
+        l40 = hsl('#556064'),
+        l45 = hsl('#606d71'),
+        l50 = hsl('#6c7a7e'),
+        l55 = hsl('#79878b'),
+        l60 = hsl('#859499'),
+        l65 = hsl('#93a1a6'),
+        l70 = hsl('#a1aeb3'),
+        l75 = hsl('#afbbc0'),
+        l80 = hsl('#bec9cc'),
+        l85 = hsl('#ced6d9'),
+        l90 = hsl('#dee4e6'),
+        l95 = hsl('#eef1f2'),
+    },
+    h220s05 = {
+        l05 = hsl('#070909'),
+        l06 = hsl('#0a0c0c'),
+        l07 = hsl('#0d0f0f'),
+        l08 = hsl('#101112'),
+        l10 = hsl('#141717'),
+        l12 = hsl('#191c1d'),
+        l15 = hsl('#202324'),
+        l20 = hsl('#2b2f30'),
+        l25 = hsl('#363b3c'),
+        l27 = hsl('#3b4041'),
+        l28 = hsl('#3d4243'),
+        l30 = hsl('#424748'),
+        l35 = hsl('#4d5355'),
+        l40 = hsl('#595f61'),
+        l45 = hsl('#656c6e'),
+        l50 = hsl('#71787b'),
+        l55 = hsl('#7e8588'),
+        l60 = hsl('#8b9295'),
+        l65 = hsl('#989fa2'),
+        l70 = hsl('#a6adaf'),
+        l75 = hsl('#b4babc'),
+        l80 = hsl('#c2c8c9'),
+        l85 = hsl('#d1d5d7'),
+        l90 = hsl('#e0e3e4'),
+        l93 = hsl('#e9ebec'),
+        l95 = hsl('#f0f1f1'),
+        l97 = hsl('#f6f7f7'),
+    },
+    h90s05 = {
+        l75 = hsl('#adaba5'),
+        l80 = hsl('#c8c6c2'),
+        l85 = hsl('#d6d4d1'),
+        l88 = hsl('#deddda'),
+        l90 = hsl('#e3e2e0'),
+        l93 = hsl('#ecebe9'),
+        l95 = hsl('#f1f1ef'),
+        l97 = hsl('#f7f6f6'),
+    },
+}
+
+-- okhsl hue values for color.
+local hues11 = {
+    red     = 025,
+    orange  = 055,
+    yellow  = 110,
+    green   = 130,
+    spring  = 155,
+    cyan    = 185,
+    blue    = 245,
+    violet  = 290,
+    magenta = 330,
+    cerise  = 345,
+    rose    = 360,
+}
+
+local hues8_equal = {
+    red = 25,
+    orange = 70,
+    yellow = 115,
+    green = 160,
+    cyan = 205,
+    blue = 250,
+    violet = 295,
+    magenta = 340,
+
+}
+
+local hues8 = {
+    red     = 025,
+    orange  = 055,
+    yellow  = 110,
+    green   = 140,
+    cyan    = 185,
+    blue    = 245,
+    violet  = 290,
+    magenta = 340,
+
 }
 
 
+-- okhsl(h, 100, l) for each hue value in hues.
+-- Static colors used in both light and dark modes.
+local colors = {
+    l45 = {
+        red     = hsl('#c80020'),
+        orange  = hsl('#a25200'),
+        yellow  = hsl('#6f6f00'),
+        green   = hsl('#4e7900'),
+        spring  = hsl('#007f47'),
+        cyan    = hsl('#007f47'),
+        blue    = hsl('#0070b1'),
+        violet  = hsl('#7516ff'),
+        magenta = hsl('#af00a9'),
+        cerise  = hsl('#ba0087'),
+        rose    = hsl('#c10065'),
+    },
+    l50 = {
+        red     = hsl('#df0024'),
+        orange  = hsl('#b45c00'),
+        yellow  = hsl('#7c7d00'),
+        green   = hsl('#588800'),
+        spring  = hsl('#008e50'),
+        cyan    = hsl('#008a7f'),
+        blue    = hsl('#007dc5'),
+        violet  = hsl('#7e43ff'),
+        magenta = hsl('#c300bd'),
+        cerise  = hsl('#cf0097'),
+        rose    = hsl('#d70072'),
+
+    },
+    l55s100 = {
+        red     = hsl('#f60029'),
+        orange  = hsl('#c76600'),
+        yellow  = hsl('#898a00'),
+        green_old   = hsl('#629600'),
+        spring  = hsl('#009d5a'),
+        green = hsl('#2f9e00'),  -- 140
+        cyan    = hsl('#00988c'),
+        blue    = hsl('#008ad9'),
+        violet  = hsl('#885eff'),
+        magenta_old = hsl('#d700d0'),
+        cerise  = hsl('#e400a6'),
+        rose    = hsl('#ed007e'),
+        magenta = hsl('#e000b4'),  -- 340
+        green145 = hsl('#00a02a'),
+    },
+    -- okhsl(h, 100, 60)
+    l60s100 = {
+        red     = hsl('#ff3b41'),
+        orange  = hsl('#da7000'),
+        yellow  = hsl('#979700'),
+        green   = hsl('#6ca500'),
+        green140 = hsl('#34ad00'), -- 140
+        green145 = hsl('#00af2f'), -- 145
+        spring  = hsl('#00ad63'),
+        cyan    = hsl('#00a79a'),
+        blue    = hsl('#0098ee'),
+        violet  = hsl('#9374ff'),
+        magenta_old = hsl('#eb00e4'),
+        magenta = hsl('#f500c5'),  -- 340
+        cerise  = hsl('#f900b7'),
+        rose    = hsl('#ff1f8b'),
+    },
+    l60s75 = {
+        red = hsl('#e0645e'),
+        orange = hsl('#cd7938'),
+        yellow = hsl('#969735'),
+        green = hsl('#61a452'),
+        cyan = hsl('#3aa499'),
+        blue = hsl('#4498d8'),
+        violet = hsl('#917cea'),
+        magenta = hsl('#d859b5'),
+
+    },
+    l65s75 = {
+        red = hsl('#e97770'),
+        orange = hsl('#dc8545'),
+        yellow = hsl('#a3a43c'),
+        magenta = hsl('#e26dbf'),
+
+    },
+    -- okhsl(h, 100, 65)
+    l65 = {
+        red     = hsl('#ff625e'),
+        orange  = hsl('#ed7b00'),
+        yellow  = hsl('#a5a500'),
+        green   = hsl('#76b300'),
+        spring  = hsl('#00bc6c'),
+        cyan    = hsl('#00b6a8'),
+        blue    = hsl('#1aa5ff'),
+        violet  = hsl('#9e88ff'),
+        magenta = hsl('#ff0bf7'),
+        cerise  = hsl('#ff47c0'),
+        rose    = hsl('#ff5699'),
+    },
+    l70 = {
+        red     = hsl('#ff7f78'),
+        orange  = hsl('#ff8610'),
+        yellow  = hsl('#b3b300'),
+        green   = hsl('#80c200'),
+        spring  = hsl('#00cc76'),
+        cyan    = hsl('#00c6b6'),
+        blue    = hsl('#52b3ff'),
+        violet  = hsl('#ab9aff'),
+        magenta = hsl('#ff5cf6'),
+        rose    = hsl('#ff77a7'),
+    },
+    -- okhsl(h, 100, 75) for backgrounds
+    l75 = {
+        red     = hsl('#ff9890'),
+        orange  = hsl('#ff9e57'),
+        yellow  = hsl('#c1c100'),
+        green   = hsl('#8ad200'),
+        spring  = hsl('#00dc7f'),
+        cyan    = hsl('#00d5c5'),
+        blue    = hsl('#75c1ff'),
+        violet  = hsl('#b8acff'),
+        magenta = hsl('#ff82f6'),
+        cerise  = hsl('#ff8cd0'),
+        rose    = hsl('#ff92b5'),
+    },
+    -- okhsl(h, 100, 80) for backgrounds
+    l80 = {
+        red     = hsl('#ffafa7'),
+        orange  = hsl('#ffb37f'),
+        yellow  = hsl('#cfd000'),
+        green   = hsl('#95e100'),
+        spring  = hsl('#00ec89'),
+        cyan    = hsl('#00e5d3'),
+        blue    = hsl('#94ceff'),
+        violet  = hsl('#c5bdff'),
+        magenta = hsl('#ff9ff7'),
+        rose    = hsl('#ffaac4'),
+    },
+    -- okhsl(h, 100, 85)
+    l85 = {
+        red     = hsl('#ffc4be'),
+        orange  = hsl('#ffc7a2'),
+        yellow  = hsl('#ddde00'),
+        green   = hsl('#9ff100'),
+        spring  = hsl('#00fc93'),
+        cyan    = hsl('#00f3ea'),
+        blue    = hsl('#b0daff'),
+        violet  = hsl('#d3ceff'),
+        magenta = hsl('#ffbaf8'),
+        rose    = hsl('#ffc1d2'),
+    },
+    l85s75 = {
+        red = hsl('#f8c7c2'),
+        orange = hsl('#f9caab'),
+        yellow = hsl('#dadc6c'),
+        green = hsl('#9fec8e'),
+        cyan = hsl('#77ecde'),
+        blue = hsl('#b6d9f9'),
+        violet = hsl('#d3cff9'),
+        magenta = hsl('#f4c4e3'),
+    },
+
+}
+
+-- okhsl(220, *, *)
+local base = {
+    h285 = {
+        s20 = {
+            l08 = hsl('#101018'),
+            l10 = hsl('#14141d'),
+            l12 = hsl('#1a1a24'),
+            l15 = hsl('#21212c'),
+            l20 = hsl('#2d2d3b'),
+            l25 = hsl('#383849'),
+
+        },
+        s10 = {
+            l08 = hsl('#111114'),
+            l10 = hsl('#16161a'),
+            l12 = hsl('#1b1b20'),
+            l15 = hsl('#222227'),
+            l20 = hsl('#2d2d34'),
+            l25 = hsl('#393941'),
+
+        },
+    },
+    h220 = {
+        s100 = {
+            l03 = hsl('#020405'),
+            l05 = hsl('#000b0f'),
+            l07 = hsl('#041014'),
+            l08 = hsl('#00141b'),
+            l10 = hsl('#001a22'),
+            l12 = hsl('#001f28'),
+            l15 = hsl('#002732'),
+            l20 = hsl('#003441'),
+            l25 = hsl('#004151'),
+        },
+        s75 = {
+            l05 = hsl('#010a0f'),
+            l10 = hsl('#031a20'),
+            l15 = hsl('#062730'),
+            l20 = hsl('#0b343f'),
+            l25 = hsl('#10404e'),
+        },
+        s50 = {
+            l05 = hsl('#020a0d'),
+            l08 = hsl('#051318'),
+            l10 = hsl('#08191e'),
+            l12 = hsl('#0b1e24'),
+            l15 = hsl('#0f262d'),
+            l20 = hsl('#16333b'),
+            l25 = hsl('#1d3f4a'),
+        },
+        s33 = {
+            l05 = hsl('#040a0c'),
+            l06 = hsl('#050d10'),
+            l07 = hsl('#071013'),
+            l08 = hsl('#081316'),
+            l10 = hsl('#0c181c'),
+            l12 = hsl('#101e22'),
+            l15 = hsl('#132328'),
+            l20 = hsl('#1e3238'),
+            l25 = hsl('#263e46'),
+            l40 = hsl('#41646f'),
+            l45 = hsl('#4b717d'),
+            l50 = hsl('#557e8b'),
+            l55 = hsl('#608c9a'),
+            l60 = hsl('#6c99a8'),
+            l65 = hsl('#79a6b5'),
+            l70 = hsl('#87b4c2'),
+            l75 = hsl('#97c1cf'),
+            l80 = hsl('#aaceda'),
+            l85 = hsl('#bedae4'),
+            l90 = hsl('#d3e7ed'),
+            l97 = hsl('#f2f8fa'),
+        },
+        s25 = {
+            l05 = hsl('#05090b'),
+            l08 = hsl('#0a1315'),
+            l10 = hsl('#0e181b'),
+            l12 = hsl('#121d21'),
+            l15 = hsl('#182529'),
+            l20 = hsl('#213136'),
+            l25 = hsl('#2a3d43'),
+            l28 = hsl('#30454b'),
+            l30 = hsl('#344a51'),
+            l35 = hsl('#3e565e'),
+            l40 = hsl('#48636c'),
+            l45 = hsl('#52707a'),
+            l50 = hsl('#5d7d87'),
+            l55 = hsl('#698a95'),
+            l60 = hsl('#7597a3'),
+            l65 = hsl('#82a5b0'),
+            l70 = hsl('#90b2bd'),
+            l75 = hsl('#a0bfc9'),
+            l80 = hsl('#b1ccd5'),
+            l85 = hsl('#c4d9e0'),
+            l90 = hsl('#d7e6ea'),
+            l95 = hsl('#ebf2f5'),
+        },
+        s20 = {
+            l05 = hsl('#05090b'),
+            l10 = hsl('#10181a'),
+            l15 = hsl('#1a2428'),
+            l20 = hsl('#243135'),
+            l25 = hsl('#2d3d42'),
+
+        },
+        s15 = {
+            l05 = hsl('#06090a'),
+            l08 = hsl('#0d1214'),
+            l10 = hsl('#111719'),
+            l12 = hsl('#161d1f'),
+            l15 = hsl('#1c2427'),
+            l20 = hsl('#263033'),
+            l25 = hsl('#303c40'),
+            l30 = hsl('#3b484d'),
+            l35 = hsl('#45555a'),
+            l40 = hsl('#506167'),
+            l45 = hsl('#5b6e74'),
+            l50 = hsl('#677b82'),
+            l55 = hsl('#73888f'),
+            l60 = hsl('#80959c'),
+            l65 = hsl('#8da2a9'),
+            l70 = hsl('#9bafb6'),
+            l75 = hsl('#aabdc3'),
+            l80 = hsl('#bacacf'),
+            l85 = hsl('#cad7db'),
+            l90 = hsl('#dce4e7'),
+            l95 = hsl('#edf2f3'),
+
+        },
+        s10 = {
+            l05 = hsl('#07090a'),
+            l08 = hsl('#0e1213'),
+            l10 = hsl('#131718'),
+            l12 = hsl('#171c1e'),
+            l15 = hsl('#1e2425'),
+            l20 = hsl('#293032'),
+            l25 = hsl('#333c3e'),
+            l30 = hsl('#3e484b'),
+            l35 = hsl('#495457'),
+            l40 = hsl('#556064'),
+            l45 = hsl('#606d71'),
+            l50 = hsl('#6c7a7e'),
+            l55 = hsl('#79878b'),
+            l60 = hsl('#859499'),
+            l65 = hsl('#93a1a6'),
+            l70 = hsl('#a1aeb3'),
+            l75 = hsl('#afbbc0'),
+            l80 = hsl('#bec9cc'),
+            l85 = hsl('#ced6d9'),
+            l90 = hsl('#dee4e6'),
+            l95 = hsl('#eef1f2'),
+        },
+        -- NOTE: Main neutral base.
+        s05 = {
+            l05 = hsl('#070909'),
+            l06 = hsl('#0a0c0c'),
+            l07 = hsl('#0d0f0f'),
+            l08 = hsl('#101112'),
+            l10 = hsl('#141717'),
+            l12 = hsl('#191c1d'),
+            l15 = hsl('#202324'),
+            l20 = hsl('#2b2f30'),
+            l25 = hsl('#363b3c'),
+            l27 = hsl('#3b4041'),
+            l28 = hsl('#3d4243'),
+            l30 = hsl('#424748'),
+            l35 = hsl('#4d5355'),
+            l40 = hsl('#595f61'),
+            l45 = hsl('#656c6e'),
+            l50 = hsl('#71787b'),
+            l55 = hsl('#7e8588'),
+            l60 = hsl('#8b9295'),
+            l65 = hsl('#989fa2'),
+            l70 = hsl('#a6adaf'),
+            l75 = hsl('#b4babc'),
+            l80 = hsl('#c2c8c9'),
+            l85 = hsl('#d1d5d7'),
+            l90 = hsl('#e0e3e4'),
+            l93 = hsl('#e9ebec'),
+            l95 = hsl('#f0f1f1'),
+            l97 = hsl('#f6f7f7'),
+        },
+    },
+    h90 = {
+        s33 = {
+            l80 = hsl('#d2c6a5'),
+            l85 = hsl('#ded4b9'),
+            l90 = hsl('#e9e2cf'),
+            l93 = hsl('#f0ebdd'),
+            l95 = hsl('#f4f1e7'),
+            l97 = hsl('#fdf6e3'),
+
+        },
+        s25 = {
+            l80 = hsl('#cfc6ae'),
+            l85 = hsl('#dcd4c0'),
+            l90 = hsl('#e7e2d5'),
+            l93 = hsl('#efebe1'),
+            l97 = hsl('#f8f6f2'),
+        },
+        s20 = {
+            l75 = hsl('#c1b9a3'),
+            l80 = hsl('#cdc6b3'),
+            l85 = hsl('#dad4c5'),
+            l90 = hsl('#e6e2d8'),
+            l93 = hsl('#eeebe3'),
+            l95 = hsl('#f3f1eb'),
+            l97 = hsl('#f8f6f3'),
+
+        },
+        s15 = {
+            l75 = hsl('#bfb9a9'),
+            l80 = hsl('#ccc6b8'),
+            l85 = hsl('#d8d4c9'),
+            l90 = hsl('#e5e2db'),
+            l93 = hsl('#edebe5'),
+            l95 = hsl('#f2f1ed'),
+            l97 = hsl('#f7f6f4'),
+
+        },
+        s10 = {
+            l80 = hsl('#cac6bd'),
+            l85 = hsl('#d7d4cd'),
+            l90 = hsl('#e4e2dd'),
+            l93 = hsl('#ecebe7'),
+            l97 = hsl('#f7f6f5'),
+
+        },
+        s05 = {
+            l75 = hsl('#adaba5'),
+            l80 = hsl('#c8c6c2'),
+            l85 = hsl('#d6d4d1'),
+            l88 = hsl('#deddda'),
+            l90 = hsl('#e3e2e0'),
+            l93 = hsl('#ecebe9'),
+            l95 = hsl('#f1f1ef'),
+            l97 = hsl('#f7f6f6'),
+        },
+        s00 = {
+            l75 = hsl('#b9b9b9'),
+            l80 = hsl('#c7c7c6'),
+            l85 = hsl('#d4d4d4'),
+            l90 = hsl('#e2e2e2'),
+            l95 = hsl('#f1f1f1')
+
+        }
+    },
+}
