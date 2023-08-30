@@ -1,0 +1,172 @@
+# Default values to merge into each theme's default node.
+[aliases.dark]
+# mode invariant keys where the ith element is an alias for
+# the ith mode base. Keys are reversed in light mode.
+# These can be used to define mode variants for each palette.
+bg0 = "dark0"
+bg1 = "dark1"
+bg2 = "dark2"
+fg0 = "gray0"
+fg1 = "gray1"
+fg2 = "gray2"
+op0 = "light0"
+op1 = "light1"
+op2 = "light2"
+
+[aliases.light]
+# mode invariant keys where the ith element is an alias for
+# the ith mode base. Keys are reversed in light mode.
+bg0 = "light2"
+bg1 = "light1"
+bg2 = "light0"
+fg0 = "gray2"
+fg1 = "gray1"
+fg2 = "gray0"
+op0 = "dark2"
+op1 = "dark1"
+op2 = "dark0"
+
+[aliases.ansi]
+color00 =  "dark2"  # black
+color01 =  "red"
+color02 =  "green"
+color03 =  "yellow"
+color04 =  "blue"
+color05 =  "magenta"
+color06 =  "cyan"
+color07 =  "gray2"  # white
+color08 =  "gray0"  # br black
+color09 =  "orange"
+color10 =  "br_green"
+color11 =  "br_yellow"
+color12 =  "br_blue"
+color13 =  "violet"
+color14 =  "br_cyan"
+color15 =  "light0"  # br white
+
+# LSP 3.17
+# export enum SemanticTokenTypes {
+# 	namespace = 'namespace',
+# 	/**
+# 	 * Represents a generic type. Acts as a fallback for types which
+# 	 * can't be mapped to a specific type like class or enum.
+# 	 */
+# 	type = 'type',
+# 	class = 'class',
+# 	enum = 'enum',
+# 	interface = 'interface',
+# 	struct = 'struct',
+# 	typeParameter = 'typeParameter',
+# 	parameter = 'parameter',
+# 	variable = 'variable',
+# 	property = 'property',
+# 	enumMember = 'enumMember',
+# 	event = 'event',
+# 	function = 'function',
+# 	method = 'method',
+# 	macro = 'macro',
+# 	keyword = 'keyword',
+# 	modifier = 'modifier',
+# 	comment = 'comment',
+# 	string = 'string',
+# 	number = 'number',
+# 	regexp = 'regexp',
+# 	operator = 'operator',
+# 	/**
+# 	 * @since 3.17.0
+# 	 */
+# 	decorator = 'decorator'
+# }
+#
+# export enum SemanticTokenModifiers {
+# 	declaration = 'declaration',
+# 	definition = 'definition',
+# 	readonly = 'readonly',
+# 	static = 'static',
+# 	deprecated = 'deprecated',
+# 	abstract = 'abstract',
+# 	async = 'async',
+# 	modification = 'modification',
+# 	documentation = 'documentation',
+# 	defaultLibrary = 'defaultLibrary'
+# }
+#
+# neovim example from :h lsp-semantic-highlight
+# hi @lsp.type.function guifg=Yellow        " function names are yellow
+# hi @lsp.type.variable.lua guifg=Green     " variables in lua are green
+# hi @lsp.mod.deprecated gui=strikethrough  " deprecated is crossed out
+# hi @lsp.typemod.function.async guifg=Blue " async functions are blue
+# NOTE: We likely need to follow a pattern set by neovim and vscode wrt
+# highlight groups.
+# 1. Assume hl is a str -> dict mapping, potentially nesting at runtime.
+#    Access is either hl[key] or hl(key) unless nested, then hl.path.to.key
+#    For example hl['lsp.type.clss'], hl.lsp.type.class
+# 2. Avoid explicit linking in the theme for simplicity? Aliases for colors
+#    exist because ostensibly the value depends on the mode, whereas a
+#    highlight group would just reference color aliases.
+# NOTE: This hl node should contain only relatively simple highlight groups,
+# focusing on those exposed by LSP and treesitter, e.g., types and modifiers.
+# Things such as UI elements are likely best handled by individual themes.
+[hl]
+"namespace" = {fg = "blah", bg = "blah", style = "blah"}
+# "type.namespace" = {fg = "blah", bg = "blah", style = "blah"}
+# "lsp.type.namespace" = {fg = "blah", bg = "blah", style = "blah"}
+# type.class         Structure
+# type.decorator     Function
+# type.enum          Structure
+# type.enumMember    Constant
+# type.function      Function
+# type.interface     Structure
+# type.macro         Macro
+# type.method        Function
+# type.namespace     Structure
+# type.parameter     Identifier
+# type.property      Identifier
+# type.struct        Structure
+# type.type          Type
+# type.typeParameter TypeDef
+# type.variable      Identifier
+"comment" = {}
+"comment.doc" = {}
+"comment.doc.python" = {}
+#
+# using nested structs
+# [hl.type]
+# class = {}
+# decorator = {}
+# [hl.mod]
+# declaration = 'declaration',
+# ddefaultLibrary = 'defaultLibrary'
+# [hl.typemod]
+# [hl.ui]
+# [hl.text]
+# literal = ""
+
+[colors]
+red = "oklch(0.60 0.15 25)"
+orange = "oklch(0.60 0.15 55)"
+yellow = "oklch(0.60 0.15 110)"
+green = "oklch(0.60 0.15 145)"
+cyan = "oklch(0.60 0.15 185)"
+blue = "oklch(0.60 0.15 235)"
+violet = "oklch(0.60 0.15 290)"
+magenta = "oklch(0.60 0.15 335)"
+br_red = "oklch(0.75 0.15 25)"
+br_orange = "oklch(0.75 0.15 55)"
+br_yellow = "oklch(0.75 0.15 110)"
+br_green = "oklch(0.75 0.15 145)"
+br_cyan = "oklch(0.75 0.15 185)"
+br_blue = "oklch(0.75 0.15 235)"
+br_violet = "oklch(0.75 0.15 290)"
+br_magenta = "oklch(0.75 0.15 335)"
+dark0 = "oklch(0.13 0.020 220)"
+dark1 = "oklch(0.18 0.020 220)"
+dark2 = "oklch(0.23 0.020 220)"
+gray0 = "oklch(0.45 0.005 220)"
+gray1 = "oklch(0.60 0.005 220)"
+gray2 = "oklch(0.75 0.005 220)"
+light0 = "oklch(0.85 0.010 90)"
+light1 = "oklch(0.90 0.010 90)"
+light2 = "oklch(0.95 0.010 90)"
+
+

@@ -1,0 +1,22 @@
+[project]
+name = "hadalized"
+version = "0.1.0"
+description = "Color theme builder for hadalized."
+authors = [
+    {name = "Shawn O'Hare", email = "shawn@shawnohare.com"},
+]
+dependencies = [
+    "coloraide>=2.3",
+    "jinja2>=3.1.2",
+    "pydantic>=2.0b3",
+]
+requires-python = ">=3.11"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.isort]
+profile = "black"

@@ -1,0 +1,34 @@
+[colors]
+ansi = [
+    '{{ color00.hex(gamut) }}',
+    '{{ color01.hex(gamut) }}',
+    '{{ color02.hex(gamut) }}',
+    '{{ color03.hex(gamut) }}',
+    '{{ color04.hex(gamut) }}',
+    '{{ color05 }}',
+    '{{ color06 }}',
+    '{{ color07 }}',
+]
+background = '{{ bg0 }}'
+brights = [
+    '{{ color08 }}',
+    '{{ color09 }}',
+    '{{ color10 }}',
+    '{{ color11 }}',
+    '{{ color12 }}',
+    '{{ color13 }}',
+    '{{ color14 }}',
+    '{{ color15 }}',
+]
+cursor_bg = '{{ fg1 }}'
+cursor_border = '{{ green }}'
+cursor_fg = '{{ light2 }}'
+foreground = '{{ fg2 }}'
+selection_bg = '{{ op2 }}'
+selection_fg = '{{ bg2 }}'
+
+[colors.indexed]
+
+[metadata]
+name = '{{ theme }} {{ palette }} {{ mode }} {{ gamut }}'
+origin_url = 'https://github.com/shawnohare/hadalized.nvim'

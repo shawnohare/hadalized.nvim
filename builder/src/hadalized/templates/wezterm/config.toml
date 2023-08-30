@@ -1,0 +1,7 @@
+[default]
+context = "mode"
+color_value = "hex"
+gamuts = ["p3"]
+filename = "{palette}_{mode}_{gamut}{extension}"
+extension = '.toml'
+output = "build"
