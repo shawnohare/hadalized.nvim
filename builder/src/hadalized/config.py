@@ -10,7 +10,7 @@ from .utils import merge, load_toml
 
 
 
-class HighlightDef(Model):
+class HLGroup(Model):
     """A color and style setting for UI elements and text tokens.
 
     Foreground and background color elements should reference a color alias.
@@ -34,7 +34,7 @@ class HighlightDef(Model):
     # font_style: str = ''
 
 
-HighlightDefault = HighlightDef(fg='fg2', bg='bg0')
+DefaultHLGroup = HLGroup(fg='fg2', bg='bg0')
 
 class Colors(Model):
     # main accents
@@ -78,11 +78,12 @@ class Colors(Model):
 #     op2 = ""
 #
 
-class Mode(Model):
+class Variant(Model):
     """A theme variant, such as dark, light or high contrast (light / dark)."""
     name: str
-    background: str
+    mode: str
     colors: dict[str, str] = Field(default_factory=dict)
+    hl: dict[str, HLGroup] = Field(default_factory=dict)
 
 
 class Project(Model):

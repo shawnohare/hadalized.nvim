@@ -253,50 +253,6 @@ def resolve_colors(colors: dict[str, str | ColorSet]) -> dict[str, ColorSet]:
     return resolved
 
 
-class Highlight(Model):
-    """A highlight group or semantic token to which a foreground, background
-    and style elements can be applied. Essentially identical to (neo)vim
-    highlight groups.
-
-    It is assumed a foreground and background color are always specified.
-
-    WARNING: Experimental feature not widely implemented.
-    """
-
-    fg: Color | ColorSet | None = Color()
-    bg: Color | ColorSet | None = Color()
-    style: str = ''
-    link: str = ''
-
-
-
-
-class ModeLookup(Model):
-    """A mode and space color mapping."""
-    color: dict[str, Color]
-    hl: dict[str, Highlight]
-
-    @classmethod
-    def new(cls, colors: dict[str, ColorSet], highlights: dict[str, HighlightDef], space: str) -> Self:
-        """Create a (Mode, Space) Color and Highlight lookup"""
-        default = highlights.get('default', HighlightDef(fg='fg2', bg='bg0'))
-
-        def new_highlight(val: HighlightDef) -> Highlight:
-            orig = val
-            while val.link:
-                val = highlights[val.link]
-            group = Highlight(
-                fg=colors[orig.fg or val.fg or default.fg][space],
-                bg=colors[orig.bg or val.bg or default.fg][space],
-                style=orig.style or val.style or default.fg,
-                link=orig.link or 'default',
-            )
-            return group
-
-        return cls(
-            color= {k: v[space] for k, v in colors.items()},
-            hl={k: new_highlight(v) for k, v in highlights.items()},
-        )
 
 
 class ModeContext(Model):

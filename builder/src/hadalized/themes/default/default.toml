@@ -1,4 +1,4 @@
-[theme]
+[project]
 name = "hadalized"
 version = "v0.1.0"
 url = "https://github.com/shawnohare/hadalized.nvim"
@@ -37,11 +37,10 @@ light2 = "oklch(0.95 0.010 90)"
 
 # A mode is a variant such as "dark", "light", "high_contrast_dark".
 # Each mode can contain its own color re-definitions and aliases.
-[modes.dark]
-name = "dark"
-background = "dark"
+[variants.dark]
+mode = "dark"
 
-[modes.dark.colors]
+[variants.dark.colors]
 bg0 = "dark0"
 bg1 = "dark1"
 bg2 = "dark2"
@@ -52,11 +51,10 @@ op0 = "light0"
 op1 = "light1"
 op2 = "light2"
 
-[modes.light]
-name = "light"
-background = "light"
+[variants.light]
+mode = "light"
 
-[modes.light.colors]
+[variants.light.colors]
 # red = "oklch(0.50, 0.15, 25)"
 bg0 = "light2"
 bg1 = "light1"
