@@ -1,7 +1,7 @@
 [default]
-context = "mode"
-color_value = "hex"
-gamuts = ["p3"]
-filename = "{palette}_{mode}_{gamut}{extension}"
+context = "variant.space"
+colorspaces = ["p3"]
 extension = '.toml'
+# filename = ''
 output = "build"
+

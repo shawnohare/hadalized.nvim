@@ -4,6 +4,7 @@ from copy import deepcopy
 from functools import reduce
 import tomllib
 
+
 def merge(*args: dict) -> dict:
     """Recursively merge dictionary inputs.
 
@@ -22,13 +23,21 @@ def merge(*args: dict) -> dict:
 
 
 def get_resource_path(path: str) -> Path:
-    path = resource_filename(
-        "hadalized", str(Path(path)),
-    )
+    """Obtain a full path to a package resource given a path relative to
+    the package. For example
+        get_resource_path('data.json') -> Path("/full/package/path/data.json")
+    """
+    path = resource_filename("hadalized", path)
     return Path(path)
 
 
 def load_toml(path: Path | str) -> dict:
-    path = Path(path)
-    with path.open("rb") as fp:
+    with Path(path).open("rb") as fp:
         return tomllib.load(fp)
+
+
+def load_template_config(app: str) -> dict:
+    """Load an application theme template configuration file."""
+    subdir_path = Path(app)
+    config_path = get_resource_path(str("templates" / subdir_path / "config.toml"))
+    return load_toml(config_path)

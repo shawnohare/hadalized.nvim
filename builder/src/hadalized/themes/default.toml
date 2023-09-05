@@ -38,33 +38,17 @@ light2 = "oklch(0.95 0.010 90)"
 # A mode is a variant such as "dark", "light", "high_contrast_dark".
 # Each mode can contain its own color re-definitions and aliases.
 [variants.dark]
+name = "dark"
 mode = "dark"
-
 [variants.dark.colors]
-bg0 = "dark0"
-bg1 = "dark1"
-bg2 = "dark2"
-fg0 = "gray0"
-fg1 = "gray1"
-fg2 = "gray2"
-op0 = "light0"
-op1 = "light1"
-op2 = "light2"
+[variants.dark.hl]
 
 [variants.light]
+name = "light"
 mode = "light"
-
 [variants.light.colors]
 # red = "oklch(0.50, 0.15, 25)"
-bg0 = "light2"
-bg1 = "light1"
-bg2 = "light0"
-fg0 = "gray2"
-fg1 = "gray1"
-fg2 = "gray0"
-op0 = "dark2"
-op1 = "dark1"
-op2 = "dark0"
+[variants.light.hl]
 
 
 # Default highlight groups define a foreground, background, and style component
@@ -88,6 +72,7 @@ color12 =  { fg = "br_blue" }
 color13 =  { fg = "violet" }
 color14 =  { fg = "br_cyan" }
 color15 =  { fg = "light0" }
+
 
 #Standard token types:
 # class 	For identifiers that declare or reference a class type.

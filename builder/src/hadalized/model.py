@@ -7,6 +7,7 @@ from pydantic import BaseModel, ConfigDict
 
 def hash_dict(inst: dict) -> int:
     """Simple hash of a dict whose values are either dicts or hashable."""
+
     def _hash(item: tuple) -> int:
         _, val = item
         if isinstance(val, dict):
@@ -30,6 +31,7 @@ class Model(BaseModel):
     """A hashable version of BaseModel with some basic dict-like
     semantics.
     """
+
     model_config = ConfigDict(extra="allow", frozen=True)
 
     def __setitem__(self, key: str, value) -> None:
@@ -44,7 +46,7 @@ class Model(BaseModel):
         elif self.model_extra is not None:
             val = self.model_extra[key]
         else:
-            raise KeyError('{key=} not found.')
+            raise KeyError("{key=} not found.")
         return val
 
     def get(self, key: str, default=None):
@@ -68,14 +70,14 @@ class Model(BaseModel):
             yield key
 
     def __hash__(self) -> int:
-        if (val := self.get('_hash')) is not None or not isinstance(val, int):
+        if (val := self.get("_hash")) is not None or not isinstance(val, int):
             data = (
-                    type(self),
-                    hash_dict(self.__dict__),
-                    hash_dict(self.model_extra or {}),
+                type(self),
+                hash_dict(self.__dict__),
+                hash_dict(self.model_extra or {}),
             )
             val = hash(data)
-            self['_hash'] = val
+            self["_hash"] = val
         return val
 
     @cache
