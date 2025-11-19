@@ -6,13 +6,11 @@
 " changes are being picked up without restarting neovim.
 "
 " Note if you're working in on your theme and have :Lushify'd the buffer,
-" your changes will be applied with our without the following line.
+" your changes will be applied with or without the following line.
 "
 " The performance impact of this call can be measured in the hundreds of
 " *nanoseconds* and such could be considered "production safe".
-" lua package.loaded['lush_theme.lush_template'] = nil
 
-" include our theme file and pass it to lush to apply
 lua package.loaded['hadalized'] = nil
 " lua require('lush')(require('hadalized'))
 lua require('hadalized')
