@@ -1,7 +1,7 @@
 vim.o.bg = 'dark'
-local dark_theme = require("lush_theme.hadalized")
+local dark_theme = require("hadalized")
 vim.o.bg = 'light'
-local light_theme = require('lush_theme.hadalized')
+local light_theme = require('hadalized')
 local lushwright = require("shipwright.transform.lush")
 
 -- we start by calling run and giving it our colorscheme as the first argument.

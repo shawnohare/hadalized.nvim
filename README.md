@@ -8,7 +8,7 @@ choice of Solarized's blue.
 
 # Palettes
 
-The theme currently contains a single default palette. Each palette
+The theme contains a single default palette. Each palette
 consists of eight accent colors and nine base tints
 
 The underlying OkHSL hue values for the default palette are a varying set of
@@ -38,10 +38,19 @@ hue values for a fixed lightness L=60 and saturation S=75.
 
 # Installation
 
-With `packer`, add
+With `lazy`, add
 
 ```lua
-use { "shawnohare/hadalized.nvim", requires = { "rktjmp/lush.nvim" } }
+return {
+    {
+        "shawnohare/hadalized.nvim",
+        opts = {
+
+        },
+        priority = 1000,
+        dependencies = { },
+    },
+}
 ```
 
 # Differenes from Solarized
