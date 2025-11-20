@@ -1,6 +1,6 @@
 vim.o.bg = 'dark'
 local dark_theme = require("hadalized")
-vim.o.bg = 'light'
+jjjjvim.o.bg = 'light'
 local light_theme = require('hadalized')
 local lushwright = require("shipwright.transform.lush")
 

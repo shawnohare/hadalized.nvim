@@ -1,8 +1,65 @@
-return {
-	["hadalized.dark.oklch"] = {
-		name = "hadalized",
-		mode = "dark",
-		space = "oklch",
+local M = {}
+
+---@class (exact) PaletteMetadata
+---@field name  string The palette's namespace
+---@field style string The palette's variant / style / colorspace.
+---@field mode  string The background, e.g., "dark" or "light".
+
+---@class (exact) Palette
+---@field meta    PaletteMetadata Metadata
+---@field red     string Hue 01.
+---@field orange  string Hue 02.
+---@field yellow  string Hue 03.
+---@field green   string Hue 04.
+---@field cyan    string Hue 05.
+---@field blue    string Hue 06.
+---@field violet  string Hue 07.
+---@field magenta string Hue 08.
+---@field dark0   string Graysale dark.
+---@field dark1   string Graysale dark.
+---@field dark2   string Graysale dark.
+---@field gray0   string Graysale medium.
+---@field gray1   string Graysale medium.
+---@field gray2   string Graysale medium.
+---@field light0  string Graysale light.
+---@field light1  string Graysale light.
+---@field light2  string Graysale light.
+---@field bg0     string Background.
+---@field bg1     string Background.
+---@field bg2     string Background.
+---@field fg0     string Foreground (main).
+---@field fg1     string Foreground (main).
+---@field fg2     string Foreground (main).
+---@field op0     string Foreground (emphasis).
+---@field op1     string Foreground (emphasis).
+---@field op2     string Foreground (emphasis).
+
+
+---Get a palette.
+---@param config Config
+---@return Palette
+function M.get(config)
+    return M.palettes[config:key()]
+end
+
+
+--- Obtain a palette key from its metadata.
+---@param palette Palette A palette instance.
+---@return string
+function M.key(palette)
+    local m = palette.meta
+    return M.fmt_key(m.name, m.style, m.mode)
+end
+
+
+---@type table<string, Palette>
+M.palettes = {
+	["hadalized.oklch.dark"] = {
+        meta = {
+            name = "hadalized",
+            style = "oklch",
+            mode = "dark",
+        },
 		red = "oklch(0.65 0.15 25)",
 		orange = "oklch(0.65 0.15 55)",
 		yellow = "oklch(0.65 0.15 110)",
@@ -30,10 +87,12 @@ return {
 		op1 = "oklch(0.9 0.01 90)",
 		op2 = "oklch(0.95 0.01 90)",
 	},
-	["hadalized.dark.p3"] = {
-		name = "hadalized",
-		mode = "dark",
-		space = "p3",
+	["hadalized.p3.dark"] = {
+        meta = {
+            name = "hadalized",
+            style = "p3",
+            mode = "dark",
+        },
 		red = "#cd6c63",
 		orange = "#c67735",
 		yellow = "#969623",
@@ -61,10 +120,12 @@ return {
 		op1 = "#e0ded7",
 		op2 = "#f0eee8",
 	},
-	["hadalized.dark.srgb"] = {
-		name = "hadalized",
-		mode = "dark",
-		space = "srgb",
+	["hadalized.srgb.dark"] = {
+        meta = {
+            name = "hadalized",
+            style = "srgb",
+            mode = "dark",
+        },
 		red = "#dc655f",
 		orange = "#d3721e",
 		yellow = "#969600",
@@ -92,10 +153,12 @@ return {
 		op1 = "#e0ded7",
 		op2 = "#f1eee7",
 	},
-	["hadalized.light.oklch"] = {
-		name = "hadalized",
-		mode = "light",
-		space = "oklch",
+	["hadalized.oklch.light"] = {
+        meta = {
+            name = "hadalized",
+            style = "oklch",
+            mode = "light",
+        },
 		red = "oklch(0.65 0.15 25)",
 		orange = "oklch(0.65 0.15 55)",
 		yellow = "oklch(0.65 0.15 110)",
@@ -123,10 +186,12 @@ return {
 		op1 = "oklch(0.18 0.02 220)",
 		op2 = "oklch(0.13 0.02 220)",
 	},
-	["hadalized.light.p3"] = {
-		name = "hadalized",
-		mode = "light",
-		space = "p3",
+	["hadalized.p3.light"] = {
+        meta = {
+            name = "hadalized",
+            style = "p3",
+            mode = "light",
+        },
 		red = "#cd6c63",
 		orange = "#c67735",
 		yellow = "#969623",
@@ -154,10 +219,12 @@ return {
 		op1 = "#0a1317",
 		op2 = "#02090c",
 	},
-	["hadalized.light.srgb"] = {
-		name = "hadalized",
-		mode = "light",
-		space = "srgb",
+	["hadalized.srgb.light"] = {
+        meta = {
+            name = "hadalized",
+            style = "srgb",
+            mode = "light",
+        },
 		red = "#dc655f",
 		orange = "#d3721e",
 		yellow = "#969600",
@@ -186,3 +253,5 @@ return {
 		op2 = "#01090d",
 	},
 }
+
+return M
