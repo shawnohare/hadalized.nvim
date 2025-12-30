@@ -1,0 +1,91 @@
+-- LSP class definitions
+
+---Named hues for normal, bright, and highlights.
+---@class (exact) HueMap
+---@field red     string Hue 01.
+---@field orange  string Hue 02.
+---@field yellow  string Hue 03.
+---@field lime    string Hue 04.
+---@field green   string Hue 05.
+---@field mint    string Hue 06.
+---@field cyan    string Hue 07.
+---@field azure   string Hue 08.
+---@field blue    string Hue 09.
+---@field violet  string Hue 10.
+---@field magenta string Hue 11.
+---@field rose    string Hue 12.
+
+
+---Base named relative to theme.
+---@class (exact) BaseMap
+---@field black     string Monochromatic.
+---@field darkgray  string Monochromatic.
+---@field gray      string Monochromatic.
+---@field lightgray string Monochromatic.
+---@field white     string Monochromatic.
+---@field bg        string Main background.
+---@field bgvar     string Main background variant (non-focused).
+---@field bg1       string Secondary background (status line, virtual).
+---@field bg2       string Tertiary background.
+---@field bg3       string Background.
+---@field bg4       string Background.
+---@field bg5       string Background.
+---@field hidden    string Foreground extra subdued.
+---@field comment   string Foreground subdued.
+---@field fg        string Foreground main.
+---@field emph      string Foreground emphasis.
+---@field op2       string Foreground or opposite mode tertiary bg.
+---@field op1       string Foreground or opposite mode secondary bg.
+---@field op        string Opposite mode main bg.
+
+---@class (exact) Palette
+---@field name    string The palette name / variant.
+---@field desc    string? Brief description about the theme.
+---@field mode    string Dark or light mode.
+---@field gamut   string The palette's colorspace, e.g., "p3".
+---@field hue     HueMap The normal hue group.
+---@field bright  HueMap The bright hue group.
+---@field hl      HueMap The bright hue group.
+---@field base    BaseMap Foregrounds and backgrounds.
+
+
+-- Class below is more for easy documentation. Use vim.api.keyset.highlight
+---@class Highlight
+---@field fg            string? Foreground color name, "#RRGGBB" or "fg" (Normal).
+---@field bg            string? Background color name, "#RRGGBB" or "bg" (Normal).
+---@field sp            string? Color name or "#RRGGBB"
+---@field blend         integer? Integer between 0 and 100
+---@field bold          boolean?
+---@field italic        boolean?
+---@field reverse       boolean?
+---@field standout      boolean?
+---@field strikethrough boolean?
+---@field undercurl     boolean?
+---@field underdashed   boolean?
+---@field underdotted   boolean?
+---@field underdouble   boolean?
+---@field underline     boolean?
+---@field nocombine     boolean?
+---@field link          string? name of another highlight group to link to, see
+---@field default       boolean? Don't override existing definition |:hi-default|
+---@field ctermfg       string? Sets foreground of cterm color |ctermfg|
+---@field ctermbg       string? Sets background of cterm color |ctermbg|
+---@field cterm         table? cterm attribute map, like |highlight-args|.
+---@field force         boolean? If true force update the highlight group.
+
+---User configuration class.
+---@class (exact) Config
+---@field bold          boolean? Enable bold fonts. Default: true.
+---@field italic        boolean? Enable italics. Default: true.
+---@field standout      boolean? Enable standout text. Default: true.
+---@field strikethrough boolean? Enable strikethroughs. Default: true.
+---@field undercurl     boolean? Enable undercurls. Default: true.
+---@field underdashed   boolean? Enable underdashes. Default: true.
+---@field underdotted   boolean? Enable underdots. Default: true.
+---@field underdouble   boolean? Enable double underlines. Default: true.
+---@field underline     boolean? Enable underlines. Defaults: true.
+
+---Load opts.
+---@class (exact) LoadOpts
+---@field palette Palette The theme palette metadata and color defs.
+---@field config  Config? Optional user configuration.

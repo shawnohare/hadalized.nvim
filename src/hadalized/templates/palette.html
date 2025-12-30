@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palette Colors for Palette {{name}}</title>
+</head>
+
+<style>
+.box {
+  display: inline-block;
+  width: 60px;
+  height: 60px;
+  border: 1px solid rgba(0, 0, 0, .2);
+}
+</style>
+
+<h1>Palette Metadata for {{name}}</h1>
+<ul>
+    <li>name  = {{name}}</li>
+    <li>desc  = {{desc}}</li>
+    <li>mode  = {{mode}}</li>
+    <li>gamut = {{gamut}}</li>
+</ul>
+
+
+<h1>Hues</h1>
+<ul>
+    {% for hue_name, code in hue.items() -%}
+    <li><div class="box" style="background: {{code}}"></div> {{hue_name}}</li>
+    {% endfor %}
+</ul>
+
+<h1>Bases</h1>
+<ul>
+    {% for hue_name, code in base.items() -%}
+    <li><div class="box" style="background: {{code}}"></div> {{hue_name}}</li>
+    {% endfor %}
+</ul>
+
+<h1>Highlights</h1>
+<ul>
+    {% for hue_name, code in hl.items() -%}
+    <li><div class="box" style="background: {{code}}"></div> {{hue_name}}</li>
+    {% endfor %}
+</ul>
+
+<h1>Brights</h1>
+<ul>
+    {% for hue_name, code in bright.items() -%}
+    <li><div class="box" style="background: {{code}}"></div> {{hue_name}}</li>
+    {% endfor %}
+</ul>

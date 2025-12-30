@@ -1,0 +1,30 @@
+[project]
+name = "hadalized"
+version = "0.1.0"
+description = "Hadalized theme builder"
+readme = "README.md"
+authors = [
+    { name = "Shawn O'Hare", email = "shawn@shawnohare.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "coloraide>=6.2",
+    "jinja2>=3.1.6",
+    "loguru>=0.7.3",
+    "luadata>=1.0.5",
+    "pydantic>=2.12.5",
+]
+
+[project.scripts]
+hadalized = "hadalized:main"
+
+[build-system]
+requires = ["uv_build>=0.9.18,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "ipython>=9.8.0",
+    "pytest>=9.0.2",
+    "ruff>=0.14.10",
+]
