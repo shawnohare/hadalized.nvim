@@ -6,4 +6,4 @@ wezterm:
     cp wezterm/* ~/.config/wezterm/colors/
 
 ed:
-    source .venv/bin/activate && nvim src/hadalized/
+    source .venv/bin/activate && nvim src/hadalized/config.py

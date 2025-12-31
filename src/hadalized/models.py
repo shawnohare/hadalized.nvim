@@ -191,6 +191,11 @@ class BaseMap(ColorMap):
     gray: ColorField = Info("oklch(0.50 0.01 220)")
     lightgray: ColorField = Info("oklch(0.70 0.01 220)")
     white: ColorField = Info("oklch(0.995 0.01 220)")
+    black: ColorField
+    darkgray: ColorField
+    gray: ColorField
+    lightgray: ColorField
+    white: ColorField
     bg: ColorField
     bgvar: ColorField
     bg1: ColorField
@@ -251,43 +256,3 @@ class Palette(BaseNode):
         instead of full color info.
         """
         return self.to("css")
-
-
-class Hues(BaseModel):
-    dark: HueMap
-    neutral: HueMap
-    light: HueMap
-    bright: HueMap
-    hl: HueMap
-
-    def items(self) -> Iterable[tuple[str, HueMap]]:
-        return ((k, getattr(self, k)) for k in self.__class__.model_fields)
-
-    def to(self, key: str, gamut: str) -> Self:
-        return self.__class__(
-            dark=self.dark.to(key, gamut),
-            neutral=self.neutral.to(key, gamut),
-            light=self.light.to(key, gamut),
-            bright=self.bright.to(key, gamut),
-            hl=self.hl.to(key, gamut),
-        )
-
-
-class PaletteMap(BaseNode):
-    dark: Palette
-    day: Palette
-    white: Palette
-
-    def values(self) -> list[Palette]:
-        return [self.dark, self.day, self.white]
-
-    def to(self, key: str, gamut: str | None) -> Self:
-        return self.__class__.model_validate(
-            {k: v.to(key, gamut or v.gamut) for k, v in self.items()}
-        )
-
-    def css(self, gamut: str | None) -> Self:
-        return self.to("css", gamut)
-
-    def hex(self, gamut: str | None) -> Self:
-        return self.to("hex", gamut)

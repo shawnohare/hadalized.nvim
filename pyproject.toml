@@ -26,5 +26,12 @@ build-backend = "uv_build"
 dev = [
     "ipython>=9.8.0",
     "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
     "ruff>=0.14.10",
+]
+
+[tool.pytest.ini_options]
+addopts = "--cov src -vvv -ra -q"
+testpaths = [
+    "tests",
 ]

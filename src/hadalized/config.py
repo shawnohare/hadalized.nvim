@@ -1,23 +1,29 @@
+"""Module containing all underlying color definitions and gamut info."""
 from functools import cache
 from typing import Self
 
 from hadalized.models import (
     ColorField,
     BaseNode,
-    ColorMap,
     HueMap,
     BaseMap,
     Info,
     Palette,
-    Hues,
-    PaletteMap,
 )
 
 
-class MonochromeMap(ColorMap):
+class Mono:
     """Singleton class containing named monochromatic colors used for
     foregrounds and backgrounds.
     """
+    black: ColorField = Info("oklch(0.10 0.01 220)")
+    darkgray: ColorField = Info("oklch(0.30 0.01 220)")
+    darkslategray: ColorField     = "oklch(0.30 0.03 220)"
+    gray: ColorField = Info("oklch(0.50 0.01 220)")
+    slategray: ColorField         = "oklch(0.600 0.03 220)"
+    lightgray: ColorField = Info("oklch(0.70 0.01 220)")
+    lightslategray: ColorField  = "oklch(0.700 0.02 220)"
+    white: ColorField = Info("oklch(0.995 0.01 220)")
 
     b12: ColorField = Info("oklch(0.125 0.025 220)")
     b13: ColorField = Info("oklch(0.135 0.025 220)")
@@ -56,9 +62,8 @@ class MonochromeMap(ColorMap):
     w100: ColorField = Info("oklch(0.995 .005 100)")
 
 
-mono = MonochromeMap()
 
-hues: Hues = Hues(
+class Hues:
     neutral=HueMap(
         red=Info("oklch(0.575 0.185 25)"),
         orange=Info("oklch(0.650 0.150 60)"),
@@ -72,7 +77,7 @@ hues: Hues = Hues(
         violet=Info("oklch(0.575 0.185 290)"),
         magenta=Info("oklch(0.575 0.185 330)"),
         rose=Info("oklch(0.675 0.100 360)"),
-    ),
+    )
     dark=HueMap(
         red=Info("oklch(0.60 0.185 25)"),
         orange=Info("oklch(0.650 0.150 60)"),
@@ -86,7 +91,7 @@ hues: Hues = Hues(
         violet=Info("oklch(0.625 0.185 290)"),
         magenta=Info("oklch(0.625 0.185 330)"),
         rose=Info("oklch(0.700 0.100 360)"),
-    ),
+    )
     light=HueMap(
         red=Info("oklch(0.550 0.185 25)"),
         orange=Info("oklch(0.650 0.150 60)"),
@@ -100,7 +105,7 @@ hues: Hues = Hues(
         violet=Info("oklch(0.550 0.185 290)"),
         magenta=Info("oklch(0.550 0.185 330)"),
         rose=Info("oklch(0.625 0.100 360)"),
-    ),
+    )
     hl=HueMap(
         red=Info("oklch(0.800 0.100 25)"),
         orange=Info("oklch(0.850 0.100 60)"),
@@ -114,7 +119,7 @@ hues: Hues = Hues(
         violet=Info("oklch(0.825 0.200 290)"),
         magenta=Info("oklch(0.825 0.200 330)"),
         rose=Info("oklch(0.825 0.200 360)"),
-    ),
+    )
     bright=HueMap(
         red=Info("oklch(0.675 0.200 25)"),
         orange=Info("oklch(0.75 0.200 60)"),
@@ -128,106 +133,127 @@ hues: Hues = Hues(
         violet=Info("oklch(0.800 0.200 290)"),
         magenta=Info("oklch(0.800 0.200 330)"),
         rose=Info("oklch(0.800 0.200 360)"),
-    ),
-)
+    )
 
 
-# Palette definitions
-palette_dark: Palette = Palette(
-    name="hadalized",
-    desc="Main dark theme with blueish solarized inspired backgrounds.",
-    mode="dark",
-    gamut="srgb",
-    hue=hues.dark,
-    base=BaseMap(
-        bg=Info("oklch(0.13 0.03 220)"),
-        bgvar=Info("oklch(0.14 0.03 220)"),
-        bg1=mono.b16,
-        bg2=mono.b20,
-        bg3=mono.b25,
-        bg4=mono.b30,
-        bg5=mono.b35,
-        hidden=mono.g45,
-        comment=mono.g70,
-        fg=mono.w80,
-        emph=mono.w85,
-        op2=mono.s80,
-        op1=mono.s85,
-        op=mono.s90,
-    ),
-    hl=hues.hl,
-    bright=hues.bright,
-)
+class Palettes:
+    # Palette definitions
+    dark: Palette = Palette(
+        name="hadalized",
+        desc="Main dark theme with blueish solarized inspired backgrounds.",
+        mode="dark",
+        gamut="srgb",
+        hue=Hues.dark,
+        base=BaseMap(
+            bg=Info("oklch(0.13 0.025 220)"),
+            bgvar=Info("oklch(0.14 0.03 220)"),
+            bg1=Mono.b16,
+            bg2=Mono.b20,
+            bg3=Mono.b25,
+            bg4=Mono.b30,
+            bg5=Mono.b35,
+            hidden=Mono.g45,
+            comment=Mono.g70,
+            fg=Mono.w80,
+            emph=Mono.w85,
+            op2=Mono.s80,
+            op1=Mono.s85,
+            op=Mono.s90,
+        ),
+        hl=Hues.hl,
+        bright=Hues.bright,
+    )
 
+    gray: Palette = Palette(
+        name="hadalized-gray",
+        desc="Dark theme variant with more grayish backgrounds.",
+        mode="dark",
+        gamut="srgb",
+        hue=Hues.dark,
+        base=BaseMap(
+            bg=Info("oklch(0.13 0.005 220)"),
+            bgvar=Info("oklch(0.14 0.005 220)"),
+            bg1=Info("oklch(0.16 0.005 220)"),
+            bg2=Info("oklch(0.20 0.005 220)"),
+            bg3=Info("oklch(0.25 0.005 220)"),
+            bg4=Info("oklch(0.30 0.005 220)"),
+            bg5=Info("oklch(0.35 0.005 220)"),
+            hidden=dark.base.hidden,
+            comment=dark.base.hidden,
+            fg=dark.base.fg,
+            emph=dark.base.emph,
+            op2=Mono.w80,
+            op1=Mono.w85,
+            op=Mono.w90,
+        ),
+        hl=Hues.hl,
+        bright=Hues.bright,
 
-palette_day: Palette = Palette(
+    )
+
+    day: Palette = Palette(
     name="hadalized-day",
     desc="Light theme variant with sunny backgrounds.",
     mode="light",
     gamut="srgb",
-    hue=hues.light,
+    hue=Hues.light,
     base=BaseMap(
-        bg=mono.s100,
-        bgvar=mono.s99,
-        bg1=mono.s95,
-        bg2=mono.s92,
-        bg3=mono.s99,
-        bg4=mono.s85,
-        bg5=mono.s80,
-        hidden=mono.g75,
-        comment=mono.g60,
-        fg=mono.g30,
-        emph=mono.g20,
-        op2=palette_dark.base.bg2,
-        op1=palette_dark.base.bg1,
-        op=palette_dark.base.bg,
+        bg=Mono.s100,
+        bgvar=Mono.s99,
+        bg1=Mono.s95,
+        bg2=Mono.s92,
+        bg3=Mono.s99,
+        bg4=Mono.s85,
+        bg5=Mono.s80,
+        hidden=Mono.g75,
+        comment=Mono.g60,
+        fg=Mono.g30,
+        emph=Mono.g20,
+        op2=dark.base.bg2,
+        op1=dark.base.bg1,
+        op=dark.base.bg,
     ),
-    hl=hues.hl,
-    bright=hues.bright,
-)
+    hl=Hues.hl,
+    bright=Hues.bright,
+   )
 
-palette_white: Palette = Palette(
-    name="hadalized-white",
-    desc="Light theme variant with whiter backgrounds.",
-    mode=palette_day.mode,
-    gamut=palette_day.gamut,
-    hue=palette_day.hue,
-    base=BaseMap(
-        bg=mono.w100,
-        bgvar=mono.w99,
-        bg1=mono.w95,
-        bg2=mono.w92,
-        bg3=mono.w99,
-        bg4=mono.w85,
-        bg5=mono.w80,
-        hidden=palette_day.base.hidden,
-        comment=palette_day.base.comment,
-        fg=palette_day.base.fg,
-        emph=palette_day.base.emph,
-        op2=palette_day.base.op2,
-        op1=palette_day.base.op1,
-        op=palette_day.base.op,
-    ),
-    hl=hues.hl,
-    bright=hues.bright,
-)
+    white: Palette = Palette(
+        name="hadalized-white",
+        desc="Light theme variant with whiter backgrounds.",
+        mode=day.mode,
+        gamut=day.gamut,
+        hue=day.hue,
+        base=BaseMap(
+            bg=Mono.w100,
+            bgvar=Mono.w99,
+            bg1=Mono.w95,
+            bg2=Mono.w92,
+            bg3=Mono.w99,
+            bg4=Mono.w85,
+            bg5=Mono.w80,
+            hidden=day.base.hidden,
+            comment=day.base.comment,
+            fg=day.base.fg,
+            emph=day.base.emph,
+            op2=day.base.op2,
+            op1=day.base.op1,
+            op=day.base.op,
+        ),
+        hl=day.hl,
+        bright=day.bright,
+    )
+
+    @classmethod
+    def items(cls) -> dict[str, Palette]:
+        return {
+            "dark": cls.dark,
+            "gray": cls.gray,
+            "day": cls.day,
+            "white": cls.white,
+        }
 
 
 misc: dict = {
-    "degrees": {
-        "rose": 0,
-        "red": 25,
-        "orange": 60,
-        "yellow": 100,
-        "lime": 120,
-        "green": 135,
-        "mint": 160,
-        "cyan": 180,
-        "azure": 220,
-        "blue": 250,
-        "violet": 290,
-        "magenta": 330,
-    },
     "terminal": {
         "pairings": {
             "red": ["red", "rose"],
@@ -260,15 +286,7 @@ class Config(BaseNode):
     from within this module.
     """
 
-    mono: MonochromeMap = mono
-    """Monochromatic colors used in palette bases."""
-    hues: Hues = hues
-    """Reusable hue definitions for dark and light modes."""
-    palettes: PaletteMap = PaletteMap(
-        dark=palette_dark,
-        day=palette_day,
-        white=palette_white,
-    )
+    palettes: dict[str, Palette] = Palettes.items()
     """Palette definitions."""
     misc: dict = misc
 
@@ -278,10 +296,7 @@ class Config(BaseNode):
         return Config()
 
     def to(self, key: str, gamut: str | None = None) -> Self:
-        default_gamut = gamut or "srgb"
         return self.__class__(
-            mono=mono.to(key, default_gamut),
-            hues=self.hues.to(key, default_gamut),
-            palettes=self.palettes.to(key, gamut),
+                palettes={k: p.to(key, gamut) for k, p in self.palettes.items()},
             misc=self.misc,
         )

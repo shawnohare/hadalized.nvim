@@ -14,32 +14,32 @@ ansi = [
     "#bebeba",
 ]
 brights = [
-    "#98a0a3",
+    "#4f5759",
     "#d2849c",
     "#959f40",
     "#d0750a",
     "#4bb4da",
     "#896ded",
     "#56bb7f",
-    "#c0beb0",
+    "#bebeba",
 ]
 
-background    = "#00090e"
+background    = "#060808"
 foreground    = "#bebeba"
-cursor_border = "#e1dfd0"
-cursor_bg     = "#253f47"
+cursor_border = "#dfdeda"
+cursor_bg     = "#383b3c"
 cursor_fg     = "#cececa"
-selection_bg  = "#04191f"
-selection_fg  = "#98a0a3"
+selection_bg  = "#141718"
+selection_fg  = "#4f5759"
 
 [colors.indexed]
 
 [metadata]
-name = "hadalized"
+name = "hadalized-gray"
 origin_url = "https://github.com/shawnohare/hadalized.nvim"
 
 [metadata.palette]
-name  = "hadalized"
-desc  = "Main dark theme with blueish solarized inspired backgrounds."
+name  = "hadalized-gray"
+desc  = "Dark theme variant with more grayish backgrounds."
 gamut = "srgb"
 mode  = "dark"

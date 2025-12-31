@@ -38,3 +38,17 @@ just gen
 ```
 This utilizes `uv run`.
 
+### Overriding configuration defaults
+
+To generate your own hadalized variants during generation
+
+```py
+from hadalized.writer import FileWritter
+from hadalized.config import Config
+
+if __name__ == "__main__":
+    config = Config(...)  # set your overrides
+    writer FileWritter(config)
+    writer.write_all()
+```
+
