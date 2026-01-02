@@ -1,5 +1,3 @@
-import pytest
-
 from hadalized.models import Info
 
 

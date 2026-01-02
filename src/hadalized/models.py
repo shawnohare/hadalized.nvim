@@ -1,4 +1,4 @@
-from typing import Iterable, Self, Literal
+from typing import Iterable, Self, Literal, Callable
 
 
 from coloraide import Color
@@ -13,6 +13,9 @@ OKLCH = "oklch"
 
 FIT_METHOD = "raytrace"
 """Configuration constants."""
+
+type ContextHandler = Callable[[Palette], Palette | dict]
+"""A function that can produce context to provide to a template."""
 
 type ColorField = ColorInfo | str
 
@@ -244,6 +247,9 @@ class Palette(BaseNode):
             bright=self.hl.to(key, gamut),
             # mono=self.mono.to(key, gamut),
         )
+
+    # TODO: add oklch method to get pure oklch values? They probably should
+    # always be in a specific gamut though so perhaps stick with the css.
 
     def hex(self) -> Self:
         """Produce a palette with only css strings in the specified gamut

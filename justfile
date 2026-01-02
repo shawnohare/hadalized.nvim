@@ -7,3 +7,7 @@ wezterm:
 
 ed:
     source .venv/bin/activate && nvim src/hadalized/config.py
+
+fmt:
+    uv run ruff format src/ tests/
+    uv run ruff check --fix src/ tests

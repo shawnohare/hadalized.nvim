@@ -1,5 +1,5 @@
 """Module containing all underlying color definitions and gamut info."""
-from functools import cache
+
 from typing import Self
 
 from hadalized.models import (
@@ -16,13 +16,14 @@ class Mono:
     """Singleton class containing named monochromatic colors used for
     foregrounds and backgrounds.
     """
+
     black: ColorField = Info("oklch(0.10 0.01 220)")
     darkgray: ColorField = Info("oklch(0.30 0.01 220)")
-    darkslategray: ColorField     = "oklch(0.30 0.03 220)"
+    darkslategray: ColorField = "oklch(0.30 0.03 220)"
     gray: ColorField = Info("oklch(0.50 0.01 220)")
-    slategray: ColorField         = "oklch(0.600 0.03 220)"
+    slategray: ColorField = "oklch(0.600 0.03 220)"
     lightgray: ColorField = Info("oklch(0.70 0.01 220)")
-    lightslategray: ColorField  = "oklch(0.700 0.02 220)"
+    lightslategray: ColorField = "oklch(0.700 0.02 220)"
     white: ColorField = Info("oklch(0.995 0.01 220)")
 
     b12: ColorField = Info("oklch(0.125 0.025 220)")
@@ -62,9 +63,8 @@ class Mono:
     w100: ColorField = Info("oklch(0.995 .005 100)")
 
 
-
 class Hues:
-    neutral=HueMap(
+    neutral = HueMap(
         red=Info("oklch(0.575 0.185 25)"),
         orange=Info("oklch(0.650 0.150 60)"),
         yellow=Info("oklch(0.675 0.120 100)"),
@@ -78,7 +78,7 @@ class Hues:
         magenta=Info("oklch(0.575 0.185 330)"),
         rose=Info("oklch(0.675 0.100 360)"),
     )
-    dark=HueMap(
+    dark = HueMap(
         red=Info("oklch(0.60 0.185 25)"),
         orange=Info("oklch(0.650 0.150 60)"),
         yellow=Info("oklch(0.700 0.120 100)"),
@@ -92,7 +92,7 @@ class Hues:
         magenta=Info("oklch(0.625 0.185 330)"),
         rose=Info("oklch(0.700 0.100 360)"),
     )
-    light=HueMap(
+    light = HueMap(
         red=Info("oklch(0.550 0.185 25)"),
         orange=Info("oklch(0.650 0.150 60)"),
         yellow=Info("oklch(0.650 0.120 100)"),
@@ -106,7 +106,7 @@ class Hues:
         magenta=Info("oklch(0.550 0.185 330)"),
         rose=Info("oklch(0.625 0.100 360)"),
     )
-    hl=HueMap(
+    hl = HueMap(
         red=Info("oklch(0.800 0.100 25)"),
         orange=Info("oklch(0.850 0.100 60)"),
         yellow=Info("oklch(0.950 0.200 100)"),
@@ -120,7 +120,7 @@ class Hues:
         magenta=Info("oklch(0.825 0.200 330)"),
         rose=Info("oklch(0.825 0.200 360)"),
     )
-    bright=HueMap(
+    bright = HueMap(
         red=Info("oklch(0.675 0.200 25)"),
         orange=Info("oklch(0.75 0.200 60)"),
         yellow=Info("oklch(0.80 0.200 100)"),
@@ -188,34 +188,33 @@ class Palettes:
         ),
         hl=Hues.hl,
         bright=Hues.bright,
-
     )
 
     day: Palette = Palette(
-    name="hadalized-day",
-    desc="Light theme variant with sunny backgrounds.",
-    mode="light",
-    gamut="srgb",
-    hue=Hues.light,
-    base=BaseMap(
-        bg=Mono.s100,
-        bgvar=Mono.s99,
-        bg1=Mono.s95,
-        bg2=Mono.s92,
-        bg3=Mono.s99,
-        bg4=Mono.s85,
-        bg5=Mono.s80,
-        hidden=Mono.g75,
-        comment=Mono.g60,
-        fg=Mono.g30,
-        emph=Mono.g20,
-        op2=dark.base.bg2,
-        op1=dark.base.bg1,
-        op=dark.base.bg,
-    ),
-    hl=Hues.hl,
-    bright=Hues.bright,
-   )
+        name="hadalized-day",
+        desc="Light theme variant with sunny backgrounds.",
+        mode="light",
+        gamut="srgb",
+        hue=Hues.light,
+        base=BaseMap(
+            bg=Mono.s100,
+            bgvar=Mono.s99,
+            bg1=Mono.s95,
+            bg2=Mono.s92,
+            bg3=Mono.s99,
+            bg4=Mono.s85,
+            bg5=Mono.s80,
+            hidden=Mono.g75,
+            comment=Mono.g60,
+            fg=Mono.g30,
+            emph=Mono.g20,
+            op2=dark.base.bg2,
+            op1=dark.base.bg1,
+            op=dark.base.bg,
+        ),
+        hl=Hues.hl,
+        bright=Hues.bright,
+    )
 
     white: Palette = Palette(
         name="hadalized-white",
@@ -286,17 +285,17 @@ class Config(BaseNode):
     from within this module.
     """
 
+    neovim_theme_template: str = "neovim_theme.lua"
+    neovim_target_dir: str = "./colors/"
+    wezterm_theme_template: str = "wezterm.toml"
+    wezterm_target_dir: str = "./wezterm"
+
     palettes: dict[str, Palette] = Palettes.items()
     """Palette definitions."""
     misc: dict = misc
 
-    @staticmethod
-    @cache
-    def load() -> Config:
-        return Config()
-
     def to(self, key: str, gamut: str | None = None) -> Self:
         return self.__class__(
-                palettes={k: p.to(key, gamut) for k, p in self.palettes.items()},
+            palettes={k: p.to(key, gamut) for k, p in self.palettes.items()},
             misc=self.misc,
         )

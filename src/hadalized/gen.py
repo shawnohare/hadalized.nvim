@@ -27,7 +27,7 @@ class FileWriter:
     """Generate and write files containing hadalized palettes."""
 
     def __init__(self, config: Config | None = None, target_dir: Path = Path("./")):
-        self.config: Config = config or Config.load()
+        self.config: Config = config or Config()
         self.jenv = Environment(
             loader=PackageLoader("hadalized"),
             undefined=StrictUndefined,
