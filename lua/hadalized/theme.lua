@@ -6,7 +6,7 @@ local M = {}
 ---@return table<string, vim.api.keyset.highlight>
 function M.make(palette, conf)
     local b = palette.base
-    local bright = palette.bright
+    -- local bright = palette.bright
     local h = palette.hue
     local hl = palette.hl
     ---@type table<string, vim.api.keyset.highlight>
@@ -17,15 +17,15 @@ function M.make(palette, conf)
             --  a boolean constant: TRUE, false
         },
         Character = { fg=h.cyan }, --  a character constant: 'c'
-        ColorColumn = { bg=b.bg1 }, -- used for the columns set with 'colorcolumn'
-        Comment = { fg=b.comment }, -- any comment
+        ColorColumn = { bg=b.bg2 }, -- used for the columns set with 'colorcolumn'
+        Comment = { fg=b.subfg }, -- any comment
         Conceal = { fg=b.hidden }, -- placeholder characters substituted for concealed text (see 'conceallevel')
         Conditional = { fg=h.orange}, --  if, then, else, endif, switch, etp.
         Constant = { fg=h.magenta }, -- (preferred) any constant
         CurSearch = { bg=hl.red, fg=b.black},
         -- NOTE: Cursor seems to be overriden by what wezterm sets.
-        Cursor = { bg=b.bg4, fg=b.emph }, -- character under the cursor
-        lCursor = { bg=b.bg4, fg=h.red}, -- character under the cursor
+        Cursor = { bg=b.bg6, fg=b.emph }, -- character under the cursor
+        lCursor = { bg=b.bg6, fg=h.red}, -- character under the cursor
         CursorColumn = { }, -- Screen-column at the cursor, when 'cursorcolumn' is set.
         CursorIM = { }, -- like Cursor, but used when in IME mode |CursorIM|
         CursorLine = {
@@ -34,7 +34,7 @@ function M.make(palette, conf)
             -- Low-priority if foreground (ctermfg OR guifg) is not set.
         },
         CursorLineNr = {
-            bg=b.bg4,
+            bg=b.bg5,
             fg=b.op,
             -- bold=conf.bold,
             -- reverse = true,
@@ -48,13 +48,13 @@ function M.make(palette, conf)
         DiffDelete = { fg=h.red }, -- diff mode: Deleted line |diff.txt|
         DiffText = { fg=h.blue, underline=conf.underline}, -- diff mode: Changed text within a changed line |diff.txt|
         Directory = { fg=h.blue, bold=conf.bold}, -- directory names (and other special names in listings)
-        EndOfBuffer = { fg=b.comment }, -- filler lines (~) after the end of the buffer.  By default, this is highlighted like |hl-NonText|.
+        EndOfBuffer = { fg=b.subfg }, -- filler lines (~) after the end of the buffer.  By default, this is highlighted like |hl-NonText|.
         Error = { fg=h.red }, -- (preferred) any erroneous construct
         ErrorMsg = { fg=h.red, bold=conf.bold}, -- error messages on the command line
         Exception = { fg=h.magenta }, --  try, catch, throw
         Float = { fg=h.violet }, --    a floating point constant: 2.3e10
         FoldColumn = { }, -- 'foldcolumn'
-        Folded = { bg=b.bg2 }, -- line used for closed folds
+        Folded = { bg=b.bg3 }, -- line used for closed folds
         Function = { fg=h.blue}, -- function name (also: methods for classes)
         Identifier = { fg=h.yellow}, -- (preferred) any variable name
         Ignore = { fg=b.hidden }, -- (preferred) left blank, hidden  |hl-Ignore|
@@ -63,26 +63,26 @@ function M.make(palette, conf)
         Italic = { fg=nil, bg=nil, italic=conf.italic },
         Keyword = { fg=h.violet }, --  any other keyword
         Label = { fg=h.green }, --    case, default, etp.
-        LineNr = { bg=b.bg1, fg=b.comment}, -- Line number for ":number" and ":#" commands, and when 'number' or 'relativenumber' option is set.
+        LineNr = { bg=b.bg2, fg=b.subfg}, -- Line number for ":number" and ":#" commands, and when 'number' or 'relativenumber' option is set.
         Macro = { fg=h.violet, italic=conf.italic }, --   preprocessor #define
         MatchParen = { fg=h.red, bold=conf.bold }, -- The character under the cursor or just before it, if it is a paired bracket, and its match. |pi_paren.txt|
         ModeMsg = { fg=h.orange, bold=conf.bold }, -- 'showmode' message (e.g., "-- INSERT -- ")
         MoreMsg = { fg=h.green }, -- |more-prompt|
-        MsgArea = { bg=b.bg1 }, -- Area for messages and cmdline
+        MsgArea = { bg=b.bg2 }, -- Area for messages and cmdline
         MsgSeparator = { }, -- Separator for scrolled messages, `msgsep` flag of 'display'
         NonText = { fg=b.hidden }, -- '@' at the end of the window, characters from 'showbreak' and other characters that do not really exist in the text (e.g., ">" displayed when a double-wide character doesn't fit at the end of the line). See also |hl-EndOfBuffer|.
         Normal = { fg=b.fg, bg=b.bg }, -- normal text
-        NormalFloat = { fg=b.fg, bg=b.bg1}, -- Normal text in floating windows.
+        NormalFloat = { fg=b.fg, bg=b.bg2}, -- Normal text in floating windows.
         NormalNC = {
             fg=b.fg,
-            bg=b.bgvar,
+            bg=b.bg1,
              -- normal text in non-current windows
         },
         Number = { fg=h.violet }, --   a number constant: 234, 0xff
         Operator = { fg=h.azure }, -- "sizeof", "+", "*", etp.
-        Pmenu = { bg=b.bg1 }, -- Popup menu: normal item.
+        Pmenu = { bg=b.bg2 }, -- Popup menu: normal item.
         PmenuSbar = { }, -- Popup menu: scrollbar.
-        PmenuSel = { bg=b.bg2 }, -- Popup menu: selected item.
+        PmenuSel = { bg=b.bg3 }, -- Popup menu: selected item.
         PmenuThumb = { }, -- Popup menu: Thumb of the scrollbar.
         PreCondit = { fg=h.magenta }, --  preprocessor #if, #else, #endif, etp.
         PreProc = { fg=h.orange }, -- (preferred) generic Preprocessor
@@ -102,12 +102,12 @@ function M.make(palette, conf)
         Standout = { standout=true },
         Statement = { fg=h.yellow }, -- (preferred) any statement
         StatusLine = {
-            bg=b.bg1,
+            bg=b.bg2,
             fg=b.fg,
             -- status line of current window
         },
         StatusLineNC = {
-            bg=b.bg2,
+            bg=b.bg3,
             -- bg=h.red,
             fg=b.hidden,
             -- status lines of not-current windows
@@ -130,11 +130,11 @@ function M.make(palette, conf)
         Todo = { fg=h.yellow, bold=conf.bold }, -- (preferred) anything that needs extra attention; mostly the keywords TODO FIXME and XXX
         Type = { fg=h.yellow }, -- (preferred) int, long, char, etp.
         Typedef = { fg=h.violet }, --  A typedef
-        VertSplit = { fg=b.bg5 }, -- the column separating vertically split windows
-        Visual = { bg=b.bg2 }, -- Visual mode selection
-        VisualNOS = { bg=b.bg2 }, -- Visual mode selection when vim is "Not Owning the Selection".
+        VertSplit = { fg=b.bg6 }, -- the column separating vertically split windows
+        Visual = { bg=b.bg3 }, -- Visual mode selection
+        VisualNOS = { bg=b.bg3 }, -- Visual mode selection when vim is "Not Owning the Selection".
         WarningMsg = { fg=h.red }, -- warning messages
-        Whitespace = { fg=b.comment}, -- "nbsp", "space", "tab" and "trail" in 'listchars'
+        Whitespace = { fg=b.subfg}, -- "nbsp", "space", "tab" and "trail" in 'listchars'
         WildMenu = { }, -- current match in 'wildmenu' completion
         -- -------------------------------------------------------------------
         -- Treesitter Groups
@@ -242,7 +242,7 @@ function M.make(palette, conf)
         ['@tag.attribute'] = { fg=h.magenta },    -- html tag attribute
         ['@tag.delimter'] = { link='Delimiter' },    -- Tag delimiter like `<` `>` `/`
         ['@text'] = { fg=b.fg },    -- For strings considered text in a markup language.
-        ['@text.reference'] = { fg=b.comment }, -- footnote, citations, etp.
+        ['@text.reference'] = { fg=b.subfg }, -- footnote, citations, etp.
         ['@title'] = { fg=b.emph },    -- Text that is part of a title.
         ['@type'] = { link='Type' },    -- For types.
         ['@type.builtin'] = { fg=h.yellow, italic=conf.italic},

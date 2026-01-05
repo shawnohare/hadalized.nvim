@@ -24,14 +24,14 @@
 ---@field lightgray string Monochromatic.
 ---@field white     string Monochromatic.
 ---@field bg        string Main background.
----@field bgvar     string Main background variant (non-focused).
----@field bg1       string Secondary background (status line, virtual).
----@field bg2       string Tertiary background.
----@field bg3       string Background.
+---@field bg1     string Main background variant (non-focused).
+---@field bg2       string Secondary background (status line, virtual).
+---@field bg3       string Tertiary background.
 ---@field bg4       string Background.
 ---@field bg5       string Background.
+---@field bg6       string Background.
 ---@field hidden    string Foreground extra subdued.
----@field comment   string Foreground subdued.
+---@field subfg   string Foreground subdued.
 ---@field fg        string Foreground main.
 ---@field emph      string Foreground emphasis.
 ---@field op2       string Foreground or opposite mode tertiary bg.

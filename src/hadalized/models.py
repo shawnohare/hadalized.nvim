@@ -1,9 +1,10 @@
-from typing import Iterable, Self, Literal, Callable
+from collections.abc import Callable, Iterable
+from hashlib import blake2b
+from typing import Literal, Self
 
-
+import luadata
 from coloraide import Color
-from pydantic import BaseModel
-
+from pydantic import BaseModel, PrivateAttr
 
 SRGB = "srgb"
 P3 = "display-p3"
@@ -17,7 +18,48 @@ FIT_METHOD = "raytrace"
 type ContextHandler = Callable[[Palette], Palette | dict]
 """A function that can produce context to provide to a template."""
 
+type PaletteTransform = Callable[[Palette], Palette]
+"""A function that can produce context to provide to a template."""
+
 type ColorField = ColorInfo | str
+
+
+# class ColorExtractor(Protocol):
+#     """A callable that extracts a specific value from a ColorField."""
+#
+#     def __call__(self, field: ColorField, *args, **kwargs) -> str: ...
+#
+#
+# class PaletteExtractor(Protocol):
+#     """A callable that extracts a specific value from a ColorField."""
+#
+#     def __call__(self, palette: Palette, *args, **kwargs) -> Palette: ...
+#
+#
+# class FieldExtractors:
+#     @staticmethod
+#     def hex(field: ColorField, gamut: str) -> str:
+#         if isinstance(field, ColorInfo):
+#             val = field.gamuts[gamut].hex
+#         else:
+#             val = field
+#         return val
+#
+#     @staticmethod
+#     def css(field: ColorField, gamut: str) -> str:
+#         if isinstance(field, ColorInfo):
+#             val = field.gamuts[gamut].css
+#         else:
+#             val = field
+#         return val
+#
+#     @staticmethod
+#     def oklch(field: ColorField, gamut: str) -> str:
+#         if isinstance(field, ColorInfo):
+#             val = field.gamuts[gamut].oklch
+#         else:
+#             val = field
+#         return val
 
 
 class BaseNode(BaseModel):
@@ -29,6 +71,9 @@ class BaseNode(BaseModel):
     def __getitem__(self, key: str):
         key = key.replace("-", "_")
         return getattr(self, key)
+
+    def model_dump_lua(self) -> str:
+        return luadata.serialize(self.model_dump(mode="json"), indent="  ")
 
 
 class GamutColor(BaseNode):
@@ -104,7 +149,8 @@ def fit(color: Color, gamut: str, fit_method=FIT_METHOD) -> Color:
 
 
 def max_oklch_chroma(
-    color: Color | str, fit_method: str = FIT_METHOD
+    color: Color | str,
+    fit_method: str = FIT_METHOD,
 ) -> dict[str, float]:
     if isinstance(color, str):
         color = parse(color)
@@ -118,7 +164,7 @@ def max_oklch_chroma(
     }
 
 
-def Info(color: Color | str, fit_method: str = FIT_METHOD) -> ColorInfo:
+def info(color: Color | str, fit_method: str = FIT_METHOD) -> ColorInfo:
     """Fit a color definition to pre-defined gamuts."""
     if isinstance(color, str):
         color = parse(color)
@@ -168,6 +214,9 @@ class ColorMap(BaseNode):
         """Convert"""
         return self.to("css", gamut)
 
+    def oklch(self, gamut: str) -> Self:
+        return self.to("oklch", gamut)
+
 
 class HueMap(ColorMap):
     """Configuration node for name hues."""
@@ -189,25 +238,20 @@ class HueMap(ColorMap):
 class BaseMap(ColorMap):
     """Configuration node for monochromatic foregrounds and backgrounds."""
 
-    black: ColorField = Info("oklch(0.10 0.01 220)")
-    darkgray: ColorField = Info("oklch(0.30 0.01 220)")
-    gray: ColorField = Info("oklch(0.50 0.01 220)")
-    lightgray: ColorField = Info("oklch(0.70 0.01 220)")
-    white: ColorField = Info("oklch(0.995 0.01 220)")
-    black: ColorField
-    darkgray: ColorField
-    gray: ColorField
-    lightgray: ColorField
-    white: ColorField
+    black: ColorField = info("oklch(0.10 0.01 220)")
+    darkgray: ColorField = info("oklch(0.30 0.01 220)")
+    gray: ColorField = info("oklch(0.50 0.01 220)")
+    lightgray: ColorField = info("oklch(0.70 0.01 220)")
+    white: ColorField = info("oklch(0.995 0.01 220)")
     bg: ColorField
-    bgvar: ColorField
     bg1: ColorField
     bg2: ColorField
     bg3: ColorField
     bg4: ColorField
     bg5: ColorField
+    bg6: ColorField
     hidden: ColorField
-    comment: ColorField
+    subfg: ColorField
     fg: ColorField
     emph: ColorField
     op2: ColorField
@@ -220,7 +264,7 @@ class Palette(BaseNode):
     desc: str
     mode: Literal["dark", "light"]
     """Whether the theme is dark or light mode."""
-    gamut: Literal["srgb", "display-p3"]
+    gamut: Literal["srgb", "display-p3"] = "srgb"
     """Default gamut to use for themes that require hex codes."""
     hue: HueMap
     """Named color hues relative to the palette."""
@@ -229,24 +273,30 @@ class Palette(BaseNode):
     hl: HueMap
     bright: HueMap
     # mono: MonochromeMap = mono
+    _cache: dict = {}
+    _hash: str = PrivateAttr("")
 
-    def to(self, key: str, gamut: str | None = None) -> Self:
+    def to(self, key: str, gamut: str = "") -> Self:
         """Produce a palette with only hex codes in the specified gamut
         instead of full color info.
         """
         # colors = {k: v.to(self.gamut, key) for k, v in self.colors().items()}
         gamut = gamut or self.gamut
-        return self.__class__(
-            name=self.name,
-            desc=self.desc,
-            mode=self.mode,
-            gamut=self.gamut,
-            hue=self.hue.to(key, gamut),
-            base=self.base.to(key, gamut),
-            hl=self.hl.to(key, gamut),
-            bright=self.hl.to(key, gamut),
-            # mono=self.mono.to(key, gamut),
-        )
+        cache_key = (key, gamut)
+        if (val := self._cache.get(cache_key)) is None:
+            val = self.__class__(
+                name=self.name,
+                desc=self.desc,
+                mode=self.mode,
+                gamut=self.gamut,
+                hue=self.hue.to(key, gamut),
+                base=self.base.to(key, gamut),
+                hl=self.hl.to(key, gamut),
+                bright=self.hl.to(key, gamut),
+                # mono=self.mono.to(key, gamut),
+            )
+            self._cache[cache_key] = val
+        return val
 
     # TODO: add oklch method to get pure oklch values? They probably should
     # always be in a specific gamut though so perhaps stick with the css.
@@ -262,3 +312,10 @@ class Palette(BaseNode):
         instead of full color info.
         """
         return self.to("css")
+
+    def hash(self) -> str:
+        """A hash of the in-gamut oklch definitions."""
+        if not self._hash:
+            data = self.model_dump_json().encode()
+            self._hash = blake2b(data, digest_size=32).hexdigest()
+        return self._hash

@@ -1,18 +1,54 @@
 """Palette and theme template rendering."""
 
 from pathlib import Path
-from typing import Callable, Self
+from typing import TYPE_CHECKING
 
 import luadata
-from jinja2 import Template, Environment, StrictUndefined, PackageLoader
+from jinja2 import (
+    Environment,
+    FileSystemLoader,
+    PackageLoader,
+    StrictUndefined,
+    Template,
+    TemplateNotFound,
+)
 from loguru import logger
-from pydantic import BaseModel
 
-from hadalized.models import Palette
-from hadalized.config import Config
+from hadalized.models import ContextHandler, Palette
 
-type ContextHandler = Callable[[Palette], Palette | dict]
-"""A function that can produce context to provide to a template."""
+if TYPE_CHECKING:
+    from pydantic import BaseModel
+
+    from hadalized.config import Config
+
+
+class TemplateEnv:
+    """Package loaders."""
+
+    package = Environment(
+        loader=PackageLoader("hadalized"),
+        undefined=StrictUndefined,
+        autoescape=True,
+    )
+    fs = Environment(
+        loader=FileSystemLoader(searchpath="./templates"),
+        undefined=StrictUndefined,
+        autoescape=True,
+    )
+    _templates: dict[str, Template] = {}
+
+    @classmethod
+    def get_template(cls, name: str | Template) -> Template:
+        """Get a template"""
+        if isinstance(name, Template):
+            template = name
+        elif (template := cls._templates.get(name)) is None:
+            try:
+                template = cls.fs.get_template(name)
+            except TemplateNotFound:
+                template = cls.package.get_template(name)
+            cls._templates[name] = template
+        return template
 
 
 def model_dump_lua(model: BaseModel) -> str:
@@ -37,45 +73,41 @@ class Handlers:
         return palette.css()
 
 
-package_env = Environment(
-    loader=PackageLoader("hadalized"),
-    undefined=StrictUndefined,
-)
-"""Default template loader that looks for templates in the hadalized
-package data."""
-
-
-class ThemeWriter:
+class PaletteWriter:
     """Responsible for rendering and writing template files for individual
-    palettes."""
+    palettes.
+    """
 
     def __init__(
         self,
         template: str | Template,
         target_dir: str | Path,
         file_extension: str = "",
-        env: Environment = package_env,
         handler: ContextHandler = Handlers.hex,
     ):
         if not file_extension and isinstance(template, Template):
             raise ValueError("File extension must be specified.")
-        self.jenv = env
         if isinstance(template, str):
-            self.template = self.jenv.get_template(template)
             _, _, ext = template.rpartition(".")
             self.file_extension = ext
         else:
-            self.template = template
             self.file_extension = file_extension
+        self.template = TemplateEnv.get_template(template)
         self.target_dir: Path = Path(target_dir)
         self.handler = handler
 
-    def render(self, palette: Palette) -> str:
+    def mkdir(self):
+        self.target_dir.mkdir(parents=True, exist_ok=True)
+
+    def render(self, data: Palette | Config) -> str:
         """Render the template. Subclasses can override as needed."""
-        context = self.handler(palette)
+        if isinstance(data, Palette):
+            context = self.handler(data)
+        else:
+            raise NotImplementedError
         return self.template.render(context)
 
-    def palette_output_path(self, palette: Palette) -> Path:
+    def output_path(self, palette: Palette) -> Path:
         return self.target_dir / f"{palette.name}.{self.file_extension}"
 
     def write_readme(self):
@@ -85,27 +117,7 @@ class ThemeWriter:
 
     def __call__(self, palette: Palette):
         """Write a rendered theme using the input palette."""
-        self.target_dir.mkdir(parents=True, exist_ok=True)
-        path = self.palette_output_path(palette)
+        self.mkdir()
+        path = self.output_path(palette)
         logger.info(f"Writing {path}")
         path.write_text(self.render(palette))
-
-    @classmethod
-    def neovim(cls, config: Config | None = None) -> Self:
-        """Create an instance responsible for writing neovim themes."""
-        config = config or Config()
-        return cls(
-            template=config.neovim_theme_template,
-            target_dir=config.neovim_target_dir,
-            handler=Handlers.lua_hex,
-        )
-
-    @classmethod
-    def wezterm(cls, config: Config | None = None) -> Self:
-        """Create an instance responsible for writing wezterm themes."""
-        config = config or Config()
-        return cls(
-            template=config.wezterm_theme_template,
-            target_dir=config.wezterm_target_dir,
-            handler=Handlers.hex,
-        )

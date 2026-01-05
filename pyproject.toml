@@ -13,6 +13,7 @@ dependencies = [
     "loguru>=0.7.3",
     "luadata>=1.0.5",
     "pydantic>=2.12.5",
+    "xdg-base-dirs>=6.0.2",
 ]
 
 [project.scripts]
@@ -28,10 +29,38 @@ dev = [
     "pytest>=9.0.2",
     "pytest-cov>=7.0.0",
     "ruff>=0.14.10",
+    "ty>=0.0.8",
 ]
 
 [tool.pytest.ini_options]
 addopts = "--cov src -vvv -ra -q"
 testpaths = [
     "tests",
+]
+
+[tool.ruff.lint]
+# select = ["ALL"]
+select = [
+    "A",        # detect shadowed builtins
+    "BLE",      # disallow catch-all exceptions
+    "C4",       # Catch incorrect use of comprehensions, dict, list, etc
+    "DTZ",      # require strict timezone manipulation with datetime
+    "E",        # PyCodeStyle errors
+    "F",        # Pyflakes rules
+    "FA",       # Enforce from __future__ import annotations
+    "FBT",      # detect boolean traps
+    "I",        # Sort imports properly
+    "ICN",      # Use common import conventions
+    "ISC",      # Good use of string concatenation
+    "N",        # enforce naming conventions, e.g. ClassName vs function_name
+    "NPY",      # Some numpy-specific things"COM", # enforce trailing comma rules
+    "PTH",      # Use pathlib instead of os.path
+    "RET",      # Good return practices
+    "S",        # disallow things like "exec"; also restricts "assert"
+    "SIM",      # Common simplification rules
+    "TC",       # Enforce importing certain types in a TYPE_CHECKING block
+    # "TD",       # Be diligent with TODO comments
+    "TID",      # Some good import practices
+    "UP",       # Warn if certain things can changed due to newer Python versions
+    "W",        # PyCodeStyle warnings
 ]

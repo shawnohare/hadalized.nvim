@@ -14,7 +14,7 @@ ansi = [
     "{{base.fg}}",
 ]
 brights = [
-    "{{base.comment}}",
+    "{{base.subfg}}",
     "{{hue.rose}}",
     "{{hue.lime}}",
     "{{hue.orange}}",
@@ -27,10 +27,10 @@ brights = [
 background    = "{{base.bg}}"
 foreground    = "{{base.fg}}"
 cursor_border = "{{base.op}}"
-cursor_bg     = "{{base.bg5}}"
+cursor_bg     = "{{base.bg6}}"
 cursor_fg     = "{{base.emph}}"
-selection_bg  = "{{base.bg2}}"
-selection_fg  = "{{base.comment}}"
+selection_bg  = "{{base.bg3}}"
+selection_fg  = "{{base.subfg}}"
 
 [colors.indexed]
 
