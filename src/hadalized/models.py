@@ -1,10 +1,10 @@
 from collections.abc import Callable, Iterable
 from hashlib import blake2b
-from typing import Literal, Self
+from typing import ClassVar, Literal, Self
 
 import luadata
 from coloraide import Color
-from pydantic import BaseModel, PrivateAttr
+from pydantic import BaseModel, ConfigDict, PrivateAttr
 
 SRGB = "srgb"
 P3 = "display-p3"
@@ -65,6 +65,10 @@ type ColorField = ColorInfo | str
 class BaseNode(BaseModel):
     """An extension of the base model to give some dict like semantics."""
 
+    model_config: ClassVar[ConfigDict] = ConfigDict(
+        frozen=True,
+    )
+
     def items(self) -> Iterable[tuple]:
         return ((k, getattr(self, k)) for k in self.__class__.model_fields)
 
@@ -74,6 +78,10 @@ class BaseNode(BaseModel):
 
     def model_dump_lua(self) -> str:
         return luadata.serialize(self.model_dump(mode="json"), indent="  ")
+
+    def __hash__(self) -> int:
+        # Defined for type checking purposes. Frozen models are hashable.
+        return hash(super())
 
 
 class GamutColor(BaseNode):

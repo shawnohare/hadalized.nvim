@@ -3,6 +3,10 @@ gen:
     uv run hadalized
     cp ./build/neovim/* colors/
 
+venv:
+    source .venv/bin/activate
+
+
 wezterm:
     @echo "Copying wezterm files."
     cp ./build/wezterm/* ~/.config/wezterm/colors/

@@ -9,8 +9,8 @@ def test_save_and_clear(tmp_path):
     template = get_template("palette_info.json")
     palette = config.palettes["hadalized"]
     cache.add(tmp_path / "info.json", palette, template)
-    assert cache.data
+    assert cache._build_data
     cache.save()
-    assert cache.build_file.exists()
+    assert cache._build_file.exists()
     cache.clear()
-    assert not cache.build_file.exists()
+    assert not cache._build_file.exists()

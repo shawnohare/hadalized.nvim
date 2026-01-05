@@ -91,15 +91,15 @@ class FileWriter:
         file_extension: str = "",
         handler: ContextHandler = PaletteHandlers.hex,
     ) -> list[Path]:
-        if not file_extension and isinstance(template, Template):
-            raise ValueError("File extension must be specified.")
         if isinstance(template, str):
-            if not file_extension:
-                _, _, file_extension = template.rpartition(".")
             template = get_template(template)
+        if not file_extension:
+            _, _, file_extension = (template.filename or "").rpartition(".")
+            if file_extension:
+                file_extension = f".{file_extension}"
         out_paths = []
         for palette in palettes:
-            path = Path(target_dir) / f"{palette.name}.{file_extension}"
+            path = Path(target_dir) / f"{palette.name}{file_extension}"
             # TODO: Check if we need to actually generate template.
             # Compute palette hash and template hash, look in cache
             if self.cache.check(path=path, context=palette, template=template):
@@ -134,8 +134,8 @@ class FileWriter:
             handler=PaletteHandlers.lua_hex,
         )
         write_readme(target_dir)
-        if written:
-            self.cache.save()
+        # if written:
+        #     self.cache.save()
         return written
 
     def write_wezterm_themes(self) -> list[Path]:
@@ -144,12 +144,12 @@ class FileWriter:
         written = self.write_palettes(
             palettes=self.palettes,
             template=self.config.wezterm_template,
-            target_dir=target_dir,
+            target_dir=self.build_dir / target_dir,
             handler=PaletteHandlers.hex,
         )
         write_readme(target_dir)
-        if written:
-            self.cache.save()
+        # if written:
+        #     self.cache.save()
         return written
 
     def write_palette_info(self) -> list[Path]:
@@ -160,8 +160,8 @@ class FileWriter:
             target_dir=self.build_dir / "info",
             handler=lambda x: {"data": x.model_dump_json(indent=4)},
         )
-        if written:
-            self.cache.save()
+        # if written:
+        #     self.cache.save()
         return written
 
     def write_starship_theme(self) -> list[Path]:
@@ -189,6 +189,8 @@ class FileWriter:
         written += self.write_wezterm_themes()
         written += self.write_starship_theme()
         written += self.write_palette_info()
+        if written:
+            self.cache.save()
         return written
 
 
