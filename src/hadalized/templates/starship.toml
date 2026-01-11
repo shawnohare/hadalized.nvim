@@ -5,12 +5,18 @@ scan_timeout = 200
 
 format = """
 [](rose)\
+$env_var\
 $os\
 $username\
+$hostname\
+$localip\
+$shlvl\
 [](bg:blue fg:rose)\
 $directory\
 [](bg:magenta fg:blue)\
 $git_branch\
+$git_state\
+$git_metrics\
 $git_status\
 [](fg:magenta bg:green)\
 $c\
@@ -22,6 +28,7 @@ $java\
 $kotlin\
 $haskell\
 $python\
+$package\
 [](fg:green bg:azure)\
 $conda\
 [](fg:azure bg:violet)\
@@ -33,31 +40,64 @@ $character"""
 
 palette = "hadalized"
 
+[env_var.STARSHIP_SHELL]
+style = "bg:rose fg:bg"
+format = "[ $env_value ]($style)"
+
 [os]
 disabled = false
 style = "bg:rose fg:bg"
 
 [os.symbols]
-Windows = ""
-Ubuntu = "󰕈"
-SUSE = ""
-Raspbian = "󰐿"
-Mint = "󰣭"
-Macos = "󰀵"
-Manjaro = ""
-Linux = "󰌽"
-Gentoo = "󰣨"
-Fedora = "󰣛"
-Alpine = ""
-Amazon = ""
-Android = ""
-AOSC = ""
-Arch = "󰣇"
-Artix = "󰣇"
-CentOS = ""
-Debian = "󰣚"
-Redhat = "󱄛"
-RedHatEnterprise = "󱄛"
+Alpaquita = " "
+Alpine = " "
+AlmaLinux = " "
+Amazon = " "
+Android = " "
+AOSC = " "
+Arch = " "
+Artix = " "
+CachyOS = " "
+CentOS = " "
+Debian = " "
+DragonFly = " "
+Elementary = " "
+Emscripten = " "
+EndeavourOS = " "
+Fedora = " "
+FreeBSD = " "
+Garuda = "󰛓 "
+Gentoo = " "
+HardenedBSD = "󰞌 "
+Illumos = "󰈸 "
+Ios = "󰀷 "
+Kali = " "
+Linux = " "
+Mabox = " "
+Macos = " "
+Manjaro = " "
+Mariner = " "
+MidnightBSD = " "
+Mint = " "
+NetBSD = " "
+NixOS = " "
+Nobara = " "
+OpenBSD = "󰈺 "
+openSUSE = " "
+OracleLinux = "󰌷 "
+Pop = " "
+Raspbian = " "
+Redhat = " "
+RedHatEnterprise = " "
+RockyLinux = " "
+Redox = "󰀘 "
+Solus = "󰠳 "
+SUSE = " "
+Ubuntu = " "
+Unknown = " "
+Void = " "
+Windows = "󰍲 "
+Zorin = " "
 
 [username]
 show_always = true
@@ -94,6 +134,12 @@ format = "[[($all_status$ahead_behind )](fg:bg bg:magenta)]($style)"
 symbol = ""
 style = "bg:green"
 format = "[[ $symbol( $version) ](fg:bg bg:green)]($style)"
+
+[package]
+style = "bg:green fg:bg"
+symbol = "󰏗 "
+format = '[$symbol$version]($style)'
+
 
 [c]
 symbol = " "
@@ -172,15 +218,16 @@ disabled = false
 show_notifications = true
 min_time_to_notify = 45000
 
-# {% for palette in palettes.values() %}
+# {% for palette in context.palettes.values() %}
 [palettes."{{palette.name}}"]
 name = "{{ palette.name }}"
 gamut = "{{ palette.gamut }}"
 mode = "{{ palette.mode }}"
 {% for name, code in palette.hue.items() -%}
-"{{ name }}" = "{{ code }}"
+{{name}} = "{{code}}"
 {% endfor -%}
-fg      = "{{ palette.base.fg }}"
-bg      = "{{ palette.base.bg }}"
+{% for name, code in palette.base.items() -%}
+{{ name }} = "{{code}}"
+{% endfor -%}
 {% endfor %}
 

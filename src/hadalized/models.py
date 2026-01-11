@@ -1,10 +1,10 @@
-from collections.abc import Callable, Iterable
-from hashlib import blake2b
-from typing import ClassVar, Literal, Self
+from collections.abc import Callable
+from functools import cache, partial
+from typing import Literal, Self
 
-import luadata
-from coloraide import Color
-from pydantic import BaseModel, ConfigDict, PrivateAttr
+from hadalized.base import BaseNode
+from hadalized.color import ColorField, ColorInfo, info
+from hadalized.render import Template as Template
 
 SRGB = "srgb"
 P3 = "display-p3"
@@ -15,215 +15,58 @@ OKLCH = "oklch"
 FIT_METHOD = "raytrace"
 """Configuration constants."""
 
-type ContextHandler = Callable[[Palette], Palette | dict]
+
+type PaletteHandler = Callable[[Palette], Palette]
 """A function that can produce context to provide to a template."""
 
-type PaletteTransform = Callable[[Palette], Palette]
-"""A function that can produce context to provide to a template."""
+type ColorFieldHandler = Callable[[ColorField], ColorField]
+# type ExtractorMethod = Literal[None, "hex", "oklch", "css", "gamut"]
 
-type ColorField = ColorInfo | str
-
-
-# class ColorExtractor(Protocol):
-#     """A callable that extracts a specific value from a ColorField."""
-#
-#     def __call__(self, field: ColorField, *args, **kwargs) -> str: ...
-#
-#
-# class PaletteExtractor(Protocol):
-#     """A callable that extracts a specific value from a ColorField."""
-#
-#     def __call__(self, palette: Palette, *args, **kwargs) -> Palette: ...
-#
-#
-# class FieldExtractors:
-#     @staticmethod
-#     def hex(field: ColorField, gamut: str) -> str:
-#         if isinstance(field, ColorInfo):
-#             val = field.gamuts[gamut].hex
-#         else:
-#             val = field
-#         return val
-#
-#     @staticmethod
-#     def css(field: ColorField, gamut: str) -> str:
-#         if isinstance(field, ColorInfo):
-#             val = field.gamuts[gamut].css
-#         else:
-#             val = field
-#         return val
-#
-#     @staticmethod
-#     def oklch(field: ColorField, gamut: str) -> str:
-#         if isinstance(field, ColorInfo):
-#             val = field.gamuts[gamut].oklch
-#         else:
-#             val = field
-#         return val
+type ExtractorMethod = Literal["identity", "gamut", "hex", "oklch", "css"]
 
 
-class BaseNode(BaseModel):
-    """An extension of the base model to give some dict like semantics."""
+def _extract(
+    val: ColorField,
+    gamut: str,
+    method: ExtractorMethod,
+) -> ColorField:
+    """ColorFieldHandler that extracts a particular leaf field value from a
+    GamutInfo field.
 
-    model_config: ClassVar[ConfigDict] = ConfigDict(
-        frozen=True,
-    )
-
-    def items(self) -> Iterable[tuple]:
-        return ((k, getattr(self, k)) for k in self.__class__.model_fields)
-
-    def __getitem__(self, key: str):
-        key = key.replace("-", "_")
-        return getattr(self, key)
-
-    def model_dump_lua(self) -> str:
-        return luadata.serialize(self.model_dump(mode="json"), indent="  ")
-
-    def __hash__(self) -> int:
-        # Defined for type checking purposes. Frozen models are hashable.
-        return hash(super())
-
-
-class GamutColor(BaseNode):
-    """Detailed information about a color fit to a specific gamut."""
-
-    oklch: str
-    """The oklch value fitted to the gamut."""
-    raw: str
-    """The raw oklch value before fitting."""
-    css: str
-    """The css string within the gamut."""
-    hex: str
-    """Hex code."""
-    is_in_gamut: bool
-    """Indicates whether the raw value is within the color gamut."""
-    max_oklch_chroma: float
-    """The maximum oklch chroma value determined from the fit method."""
-
-
-class ColorInfo(BaseNode):
-    """Detailed information about a specific color."""
-
-    # name: str
-    # """Name of the color."""
-    definition: str
-    """Parseable color definition, e.g., a css value."""
-    oklch: str
-    """Raw oklch value."""
-    gamuts: dict[str, GamutColor]
-
-    # srgb: GamutColor
-    # """srgb info"""
-    # display_p3: GamutColor = Field(
-    #     validation_alias=AliasChoices("display_p3", "display-p3"),
-    #     serialization_alias="display-p3",
-    # )
-    @property
-    def srgb(self) -> GamutColor:
-        return self.gamuts["srgb"]
-
-    @property
-    def display_p3(self) -> GamutColor:
-        return self.gamuts["display-p3"]
-
-    def to(self, key: str, gamut: str) -> str:
-        """Convert the color to a css or hex code."""
-        gi = self.gamuts[gamut]
-        return getattr(gi, key)
-
-
-def to_hex(color: Color) -> str:
-    """Convert RGB + alpha channels to their corresponding 24-bit or 34-bit
-    hex color code. Used primarily to extract a hex code for use
-    in programs--such as neovim--that only allow specifying colors
-    via RGB channels.
+    The function is idempotent, but composing terminates at the first leaf.
+    For example, with f as this function
+        f(f(color, gamut="srgb", method="hex"), gamut="display-p3", method="css")
+    is the same as
+        f(color, gamut="srgb", method="hex")
+    as the latter call already extracts a leaf value. Similarly
+        f(f(color, gamut="srgb", method="gamut"), gamut="", method="css")
+    is equivalent to
+        f(color, gamut="srgb", method="css")
     """
-    if color.space() != SRGB:
-        color = Color(SRGB, color.coords(), alpha=color.alpha())
-    return color.to_string(hex=True)
+    if method == "identity" or isinstance(val, str):
+        return val
 
-
-def parse(text: str) -> Color:
-    """Convert a CSS color string to a Color instance."""
-    match = Color.match(text, fullmatch=True)
-    if match is None:
-        raise ValueError(f"Could not parse color: {text}")
-    return Color(match.color)
-
-
-def fit(color: Color, gamut: str, fit_method=FIT_METHOD) -> Color:
-    """Fit a color to the specified input. Does not mutate input color."""
-    return color.clone().fit(gamut, fit_method=fit_method)
-
-
-def max_oklch_chroma(
-    color: Color | str,
-    fit_method: str = FIT_METHOD,
-) -> dict[str, float]:
-    if isinstance(color, str):
-        color = parse(color)
-    lightness, _, hue = color.convert("oklch").coords()
-    cmax = Color("oklch", (lightness, 0.4, hue))
-    return {
-        "lightness": lightness,
-        "hue": hue,
-        P3: fit(cmax, P3, fit_method).get("chroma"),
-        SRGB: fit(cmax, SRGB, fit_method).get("chroma"),
-    }
-
-
-def info(color: Color | str, fit_method: str = FIT_METHOD) -> ColorInfo:
-    """Fit a color definition to pre-defined gamuts."""
-    if isinstance(color, str):
-        color = parse(color)
-    definition = color.to_string()
-    if color.space() != OKLCH:
-        color = color.convert(OKLCH)
-
-    max_chromas = max_oklch_chroma(color)
-
-    gamuts: dict[str, GamutColor] = {}
-    for gamut in (SRGB, P3):
-        raw = color.convert(gamut)
-        oklch_fitted = fit(color, gamut, fit_method)
-        fitted = oklch_fitted.convert(gamut)
-        gamuts[gamut] = GamutColor(
-            oklch=oklch_fitted.to_string(),
-            raw=raw.to_string(),
-            css=fitted.to_string(),
-            hex=to_hex(fitted),
-            is_in_gamut=raw.in_gamut(),
-            max_oklch_chroma=max_chromas[gamut],
-        )
-
-    return ColorInfo(
-        definition=definition,
-        oklch=color.to_string(),
-        gamuts=gamuts,
-    )
+    node = val.gamuts[gamut] if isinstance(val, ColorInfo) else val
+    return node if method == "gamut" else node[method]
 
 
 class ColorMap(BaseNode):
-    """A data structure containing color name -> color info or string."""
+    """A data structure containing color name -> color info of some form. The
+    form can either be a complete color info object containing data for all
+    gamuts, gamut specific color info, or a string. While the model itself
+    does not enforce uniformity of type among the strings, the data structure
+    should typically be equivalent to one of
+        Mapping[str, ColorInfo]
+        Mapping[str, GamutColor]
+        Mapping[str, str]
+    Instances containing values other than ColorInfo are obtained via transform
+    methods.
+    """
 
-    def to(self, key: str, gamut: str) -> Self:
-        """Extract a property such as hex code or css string of the gamut color."""
-        data: dict[str, str] = {
-            k: v.to(key=key, gamut=gamut) if isinstance(v, ColorInfo) else v
-            for k, v in self.items()
-        }
+    def map(self, handler: ColorFieldHandler) -> Self:
+        """Apply a generic color field handler to each field."""
+        data: dict[str, ColorField] = {k: handler(v) for k, v in self}
         return self.model_validate(data)
-
-    def hex(self, gamut: str) -> Self:
-        """Convert"""
-        return self.to("hex", gamut)
-
-    def css(self, gamut: str) -> Self:
-        """Convert"""
-        return self.to("css", gamut)
-
-    def oklch(self, gamut: str) -> Self:
-        return self.to("oklch", gamut)
 
 
 class HueMap(ColorMap):
@@ -268,6 +111,8 @@ class BaseMap(ColorMap):
 
 
 class Palette(BaseNode):
+    """Defines the colors to injkkkect to a particular theme template."""
+
     name: str
     desc: str
     mode: Literal["dark", "light"]
@@ -280,34 +125,23 @@ class Palette(BaseNode):
     """Named bases relative to the palette."""
     hl: HueMap
     bright: HueMap
-    # mono: MonochromeMap = mono
-    _cache: dict = {}
-    _hash: str = PrivateAttr("")
 
-    def to(self, key: str, gamut: str = "") -> Self:
-        """Produce a palette with only hex codes in the specified gamut
-        instead of full color info.
-        """
-        # colors = {k: v.to(self.gamut, key) for k, v in self.colors().items()}
-        gamut = gamut or self.gamut
-        cache_key = (key, gamut)
-        if (val := self._cache.get(cache_key)) is None:
-            val = self.__class__(
-                name=self.name,
-                desc=self.desc,
-                mode=self.mode,
-                gamut=self.gamut,
-                hue=self.hue.to(key, gamut),
-                base=self.base.to(key, gamut),
-                hl=self.hl.to(key, gamut),
-                bright=self.hl.to(key, gamut),
-                # mono=self.mono.to(key, gamut),
-            )
-            self._cache[cache_key] = val
-        return val
+    def map(self, handler: ColorFieldHandler) -> Self:
+        kwargs = {k: v.map(handler) if isinstance(v, ColorMap) else v for k, v in self}
+        return self.model_validate(kwargs)
 
-    # TODO: add oklch method to get pure oklch values? They probably should
-    # always be in a specific gamut though so perhaps stick with the css.
+    @cache
+    def to(self, method: ExtractorMethod) -> Self:
+        """Return a transformed palette containing ColorField values
+        specified by the method"""
+        if method == "identity":
+            return self
+
+        func = partial(_extract, gamut=self.gamut, method=method)
+        return self.map(func)
+
+    def gamut_info(self) -> Self:
+        return self.to("gamut")
 
     def hex(self) -> Self:
         """Produce a palette with only css strings in the specified gamut
@@ -321,9 +155,12 @@ class Palette(BaseNode):
         """
         return self.to("css")
 
-    def hash(self) -> str:
-        """A hash of the in-gamut oklch definitions."""
-        if not self._hash:
-            data = self.model_dump_json().encode()
-            self._hash = blake2b(data, digest_size=32).hexdigest()
-        return self._hash
+    def oklch(self) -> Self:
+        """Produce a palette with only oklch css strings in the specified gamut
+        instead of full color info.
+        """
+        return self.to("oklch")
+
+    def identity(self) -> Self:
+        """No op identity function on a palette."""
+        return self

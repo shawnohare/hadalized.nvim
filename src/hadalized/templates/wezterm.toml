@@ -4,42 +4,42 @@
 
 [colors]
 ansi = [
-    "{{base.hidden}}",
-    "{{hue.red}}",
-    "{{hue.green}}",
-    "{{hue.yellow}}",
-    "{{hue.blue}}",
-    "{{hue.magenta}}",
-    "{{hue.cyan}}",
-    "{{base.fg}}",
+    "{{context.base.hidden}}",
+    "{{context.hue.red}}",
+    "{{context.hue.green}}",
+    "{{context.hue.yellow}}",
+    "{{context.hue.blue}}",
+    "{{context.hue.magenta}}",
+    "{{context.hue.cyan}}",
+    "{{context.base.fg}}",
 ]
 brights = [
-    "{{base.subfg}}",
-    "{{hue.rose}}",
-    "{{hue.lime}}",
-    "{{hue.orange}}",
-    "{{hue.azure}}",
-    "{{hue.violet}}",
-    "{{hue.mint}}",
-    "{{base.op2}}",
+    "{{context.base.subfg}}",
+    "{{context.hue.rose}}",
+    "{{context.hue.lime}}",
+    "{{context.hue.orange}}",
+    "{{context.hue.azure}}",
+    "{{context.hue.violet}}",
+    "{{context.hue.mint}}",
+    "{{context.base.op2}}",
 ]
 
-background    = "{{base.bg}}"
-foreground    = "{{base.fg}}"
-cursor_border = "{{base.op}}"
-cursor_bg     = "{{base.bg6}}"
-cursor_fg     = "{{base.emph}}"
-selection_bg  = "{{base.bg3}}"
-selection_fg  = "{{base.subfg}}"
+background    = "{{context.base.bg}}"
+foreground    = "{{context.base.fg}}"
+cursor_border = "{{context.base.op}}"
+cursor_bg     = "{{context.base.bg6}}"
+cursor_fg     = "{{context.base.emph}}"
+selection_bg  = "{{context.base.bg3}}"
+selection_fg  = "{{context.base.subfg}}"
 
 [colors.indexed]
 
 [metadata]
-name = "{{name}}"
+name = "{{context.name}}"
 origin_url = "https://github.com/shawnohare/hadalized.nvim"
 
 [metadata.palette]
-name  = "{{name}}"
-desc  = "{{desc}}"
-gamut = "{{gamut}}"
-mode  = "{{mode}}"
+name  = "{{context.name}}"
+desc  = "{{context.desc}}"
+gamut = "{{context.gamut}}"
+mode  = "{{context.mode}}"

@@ -1,70 +1,12 @@
 """Render templates and write outputs."""
 
-from functools import cache
 from pathlib import Path
-from typing import TYPE_CHECKING
 
-from jinja2 import (
-    Environment,
-    FileSystemLoader,
-    PackageLoader,
-    StrictUndefined,
-    Template,
-    TemplateNotFound,
-    select_autoescape,
-)
 from loguru import logger
 
 from hadalized.cache import Cache
-from hadalized.config import Config
-
-if TYPE_CHECKING:
-    from hadalized.models import ContextHandler, Palette
-
-
-class PaletteHandlers:
-    """A collection of palette ContextHandler functions."""
-
-    @staticmethod
-    def hex(palette: Palette) -> Palette:
-        """Handler that extracts hex values from the palette."""
-        return palette.hex()
-
-    @staticmethod
-    def lua_hex(palette: Palette) -> dict:
-        return {"data": palette.hex().model_dump_lua()}
-
-    @staticmethod
-    def css(palette: Palette) -> Palette:
-        """Handler that extracts css values from the palette."""
-        return palette.css()
-
-
-class TemplateEnvs:
-    """Package loaders."""
-
-    package = Environment(
-        loader=PackageLoader("hadalized"),
-        undefined=StrictUndefined,
-        # autoescape=True,
-        autoescape=select_autoescape("html", "xml"),
-    )
-    fs = Environment(
-        loader=FileSystemLoader(searchpath="./templates"),
-        undefined=StrictUndefined,
-        autoescape=select_autoescape("html", "xml"),
-    )
-
-
-@cache
-def get_template(name: str) -> Template:
-    """Get a template. Looks first for a template in ./templates/ and
-    then a pre-defined package template."""
-    try:
-        template = TemplateEnvs.fs.get_template(name)
-    except TemplateNotFound:
-        template = TemplateEnvs.package.get_template(name)
-    return template
+from hadalized.config import BuildDirective, Config
+from hadalized.models import Template
 
 
 def write_readme(target_dir: str | Path):
@@ -79,123 +21,76 @@ class FileWriter:
 
     def __init__(self, config: Config | None = None):
         self.config: Config = config or Config()
-        self.cache = Cache(self.config.cache_dir).load()
+        self.cache = Cache(self.config.cache_dir)
         self.build_dir: Path = self.config.build_dir
-        self.palettes: list[Palette] = list(self.config.palettes.values())
 
-    def write_palettes(
-        self,
-        palettes: list[Palette],
-        template: str | Template,
-        target_dir: str | Path,
-        file_extension: str = "",
-        handler: ContextHandler = PaletteHandlers.hex,
-    ) -> list[Path]:
-        if isinstance(template, str):
-            template = get_template(template)
-        if not file_extension:
-            _, _, file_extension = (template.filename or "").rpartition(".")
-            if file_extension:
-                file_extension = f".{file_extension}"
-        out_paths = []
-        for palette in palettes:
-            path = Path(target_dir) / f"{palette.name}{file_extension}"
-            # TODO: Check if we need to actually generate template.
-            # Compute palette hash and template hash, look in cache
-            if self.cache.check(path=path, context=palette, template=template):
-                logger.info(f"Skipping previously generated file: {path}")
+    def write_palettes(self, directive: BuildDirective) -> list[Path]:
+        """Handler for when the build directive specifies that one file per
+        palette should be generated."""
+        if directive.context_type != "single":
+            raise ValueError("Directive must have context_type == 'single'")
+        template = Template(directive.template)
+        written: list[Path] = []
+        target_dir = self.config.build_dir / directive.subdir
+        target_dir.mkdir(parents=True, exist_ok=True)
+
+        for palette in self.config.palettes.values():
+            path = target_dir / directive.file_name.format(palette=palette)
+            context = palette.to(directive.extractor)
+            ok, digest = self.cache.check(path, template, context)
+
+            if ok:
+                logger.info(f"Already generated {path}")
                 continue
-            path.parent.mkdir(parents=True, exist_ok=True)
+
             logger.info(f"Writing {path}")
-            path.write_text(template.render(handler(palette)))
-            self.cache.add(path=path, context=palette, template=template)
-            out_paths.append(path)
-        return out_paths
-
-    def write_html_palettes(self) -> list[Path]:
-        """Write an html file displaying the colors for each palette."""
-        written = self.write_palettes(
-            palettes=self.palettes,
-            template="palette.html",
-            target_dir=self.build_dir / "html",
-            handler=PaletteHandlers.css,
-        )
-        if written:
-            self.cache.save()
+            template.write(path, context)
+            self.cache.add(path, digest)
+            written.append(path)
         return written
 
-    def write_neovim_themes(self) -> list[Path]:
-        """Write a lua module containing defining neovim theme for each palette."""
-        target_dir = self.build_dir / "neovim"
-        written = self.write_palettes(
-            palettes=self.palettes,
-            template=self.config.neovim_template,
-            target_dir=target_dir,
-            handler=PaletteHandlers.lua_hex,
-        )
-        write_readme(target_dir)
-        # if written:
-        #     self.cache.save()
-        return written
-
-    def write_wezterm_themes(self) -> list[Path]:
-        """Write a lua module containing defining neovim theme for each palette."""
-        target_dir = self.build_dir / "wezterm"
-        written = self.write_palettes(
-            palettes=self.palettes,
-            template=self.config.wezterm_template,
-            target_dir=self.build_dir / target_dir,
-            handler=PaletteHandlers.hex,
-        )
-        write_readme(target_dir)
-        # if written:
-        #     self.cache.save()
-        return written
-
-    def write_palette_info(self) -> list[Path]:
-        """Dump each palette's full information into a separate json file."""
-        written = self.write_palettes(
-            palettes=self.palettes,
-            template="palette_info.json",
-            target_dir=self.build_dir / "info",
-            handler=lambda x: {"data": x.model_dump_json(indent=4)},
-        )
-        # if written:
-        #     self.cache.save()
-        return written
-
-    def write_starship_theme(self) -> list[Path]:
-        path = self.build_dir / "starship" / "starship.toml"
-        template = get_template(self.config.starship_template)
-        if not self.cache.check(path, self.config, template):
-            path.parent.mkdir(parents=True, exist_ok=True)
-            context = self.config.to("hex")
-            text = template.render(context)
-            logger.info(f"Writing {path}")
-            path.write_text(text)
-            self.cache.add(path, self.config, template)
-            self.cache.save()
-            written = [path]
+    def write_full(self, directive: BuildDirective) -> list[Path]:
+        """Handle build directives with full context."""
+        if directive.context_type != "full":
+            raise ValueError("Directive must have context_type == 'full'")
+        template = Template(directive.template)
+        written: list[Path] = []
+        target_dir = self.config.build_dir / directive.subdir
+        target_dir.mkdir(parents=True, exist_ok=True)
+        path = target_dir / directive.file_name
+        context = self.config.to(directive.extractor)
+        ok, digest = self.cache.check(path, template, context)
+        if ok:
+            logger.info(f"Already generated {path}")
         else:
-            logger.info(f"Skipping previously generated {path}")
-            written = []
+            template.write(path, context)
+            self.cache.add(path, digest)
+            written.append(path)
         return written
 
     def write_all(self) -> list[Path]:
         """Generate all relevant files."""
         written = []
-        written += self.write_html_palettes()
-        written += self.write_neovim_themes()
-        written += self.write_wezterm_themes()
-        written += self.write_starship_theme()
-        written += self.write_palette_info()
-        if written:
-            self.cache.save()
+        for directive in self.config.directives.values():
+            match directive.context_type:
+                case "single":
+                    written += self.write_palettes(directive)
+                case "full":
+                    written += self.write_full(directive)
         return written
+
+    def __enter__(self):
+        self.cache.connect()
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.cache.close()
 
 
 def main():
-    FileWriter().write_all()
+    with FileWriter() as writer:
+        writer = FileWriter()
+        writer.write_all()
 
 
 if __name__ == "__main__":

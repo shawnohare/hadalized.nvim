@@ -16,7 +16,7 @@
 --
 
 ---@type Palette
-local palette = {{data}}
+local palette = {{context.model_dump_lua()}}
 
 package.loaded['hadalized'] = nil
 require('hadalized').load({palette = palette})
