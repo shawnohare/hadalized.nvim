@@ -223,10 +223,10 @@ min_time_to_notify = 45000
 name = "{{ palette.name }}"
 gamut = "{{ palette.gamut }}"
 mode = "{{ palette.mode }}"
-{% for name, code in palette.hue.items() -%}
+{% for name, code in palette.hue -%}
 {{name}} = "{{code}}"
 {% endfor -%}
-{% for name, code in palette.base.items() -%}
+{% for name, code in palette.base -%}
 {{ name }} = "{{code}}"
 {% endfor -%}
 {% endfor %}

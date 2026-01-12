@@ -3,51 +3,47 @@ from functools import cache, partial
 from typing import Literal, Self
 
 from hadalized.base import BaseNode
-from hadalized.color import ColorField, ColorInfo, info
+from hadalized.color import ColorField, ColorInfo
 from hadalized.render import Template as Template
-
-SRGB = "srgb"
-P3 = "display-p3"
-OKLCH = "oklch"
-
-"""Colorspace name constants."""
-
-FIT_METHOD = "raytrace"
-"""Configuration constants."""
-
 
 type PaletteHandler = Callable[[Palette], Palette]
 """A function that can produce context to provide to a template."""
 
 type ColorFieldHandler = Callable[[ColorField], ColorField]
-# type ExtractorMethod = Literal[None, "hex", "oklch", "css", "gamut"]
 
-type ExtractorMethod = Literal["identity", "gamut", "hex", "oklch", "css"]
+type ColorType = Literal["info", "gamut", "hex", "oklch", "css"]
+"""Denotes the type of value contained in a ColorField.
+- info indicates the field is a full ColorInfo instance.
+- gamut indicates the field is a GamutInfo instance.
+- hex indicates the field is a GamutInfo.hex string.
+- oklch indicates the field is a GamutInfo.oklch string.
+- css indicates the field is a GamutInfo.css string.
+"""
 
 
 def _extract(
     val: ColorField,
     gamut: str,
-    method: ExtractorMethod,
+    color_type: ColorType,
 ) -> ColorField:
     """ColorFieldHandler that extracts a particular leaf field value from a
     GamutInfo field.
 
     The function is idempotent, but composing terminates at the first leaf.
     For example, with f as this function
-        f(f(color, gamut="srgb", method="hex"), gamut="display-p3", method="css")
+        f(f(color, "srgb", "hex"), gamut="display-p3", color_type="css")
     is the same as
-        f(color, gamut="srgb", method="hex")
+        f(color, "srgb", "hex")
     as the latter call already extracts a leaf value. Similarly
-        f(f(color, gamut="srgb", method="gamut"), gamut="", method="css")
+        f(f(color, "srgb", "gamut"), gamut="", color_type="css")
     is equivalent to
-        f(color, gamut="srgb", method="css")
+        f(color, "srgb", "css")
     """
-    if method == "identity" or isinstance(val, str):
+    if color_type == "identity" or isinstance(val, str):
         return val
 
     node = val.gamuts[gamut] if isinstance(val, ColorInfo) else val
-    return node if method == "gamut" else node[method]
+    return node if color_type == "gamut" else node[color_type]
 
 
 class ColorMap(BaseNode):
@@ -67,6 +63,9 @@ class ColorMap(BaseNode):
         """Apply a generic color field handler to each field."""
         data: dict[str, ColorField] = {k: handler(v) for k, v in self}
         return self.model_validate(data)
+
+
+# def fmap(data: Mapping[str, ColorField]) -> Mapping[str, ColorField]:
 
 
 class HueMap(ColorMap):
@@ -89,11 +88,11 @@ class HueMap(ColorMap):
 class BaseMap(ColorMap):
     """Configuration node for monochromatic foregrounds and backgrounds."""
 
-    black: ColorField = info("oklch(0.10 0.01 220)")
-    darkgray: ColorField = info("oklch(0.30 0.01 220)")
-    gray: ColorField = info("oklch(0.50 0.01 220)")
-    lightgray: ColorField = info("oklch(0.70 0.01 220)")
-    white: ColorField = info("oklch(0.995 0.01 220)")
+    black: ColorField = ColorInfo.parse("oklch(0.10 0.01 220)")
+    darkgray: ColorField = ColorInfo.parse("oklch(0.30 0.01 220)")
+    gray: ColorField = ColorInfo.parse("oklch(0.50 0.01 220)")
+    lightgray: ColorField = ColorInfo.parse("oklch(0.70 0.01 220)")
+    white: ColorField = ColorInfo.parse("oklch(0.995 0.01 220)")
     bg: ColorField
     bg1: ColorField
     bg2: ColorField
@@ -131,13 +130,13 @@ class Palette(BaseNode):
         return self.model_validate(kwargs)
 
     @cache
-    def to(self, method: ExtractorMethod) -> Self:
+    def to(self, color_type: ColorType) -> Self:
         """Return a transformed palette containing ColorField values
-        specified by the method"""
-        if method == "identity":
+        specified color type."""
+        if color_type == "info":
             return self
 
-        func = partial(_extract, gamut=self.gamut, method=method)
+        func = partial(_extract, gamut=self.gamut, color_type=color_type)
         return self.map(func)
 
     def gamut_info(self) -> Self:

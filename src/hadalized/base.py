@@ -1,13 +1,10 @@
 """Base container for all model classes."""
 
 from functools import cache
-from typing import TYPE_CHECKING, ClassVar
+from typing import ClassVar
 
 import luadata
 from pydantic import BaseModel, ConfigDict
-
-if TYPE_CHECKING:
-    from collections.abc import Iterable
 
 
 class BaseNode(BaseModel):
@@ -16,9 +13,6 @@ class BaseNode(BaseModel):
     model_config: ClassVar[ConfigDict] = ConfigDict(
         frozen=True,
     )
-
-    def items(self) -> Iterable[tuple]:
-        return ((k, getattr(self, k)) for k in self.__class__.model_fields)
 
     def __len__(self) -> int:
         return len(self.__class__.model_fields)

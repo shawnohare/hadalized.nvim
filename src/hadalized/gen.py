@@ -23,20 +23,64 @@ class FileWriter:
         self.config: Config = config or Config()
         self.cache = Cache(self.config.cache_dir)
         self.build_dir: Path = self.config.build_dir
+        self.palettes = list(self.config.palettes.values())
 
-    def write_palettes(self, directive: BuildDirective) -> list[Path]:
-        """Handler for when the build directive specifies that one file per
-        palette should be generated."""
-        if directive.context_type != "single":
-            raise ValueError("Directive must have context_type == 'single'")
+    # def write_palettes(self, directive: BuildDirective) -> list[Path]:
+    #     """Handler for when the build directive specifies that one file per
+    #     palette should be generated."""
+    #     if directive.context_type != "palette":
+    #         raise ValueError("Directive must have context_type == 'single'")
+    #     template = Template(directive.template)
+    #     written: list[Path] = []
+    #     target_dir = self.config.build_dir / directive.subdir
+    #     target_dir.mkdir(parents=True, exist_ok=True)
+    #
+    #     for palette in self.config.palettes.values():
+    #         path = target_dir / directive.file_name.format(palette=palette)
+    #         context = palette.to(directive.color_type)
+    #         ok, digest = self.cache.check(path, template, context)
+    #
+    #         if ok:
+    #             logger.info(f"Already generated {path}")
+    #             continue
+    #
+    #         logger.info(f"Writing {path}")
+    #         template.write(path, context)
+    #         self.cache.add(path, digest)
+    #         written.append(path)
+    #     return written
+    #
+    # def write_full(self, directive: BuildDirective) -> list[Path]:
+    #     """Handle build directives with full context."""
+    #     if directive.context_type != "config":
+    #         raise ValueError("Directive must have context_type == 'full'")
+    #     template = Template(directive.template)
+    #     written: list[Path] = []
+    #     target_dir = self.config.build_dir / directive.subdir
+    #     target_dir.mkdir(parents=True, exist_ok=True)
+    #     path = target_dir / directive.file_name
+    #     context = self.config.to(directive.color_type)
+    #     ok, digest = self.cache.check(path, template, context)
+    #     if ok:
+    #         logger.info(f"Already generated {path}")
+    #     else:
+    #         template.write(path, context)
+    #         self.cache.add(path, digest)
+    #         written.append(path)
+    #     return written
+
+    def write(self, directive: BuildDirective) -> list[Path]:
         template = Template(directive.template)
-        written: list[Path] = []
-        target_dir = self.config.build_dir / directive.subdir
+        target_dir = self.config.build_dir / directive.output_path.parent
         target_dir.mkdir(parents=True, exist_ok=True)
-
-        for palette in self.config.palettes.values():
-            path = target_dir / directive.file_name.format(palette=palette)
-            context = palette.to(directive.extractor)
+        if directive.context_type == "palette":
+            context_nodes = self.palettes
+        else:
+            context_nodes = [self.config]
+        written: list[Path] = []
+        for node in context_nodes:
+            path = target_dir / directive.output_path.name.format(**node.model_dump())
+            context = node.to(directive.color_type)
             ok, digest = self.cache.check(path, template, context)
 
             if ok:
@@ -49,34 +93,16 @@ class FileWriter:
             written.append(path)
         return written
 
-    def write_full(self, directive: BuildDirective) -> list[Path]:
-        """Handle build directives with full context."""
-        if directive.context_type != "full":
-            raise ValueError("Directive must have context_type == 'full'")
-        template = Template(directive.template)
-        written: list[Path] = []
-        target_dir = self.config.build_dir / directive.subdir
-        target_dir.mkdir(parents=True, exist_ok=True)
-        path = target_dir / directive.file_name
-        context = self.config.to(directive.extractor)
-        ok, digest = self.cache.check(path, template, context)
-        if ok:
-            logger.info(f"Already generated {path}")
-        else:
-            template.write(path, context)
-            self.cache.add(path, digest)
-            written.append(path)
-        return written
-
     def write_all(self) -> list[Path]:
         """Generate all relevant files."""
         written = []
         for directive in self.config.directives.values():
-            match directive.context_type:
-                case "single":
-                    written += self.write_palettes(directive)
-                case "full":
-                    written += self.write_full(directive)
+            written += self.write(directive)
+            # match directive.context_type:
+            #     case "palette":
+            #         written += self.write_palettes(directive)
+            #     case "config":
+            #         written += self.write_full(directive)
         return written
 
     def __enter__(self):
@@ -89,7 +115,6 @@ class FileWriter:
 
 def main():
     with FileWriter() as writer:
-        writer = FileWriter()
         writer.write_all()
 
 

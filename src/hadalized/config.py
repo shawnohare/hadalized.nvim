@@ -11,12 +11,12 @@ from hadalized.models import (
     BaseNode,
     ColorField,
     ColorInfo,
-    ExtractorMethod,
+    ColorType,
     HueMap,
     Palette,
 )
 
-color = ColorInfo.new
+parse = ColorInfo.parse
 
 
 class Mono:
@@ -24,122 +24,122 @@ class Mono:
     foregrounds and backgrounds.
     """
 
-    black: ColorField = color("oklch(0.10 0.01 220)")
-    darkgray: ColorField = color("oklch(0.30 0.01 220)")
+    black: ColorField = parse("oklch(0.10 0.01 220)")
+    darkgray: ColorField = parse("oklch(0.30 0.01 220)")
     darkslategray: ColorField = "oklch(0.30 0.03 220)"
-    gray: ColorField = color("oklch(0.50 0.01 220)")
+    gray: ColorField = parse("oklch(0.50 0.01 220)")
     slategray: ColorField = "oklch(0.600 0.03 220)"
-    lightgray: ColorField = color("oklch(0.70 0.01 220)")
+    lightgray: ColorField = parse("oklch(0.70 0.01 220)")
     lightslategray: ColorField = "oklch(0.700 0.02 220)"
-    white: ColorField = color("oklch(0.995 0.01 220)")
+    white: ColorField = parse("oklch(0.995 0.01 220)")
 
-    b12: ColorField = color("oklch(0.125 0.025 220)")
-    b13: ColorField = color("oklch(0.135 0.025 220)")
-    b16: ColorField = color("oklch(0.1625 0.025 220)")
-    b20: ColorField = color("oklch(0.200 .030 220)")
-    b25: ColorField = color("oklch(0.250 .030 220)")
-    b30: ColorField = color("oklch(0.300 .035 220)")
-    b35: ColorField = color("oklch(0.350 .035 220)")
-    g20: ColorField = color("oklch(0.200 .010 220)")
-    g30: ColorField = color("oklch(0.300 .010 220)")
-    g35: ColorField = color("oklch(0.350 .010 220)")
-    g45: ColorField = color("oklch(0.450 .010 220)")
-    g60: ColorField = color("oklch(0.600 .010 220)")
-    g65: ColorField = color("oklch(0.650 .010 220)")
-    g70: ColorField = color("oklch(0.700 .010 220)")
-    g75: ColorField = color("oklch(0.750 .010 220)")
-    g80: ColorField = color("oklch(0.800 .010 220)")
-    g90: ColorField = color("oklch(0.900 .010 220)")
-    s80: ColorField = color("oklch(0.800 .020 100)")
-    s85: ColorField = color("oklch(0.850 .020 100)")
-    s90: ColorField = color("oklch(0.900 .020 100)")
-    s91: ColorField = color("oklch(0.910 .020 100)")
-    s92: ColorField = color("oklch(0.925 .020 100)")
-    s95: ColorField = color("oklch(0.950 .020 100)")
-    s97: ColorField = color("oklch(0.975 .015 100)")
-    s99: ColorField = color("oklch(0.990 .010 100)")
-    s100: ColorField = color("oklch(0.995 .010 100)")
-    w80: ColorField = color("oklch(0.800 .005 100)")
-    w85: ColorField = color("oklch(0.850 .005 100)")
-    w90: ColorField = color("oklch(0.900 .005 100)")
-    w91: ColorField = color("oklch(0.910 .005 100)")
-    w92: ColorField = color("oklch(0.925 .005 100)")
-    w95: ColorField = color("oklch(0.950 .005 100)")
-    w97: ColorField = color("oklch(0.975 .005 100)")
-    w99: ColorField = color("oklch(0.990 .005 100)")
-    w100: ColorField = color("oklch(0.995 .005 100)")
+    b12: ColorField = parse("oklch(0.125 0.025 220)")
+    b13: ColorField = parse("oklch(0.135 0.025 220)")
+    b16: ColorField = parse("oklch(0.1625 0.025 220)")
+    b20: ColorField = parse("oklch(0.200 .030 220)")
+    b25: ColorField = parse("oklch(0.250 .030 220)")
+    b30: ColorField = parse("oklch(0.300 .035 220)")
+    b35: ColorField = parse("oklch(0.350 .035 220)")
+    g20: ColorField = parse("oklch(0.200 .010 220)")
+    g30: ColorField = parse("oklch(0.300 .010 220)")
+    g35: ColorField = parse("oklch(0.350 .010 220)")
+    g45: ColorField = parse("oklch(0.450 .010 220)")
+    g60: ColorField = parse("oklch(0.600 .010 220)")
+    g65: ColorField = parse("oklch(0.650 .010 220)")
+    g70: ColorField = parse("oklch(0.700 .010 220)")
+    g75: ColorField = parse("oklch(0.750 .010 220)")
+    g80: ColorField = parse("oklch(0.800 .010 220)")
+    g90: ColorField = parse("oklch(0.900 .010 220)")
+    s80: ColorField = parse("oklch(0.800 .020 100)")
+    s85: ColorField = parse("oklch(0.850 .020 100)")
+    s90: ColorField = parse("oklch(0.900 .020 100)")
+    s91: ColorField = parse("oklch(0.910 .020 100)")
+    s92: ColorField = parse("oklch(0.925 .020 100)")
+    s95: ColorField = parse("oklch(0.950 .020 100)")
+    s97: ColorField = parse("oklch(0.975 .015 100)")
+    s99: ColorField = parse("oklch(0.990 .010 100)")
+    s100: ColorField = parse("oklch(0.995 .010 100)")
+    w80: ColorField = parse("oklch(0.800 .005 100)")
+    w85: ColorField = parse("oklch(0.850 .005 100)")
+    w90: ColorField = parse("oklch(0.900 .005 100)")
+    w91: ColorField = parse("oklch(0.910 .005 100)")
+    w92: ColorField = parse("oklch(0.925 .005 100)")
+    w95: ColorField = parse("oklch(0.950 .005 100)")
+    w97: ColorField = parse("oklch(0.975 .005 100)")
+    w99: ColorField = parse("oklch(0.990 .005 100)")
+    w100: ColorField = parse("oklch(0.995 .005 100)")
 
 
 class Hues:
     neutral = HueMap(
-        red=color("oklch(0.575 0.185 25)"),
-        orange=color("oklch(0.650 0.150 60)"),
-        yellow=color("oklch(0.675 0.120 100)"),
-        lime=color("oklch(0.650 0.130 115)"),
-        green=color("oklch(0.575 0.165 130)"),
-        mint=color("oklch(0.675 0.130 155)"),
-        cyan=color("oklch(0.625 0.100 180)"),
-        azure=color("oklch(0.675 0.110 225)"),
-        blue=color("oklch(0.575 0.140 250)"),
-        violet=color("oklch(0.575 0.185 290)"),
-        magenta=color("oklch(0.575 0.185 330)"),
-        rose=color("oklch(0.675 0.100 360)"),
+        red=parse("oklch(0.575 0.185 25)"),
+        orange=parse("oklch(0.650 0.150 60)"),
+        yellow=parse("oklch(0.675 0.120 100)"),
+        lime=parse("oklch(0.650 0.130 115)"),
+        green=parse("oklch(0.575 0.165 130)"),
+        mint=parse("oklch(0.675 0.130 155)"),
+        cyan=parse("oklch(0.625 0.100 180)"),
+        azure=parse("oklch(0.675 0.110 225)"),
+        blue=parse("oklch(0.575 0.140 250)"),
+        violet=parse("oklch(0.575 0.185 290)"),
+        magenta=parse("oklch(0.575 0.185 330)"),
+        rose=parse("oklch(0.675 0.100 360)"),
     )
     dark = HueMap(
-        red=color("oklch(0.60 0.185 25)"),
-        orange=color("oklch(0.650 0.150 60)"),
-        yellow=color("oklch(0.700 0.120 100)"),
-        lime=color("oklch(0.675 0.120 115)"),
-        green=color("oklch(0.650 0.165 130)"),
-        mint=color("oklch(0.715 0.130 155)"),
-        cyan=color("oklch(0.650 0.100 180)"),
-        azure=color("oklch(0.725 0.110 225)"),
-        blue=color("oklch(0.625 0.150 250)"),
-        violet=color("oklch(0.625 0.185 290)"),
-        magenta=color("oklch(0.625 0.185 330)"),
-        rose=color("oklch(0.700 0.100 360)"),
+        red=parse("oklch(0.60 0.185 25)"),
+        orange=parse("oklch(0.650 0.150 60)"),
+        yellow=parse("oklch(0.700 0.120 100)"),
+        lime=parse("oklch(0.675 0.120 115)"),
+        green=parse("oklch(0.650 0.165 130)"),
+        mint=parse("oklch(0.715 0.130 155)"),
+        cyan=parse("oklch(0.650 0.100 180)"),
+        azure=parse("oklch(0.725 0.110 225)"),
+        blue=parse("oklch(0.625 0.150 250)"),
+        violet=parse("oklch(0.625 0.185 290)"),
+        magenta=parse("oklch(0.625 0.185 330)"),
+        rose=parse("oklch(0.700 0.100 360)"),
     )
     light = HueMap(
-        red=color("oklch(0.550 0.185 25)"),
-        orange=color("oklch(0.650 0.150 60)"),
-        yellow=color("oklch(0.650 0.120 100)"),
-        lime=color("oklch(0.650 0.130 115)"),
-        green=color("oklch(0.575 0.165 130)"),
-        mint=color("oklch(0.650 0.130 155)"),
-        cyan=color("oklch(0.550 0.100 180)"),
-        azure=color("oklch(0.650 0.110 225)"),
-        blue=color("oklch(0.575 0.140 250)"),
-        violet=color("oklch(0.550 0.185 290)"),
-        magenta=color("oklch(0.550 0.185 330)"),
-        rose=color("oklch(0.625 0.100 360)"),
+        red=parse("oklch(0.550 0.185 25)"),
+        orange=parse("oklch(0.650 0.150 60)"),
+        yellow=parse("oklch(0.650 0.120 100)"),
+        lime=parse("oklch(0.650 0.130 115)"),
+        green=parse("oklch(0.575 0.165 130)"),
+        mint=parse("oklch(0.650 0.130 155)"),
+        cyan=parse("oklch(0.550 0.100 180)"),
+        azure=parse("oklch(0.650 0.110 225)"),
+        blue=parse("oklch(0.575 0.140 250)"),
+        violet=parse("oklch(0.550 0.185 290)"),
+        magenta=parse("oklch(0.550 0.185 330)"),
+        rose=parse("oklch(0.625 0.100 360)"),
     )
     hl = HueMap(
-        red=color("oklch(0.800 0.100 25)"),
-        orange=color("oklch(0.850 0.100 60)"),
-        yellow=color("oklch(0.950 0.200 100)"),
-        lime=color("oklch(0.855 0.100 115)"),
-        green=color("oklch(0.85 0.100 130)"),
-        mint=color("oklch(0.875 0.100 155)"),
-        cyan=color("oklch(0.900 0.100 180)"),
-        azure=color("oklch(0.875 0.100 225)"),
-        blue=color("oklch(0.825 0.100 250)"),
-        violet=color("oklch(0.825 0.200 290)"),
-        magenta=color("oklch(0.825 0.200 330)"),
-        rose=color("oklch(0.825 0.200 360)"),
+        red=parse("oklch(0.800 0.100 25)"),
+        orange=parse("oklch(0.850 0.100 60)"),
+        yellow=parse("oklch(0.950 0.200 100)"),
+        lime=parse("oklch(0.855 0.100 115)"),
+        green=parse("oklch(0.85 0.100 130)"),
+        mint=parse("oklch(0.875 0.100 155)"),
+        cyan=parse("oklch(0.900 0.100 180)"),
+        azure=parse("oklch(0.875 0.100 225)"),
+        blue=parse("oklch(0.825 0.100 250)"),
+        violet=parse("oklch(0.825 0.200 290)"),
+        magenta=parse("oklch(0.825 0.200 330)"),
+        rose=parse("oklch(0.825 0.200 360)"),
     )
     bright = HueMap(
-        red=color("oklch(0.675 0.200 25)"),
-        orange=color("oklch(0.75 0.200 60)"),
-        yellow=color("oklch(0.80 0.200 100)"),
-        lime=color("oklch(0.800 0.200 120)"),
-        green=color("oklch(0.800 0.200 135)"),
-        mint=color("oklch(0.800 0.200 155)"),
-        cyan=color("oklch(0.800 0.200 180)"),
-        azure=color("oklch(0.800 0.200 225)"),
-        blue=color("oklch(0.800 0.200 250)"),
-        violet=color("oklch(0.800 0.200 290)"),
-        magenta=color("oklch(0.800 0.200 330)"),
-        rose=color("oklch(0.800 0.200 360)"),
+        red=parse("oklch(0.675 0.200 25)"),
+        orange=parse("oklch(0.75 0.200 60)"),
+        yellow=parse("oklch(0.80 0.200 100)"),
+        lime=parse("oklch(0.800 0.200 120)"),
+        green=parse("oklch(0.800 0.200 135)"),
+        mint=parse("oklch(0.800 0.200 155)"),
+        cyan=parse("oklch(0.800 0.200 180)"),
+        azure=parse("oklch(0.800 0.200 225)"),
+        blue=parse("oklch(0.800 0.200 250)"),
+        violet=parse("oklch(0.800 0.200 290)"),
+        magenta=parse("oklch(0.800 0.200 330)"),
+        rose=parse("oklch(0.800 0.200 360)"),
     )
 
 
@@ -152,8 +152,8 @@ class Palettes:
         gamut="srgb",
         hue=Hues.dark,
         base=BaseMap(
-            bg=color("oklch(0.13 0.025 220)"),
-            bg1=color("oklch(0.14 0.03 220)"),
+            bg=parse("oklch(0.13 0.025 220)"),
+            bg1=parse("oklch(0.14 0.03 220)"),
             bg2=Mono.b16,
             bg3=Mono.b20,
             bg4=Mono.b25,
@@ -178,13 +178,13 @@ class Palettes:
         gamut="srgb",
         hue=Hues.dark,
         base=BaseMap(
-            bg=color("oklch(0.13 0.005 220)"),
-            bg1=color("oklch(0.14 0.005 220)"),
-            bg2=color("oklch(0.16 0.005 220)"),
-            bg3=color("oklch(0.20 0.005 220)"),
-            bg4=color("oklch(0.25 0.005 220)"),
-            bg5=color("oklch(0.30 0.005 220)"),
-            bg6=color("oklch(0.35 0.005 220)"),
+            bg=parse("oklch(0.13 0.005 220)"),
+            bg1=parse("oklch(0.14 0.005 220)"),
+            bg2=parse("oklch(0.16 0.005 220)"),
+            bg3=parse("oklch(0.20 0.005 220)"),
+            bg4=parse("oklch(0.25 0.005 220)"),
+            bg5=parse("oklch(0.30 0.005 220)"),
+            bg6=parse("oklch(0.35 0.005 220)"),
             hidden=dark.base.hidden,
             subfg=dark.base.subfg,
             fg=dark.base.fg,
@@ -294,20 +294,19 @@ class BuildDirective(BaseNode):
 
     template: str
     """Template filename."""
-    subdir: str
-    """Build directory subdirectory to render file(s)."""
-    file_name: str
-    """Output path template."""
-    context_type: Literal["single", "full"]
+    output_path: Path
+    """Output path template relative to a build directory."""
+    context_type: Literal["palette", "config"]
     """The underlying context type to pass to the template. Currently two
     modes are supported.
-    - "single", which assumes that each template is rendered with an individual
+    - "palette", which assumes that each template is rendered with an individual
       palette.
-    - "all", where there entire configuration, in particular all palettes,
+    - "config", where there entire configuration, in particular all palettes,
       are passed into a single palette.
     """
     # handler_type: Literal["hex", "css", "oklch", "lua", "identity"]
-    extractor: ExtractorMethod
+    color_type: ColorType
+    """Indicates the type of value a ColorField should have within the context."""
     """Determines a transformation (extraction) to apply to each ColorField leaf
     in a palette.
     - None is equivalent to the identity function, and used when the most
@@ -335,38 +334,33 @@ def default_build_directives() -> dict[str, BuildDirective]:
     return {
         "neovim": BuildDirective(
             template="neovim.lua",
-            context_type="single",
-            subdir="neovim",
-            file_name="{palette.name}.lua",
-            extractor="hex",
+            context_type="palette",
+            output_path=Path("neovim/{name}.lua"),
+            color_type="hex",
         ),
         "wezterm": BuildDirective(
             template="wezterm.toml",
-            context_type="single",
-            subdir="wezterm",
-            file_name="{palette.name}.toml",
-            extractor="hex",
+            context_type="palette",
+            output_path=Path("wezterm/{name}.toml"),
+            color_type="hex",
         ),
         "starship": BuildDirective(
             template="starship.toml",
-            context_type="full",
-            subdir="starship",
-            file_name="starship.toml",
-            extractor="hex",
+            context_type="config",
+            output_path=Path("starship/starship.toml"),
+            color_type="hex",
         ),
         "info": BuildDirective(
             template="palette_info.json",
-            context_type="single",
-            subdir="info",
-            file_name="{palette.name}.json",
-            extractor="identity",
+            context_type="palette",
+            output_path=Path("info/{name}.json"),
+            color_type="info",
         ),
         "html_samples": BuildDirective(
             template="palette.html",
-            context_type="single",
-            subdir="html_samples",
-            file_name="{palette.name}.html",
-            extractor="css",
+            context_type="palette",
+            output_path=Path("html_samples/{name}.html"),
+            color_type="css",
         ),
     }
 
@@ -390,12 +384,12 @@ class Config(BaseNode):
     """Palette definitions."""
     misc: dict = misc
 
-    def to(self, method: ExtractorMethod):
+    def to(self, color_type: ColorType):
         return self.__class__(
             build_dir=self.build_dir,
             cache_dir=self.cache_dir,
             directives=self.directives,
-            palettes={k: p.to(method) for k, p in self.palettes.items()},
+            palettes={k: p.to(color_type) for k, p in self.palettes.items()},
             misc=self.misc,
         )
 

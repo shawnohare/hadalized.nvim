@@ -8,9 +8,6 @@ from hadalized.render import Template as Template
 
 """Colorspace name constants."""
 
-FIT_METHOD = "raytrace"
-"""Configuration constants."""
-
 
 class ColorSpace(StrEnum):
     srgb = "srgb"
@@ -34,32 +31,13 @@ def to_hex(val: ColorBase) -> str:
     return val.to_string(hex=True)
 
 
-def parse(text: str) -> ColorBase:
-    """Convert a CSS color string to a Color instance."""
-    match = ColorBase.match(text, fullmatch=True)
-    if match is None:
-        raise ValueError(f"Could not parse color: {text}")
-    return ColorBase(match.color)
-
-
-def fit(val: ColorBase, gamut: str, fit_method=FIT_METHOD) -> ColorBase:
-    """Fit a color to the specified input. Does not mutate input color."""
-    return val.clone().fit(gamut, fit_method=fit_method)
-
-
-def max_oklch_chroma(
-    val: ColorBase,
-    gamut: str,
-    fit_method: str = FIT_METHOD,
-) -> float:
-    lightness, _, hue = val.convert("oklch").coords()
-    cmax = ColorBase("oklch", (lightness, 0.4, hue))
-    return fit(cmax, gamut, fit_method).get("chroma")
-
-
 class GamutInfo(BaseNode):
     """Detailed information about a color fit to a specific gamut."""
 
+    fit_method: ClassVar[str] = "raytrace"
+
+    name: str
+    """Name of the gamut."""
     oklch: str
     """The oklch value fitted to the gamut."""
     raw: str
@@ -74,20 +52,31 @@ class GamutInfo(BaseNode):
     """The maximum oklch chroma value determined from the fit method."""
 
     @classmethod
-    def new(cls, val: ColorBase, gamut: str, fit_method: str = FIT_METHOD) -> Self:
+    def fit(cls, val: ColorBase, gamut: str) -> ColorBase:
+        return val.clone().fit(gamut, fit_method=cls.fit_method)
+
+    @classmethod
+    def get_max_chroma(cls, val: ColorBase, gamut: str) -> float:
+        lightness, _, hue = val.convert("oklch").coords()
+        cmax = ColorBase("oklch", (lightness, 0.4, hue))
+        return cls.fit(cmax, gamut).get("chroma")
+
+    @classmethod
+    def new(cls, val: ColorBase, gamut: str) -> Self:
         """Obtain GamutInfo for the input color with respect to specified gamut."""
         if val.space() != ColorSpace.oklch:
             val = val.convert(ColorSpace.oklch)
         raw = val.convert(gamut)
-        oklch_fitted = fit(val, gamut, fit_method)
+        oklch_fitted = cls.fit(val, gamut)
         fitted = oklch_fitted.convert(gamut)
         return cls(
+            name=gamut,
             oklch=oklch_fitted.to_string(),
             raw=raw.to_string(),
             css=fitted.to_string(),
             hex=to_hex(fitted),
             is_in_gamut=raw.in_gamut(),
-            max_oklch_chroma=max_oklch_chroma(val, gamut),
+            max_oklch_chroma=cls.get_max_chroma(val, gamut),
         )
 
 
@@ -96,8 +85,7 @@ class ColorInfo(BaseNode):
 
     gamut_keys: ClassVar[list[ColorSpace]] = [ColorSpace.display_p3, ColorSpace.srgb]
 
-    # name: str
-    # """Name of the color."""
+    # parsed: ColorBase = Field(exclude=True)
     definition: str
     """Parseable color definition, e.g., a css value."""
     oklch: str
@@ -113,9 +101,12 @@ class ColorInfo(BaseNode):
         return self.gamuts[ColorSpace.display_p3]
 
     @classmethod
-    def new(cls, val: str | ColorBase, fit_method: str = FIT_METHOD) -> Self:
+    def parse(cls, val: str | ColorBase) -> Self:
         if isinstance(val, str):
-            val = parse(val)
+            match = ColorBase.match(val, fullmatch=True)
+            if match is None:
+                raise ValueError(f"Could not parse color: {val}")
+            val = ColorBase(match.color)
 
         definition = val.to_string()
         if val.space() != ColorSpace.oklch:
@@ -124,10 +115,5 @@ class ColorInfo(BaseNode):
         return cls(
             definition=definition,
             oklch=val.to_string(),
-            gamuts={k: GamutInfo.new(val, k, fit_method) for k in ColorInfo.gamut_keys},
+            gamuts={k: GamutInfo.new(val, k) for k in ColorInfo.gamut_keys},
         )
-
-
-def info(val: ColorBase | str, fit_method: str = FIT_METHOD) -> ColorInfo:
-    """Fit a color definition to pre-defined gamuts."""
-    return ColorInfo.new(val, fit_method)
