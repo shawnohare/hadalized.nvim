@@ -1,24 +1,26 @@
+"""Data structures used to define color palettes."""
+
 from collections.abc import Callable
-from functools import cache, partial
+from enum import StrEnum, auto
+from functools import partial
 from typing import Literal, Self
+
+from pydantic import PrivateAttr
 
 from hadalized.base import BaseNode
 from hadalized.color import ColorField, ColorInfo
-from hadalized.render import Template as Template
-
-type PaletteHandler = Callable[[Palette], Palette]
-"""A function that can produce context to provide to a template."""
 
 type ColorFieldHandler = Callable[[ColorField], ColorField]
 
-type ColorType = Literal["info", "gamut", "hex", "oklch", "css"]
-"""Denotes the type of value contained in a ColorField.
-- info indicates the field is a full ColorInfo instance.
-- gamut indicates the field is a GamutInfo instance.
-- hex indicates the field is a GamutInfo.hex string.
-- oklch indicates the field is a GamutInfo.oklch string.
-- css indicates the field is a GamutInfo.css string.
-"""
+
+class ColorType(StrEnum):
+    """Constants representing nodes in a ColorInfo object."""
+
+    info = "ColorInfo"
+    gamut = "GamutInfo"
+    hex = auto()
+    oklch = auto()
+    css = auto()
 
 
 def _extract(
@@ -26,29 +28,34 @@ def _extract(
     gamut: str,
     color_type: ColorType,
 ) -> ColorField:
-    """ColorFieldHandler that extracts a particular leaf field value from a
-    GamutInfo field.
+    """Extract fields from a ColorInfo or GamutInfo instance.
 
     The function is idempotent, but composing terminates at the first leaf.
     For example, with f as this function
-        f(f(color, "srgb", "hex"), gamut="display-p3", color_type="css")
+        f(f(color, "srgb", ColorType.hex), gamut="display-p3", color_type=ColorType.css)
     is the same as
-        f(color, "srgb", "hex")
+        f(color, "srgb", ColorType.hex)
     as the latter call already extracts a leaf value. Similarly
-        f(f(color, "srgb", "gamut"), gamut="", color_type="css")
+        f(f(color, "srgb", "gamut"), gamut="", color_type=ColorType.css)
     is equivalent to
-        f(color, "srgb", "css")
+        f(color, "srgb", ColorType.css)
+
+    Returns:
+        A new Colorfield, typically a value extracted from a ColorInfo
+        instance.
+
     """
-    if color_type == "identity" or isinstance(val, str):
+    if color_type == ColorType.info or isinstance(val, str):
         return val
 
     node = val.gamuts[gamut] if isinstance(val, ColorInfo) else val
-    return node if color_type == "gamut" else node[color_type]
+    return node if color_type == ColorType.gamut else node[color_type]
 
 
 class ColorMap(BaseNode):
-    """A data structure containing color name -> color info of some form. The
-    form can either be a complete color info object containing data for all
+    """Base dataclass for mappings of the form color name -> ColorInfo.
+
+    The fields can either be a complete object containing data for all
     gamuts, gamut specific color info, or a string. While the model itself
     does not enforce uniformity of type among the strings, the data structure
     should typically be equivalent to one of
@@ -60,16 +67,18 @@ class ColorMap(BaseNode):
     """
 
     def map(self, handler: ColorFieldHandler) -> Self:
-        """Apply a generic color field handler to each field."""
+        """Apply a generic color field handler to each field.
+
+        Returns:
+            A new ColorMap instance with the handler applied to each field.
+
+        """
         data: dict[str, ColorField] = {k: handler(v) for k, v in self}
         return self.model_validate(data)
 
 
-# def fmap(data: Mapping[str, ColorField]) -> Mapping[str, ColorField]:
-
-
 class HueMap(ColorMap):
-    """Configuration node for name hues."""
+    """Configuration node for named hues."""
 
     red: ColorField
     orange: ColorField
@@ -86,7 +95,7 @@ class HueMap(ColorMap):
 
 
 class BaseMap(ColorMap):
-    """Configuration node for monochromatic foregrounds and backgrounds."""
+    """Configuration node for foregrounds and backgrounds."""
 
     black: ColorField = ColorInfo.parse("oklch(0.10 0.01 220)")
     darkgray: ColorField = ColorInfo.parse("oklch(0.30 0.01 220)")
@@ -110,7 +119,10 @@ class BaseMap(ColorMap):
 
 
 class Palette(BaseNode):
-    """Defines the colors to injkkkect to a particular theme template."""
+    """A collection of hues and bases.
+
+    The primary data structure used to render an application theme template.
+    """
 
     name: str
     desc: str
@@ -124,42 +136,81 @@ class Palette(BaseNode):
     """Named bases relative to the palette."""
     hl: HueMap
     bright: HueMap
+    _cache: dict = PrivateAttr({})
+    """Used to cach transformations of the palette."""
 
     def map(self, handler: ColorFieldHandler) -> Self:
+        """Map a handler accross color fields.
+
+        Returns:
+            A new Palette instance with the handler applied to each
+            field that contains a ColorMap instance.
+
+        """
         kwargs = {k: v.map(handler) if isinstance(v, ColorMap) else v for k, v in self}
         return self.model_validate(kwargs)
 
-    @cache
     def to(self, color_type: ColorType) -> Self:
-        """Return a transformed palette containing ColorField values
-        specified color type."""
+        """Entry point for the `map` method that accepts a directive.
+
+        Returns:
+            A new Palette instance with the handler applied to each
+            field that contains a ColorMap instance.
+
+        """
         if color_type == "info":
             return self
 
-        func = partial(_extract, gamut=self.gamut, color_type=color_type)
-        return self.map(func)
+        if (val := self._cache.get(color_type)) is None:
+            func = partial(_extract, gamut=self.gamut, color_type=color_type)
+            val = self.map(func)
+            self._cache[color_type] = val
+        return val
 
     def gamut_info(self) -> Self:
-        return self.to("gamut")
+        """Extract GamutInfo from each ColorInfo leaf.
+
+        Returns:
+            A new Palette where each ColorField leaf is a GamutInfo instance.
+
+        """
+        return self.to(ColorType.gamut)
 
     def hex(self) -> Self:
-        """Produce a palette with only css strings in the specified gamut
-        instead of full color info.
+        """Extract RGB hex codes from each ColorInfo leaf.
+
+        Returns:
+            A new Palette where each ColorField leaf is a hex code string
+            in the palette's `gamut` value.
+
         """
-        return self.to("hex")
+        return self.to(ColorType.hex)
 
     def css(self) -> Self:
-        """Produce a palette with only css strings in the specified gamut
-        instead of full color info.
+        """Extract css strings from each ColorInfo leaf.
+
+        Returns:
+            A new Palette where each ColorField leaf is a css string referencing
+            the palette's `gamut` value.
+
         """
-        return self.to("css")
+        return self.to(ColorType.css)
 
     def oklch(self) -> Self:
-        """Produce a palette with only oklch css strings in the specified gamut
-        instead of full color info.
+        """Extract oklch strings from each ColorInfo leaf.
+
+        Returns:
+            A new Palette where each ColorField leaf is an oklch string fit
+            the palette's `gamut` value.
+
         """
-        return self.to("oklch")
+        return self.to(ColorType.oklch)
 
     def identity(self) -> Self:
-        """No op identity function on a palette."""
+        """No op identity function on a palette.
+
+        Returns:
+            The instance itself.
+
+        """
         return self

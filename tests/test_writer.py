@@ -1,14 +1,14 @@
 from hadalized.config import Config
-from hadalized.gen import FileWriter
+from hadalized.writer import ThemeWriter
 
 
-def test_write_all(tmp_path):
-    config = Config(build_dir=tmp_path, cache_dir=tmp_path / "cache")
-    with FileWriter(config) as writer:
-        written = writer.write_all()
+def test_run(config: Config):
+    """Tests the main ThemeWriter.run"""
+    with ThemeWriter(config) as writer:
+        written = writer.run()
         assert written
         assert (config.build_dir / "neovim" / "hadalized.lua").exists()
         assert (config.build_dir / "wezterm" / "hadalized.toml").exists()
         assert (config.build_dir / "starship" / "starship.toml").exists()
-        written = writer.write_all()
+        written = writer.run()
         assert written == []

@@ -26,29 +26,28 @@ return {
 ## python generator package
 
 The underlying color palettes are defined as oklch values in the included
-python `hadalized.config` module. The `hadalied` python package generates
-themes for
+python [hadalized.config](./src/hadalized/config.py) module. The `hadalied`
+python package generates themes for different applications, which can be
+copied to their respective application config folders (or dotfiles repo)
+manually. As the python application is generated
 
-- neovim (output to [colors/](colors/))
-- wezterm terminal emulator (output to [wezterm/](wezterm/))
 
-To generate (all) hadalized files utilize
+To generate all theme files, assuming `uv` and `just` are installed
+
+```sh
+just
 ```
-just gen
-```
-This utilizes `uv run`.
 
 ### Overriding configuration defaults
 
 To generate your own hadalized variants during generation
 
 ```py
-from hadalized.writer import FileWritter
+from hadalized.writer import ThemeWritter
 from hadalized.config import Config
 
 if __name__ == "__main__":
     config = Config(...)  # set your overrides
-    writer FileWritter(config)
-    writer.write_all()
+    with ThemeWriter(config) as writer:
+        writer.run()
 ```
-

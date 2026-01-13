@@ -17,7 +17,7 @@ dependencies = [
 ]
 
 [project.scripts]
-hadalized = "hadalized:main"
+hadalized = "hadalized:writer.run"
 
 [build-system]
 requires = ["uv_build>=0.9.18,<0.10.0"]
@@ -40,27 +40,46 @@ testpaths = [
 
 [tool.ruff.lint]
 # select = ["ALL"]
+preview = true
 select = [
     "A",        # detect shadowed builtins
+    "B",        # flake bugbear
     "BLE",      # disallow catch-all exceptions
     "C4",       # Catch incorrect use of comprehensions, dict, list, etc
+    "C90",      # mccabe complexity checks
+    "D",        # Docstring style
+    "DOC",      # Docstring linting
     "DTZ",      # require strict timezone manipulation with datetime
     "E",        # PyCodeStyle errors
     "F",        # Pyflakes rules
     "FA",       # Enforce from __future__ import annotations
     "FBT",      # detect boolean traps
+    "FURB",     # refurb
     "I",        # Sort imports properly
     "ICN",      # Use common import conventions
     "ISC",      # Good use of string concatenation
     "N",        # enforce naming conventions, e.g. ClassName vs function_name
     "NPY",      # Some numpy-specific things"COM", # enforce trailing comma rules
+    "PERF",     # performance linting
+    "PLE",      # pylint errors
+    "PLR",      # pylint refactor
+    "PLW",      # pylint warnings
+    "PT",       # pytest style
     "PTH",      # Use pathlib instead of os.path
+    "PYI",      # Some typing annotation checks
+    "PIE",      # Some unnecessary operators
+    "Q",        # quotes
     "RET",      # Good return practices
+    "RUF",      # Ruff specific rules
     "S",        # disallow things like "exec"; also restricts "assert"
     "SIM",      # Common simplification rules
     "TC",       # Enforce importing certain types in a TYPE_CHECKING block
     # "TD",       # Be diligent with TODO comments
     "TID",      # Some good import practices
+    # "TRY",      # exception style
     "UP",       # Warn if certain things can changed due to newer Python versions
     "W",        # PyCodeStyle warnings
 ]
+
+[tool.ruff.format]
+preview = true

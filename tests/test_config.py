@@ -1,5 +1,5 @@
 from hadalized.config import Config
 
 
-def test_config_load():
+def test_config_defaults():
     assert Config()

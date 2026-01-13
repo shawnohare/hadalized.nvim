@@ -6,23 +6,19 @@ from typing import Literal, Self
 from pydantic import Field
 
 from hadalized.cache import Cache
+from hadalized.color import parse
 from hadalized.models import (
     BaseMap,
     BaseNode,
     ColorField,
-    ColorInfo,
     ColorType,
     HueMap,
     Palette,
 )
 
-parse = ColorInfo.parse
-
 
 class Mono:
-    """Singleton class containing named monochromatic colors used for
-    foregrounds and backgrounds.
-    """
+    """Container for named color refs used in foregrounds and backgrounds."""
 
     black: ColorField = parse("oklch(0.10 0.01 220)")
     darkgray: ColorField = parse("oklch(0.30 0.01 220)")
@@ -71,6 +67,8 @@ class Mono:
 
 
 class Hues:
+    """Default hue refs used in palettes."""
+
     neutral = HueMap(
         red=parse("oklch(0.575 0.185 25)"),
         orange=parse("oklch(0.650 0.150 60)"),
@@ -144,7 +142,8 @@ class Hues:
 
 
 class Palettes:
-    # Palette definitions
+    """Refs for builtin Palette instances."""
+
     dark: Palette = Palette(
         name="hadalized",
         desc="Main dark theme with blueish solarized inspired backgrounds.",
@@ -249,14 +248,21 @@ class Palettes:
         bright=day.bright,
     )
 
-    @classmethod
-    def to_dict(cls) -> dict[str, Palette]:
-        return {
-            cls.dark.name: cls.dark,
-            cls.gray.name: cls.gray,
-            cls.day.name: cls.day,
-            cls.white.name: cls.white,
-        }
+
+def default_palettes() -> dict[str, Palette]:
+    """Palette map to use in generating theme files.
+
+    Returns:
+        A map of palette name to palette.
+
+    """
+    cls = Palettes
+    return {
+        cls.dark.name: cls.dark,
+        cls.gray.name: cls.gray,
+        cls.day.name: cls.day,
+        cls.white.name: cls.white,
+    }
 
 
 misc: dict = {
@@ -287,10 +293,8 @@ misc: dict = {
 }
 
 
-class BuildDirective(BaseNode):
-    """Information about which files should be generatted for a specific
-    template.
-    """
+class BuildConfig(BaseNode):
+    """Information about which files should be generatted specific template."""
 
     template: str
     """Template filename."""
@@ -330,71 +334,102 @@ class BuildDirective(BaseNode):
     """
 
 
-def default_build_directives() -> dict[str, BuildDirective]:
+def default_builds() -> dict[str, BuildConfig]:
+    """Builtin build configs.
+
+    Returns:
+        The default build instructions used to generate theme files.
+
+    """
     return {
-        "neovim": BuildDirective(
+        "neovim": BuildConfig(
             template="neovim.lua",
             context_type="palette",
             output_path=Path("neovim/{name}.lua"),
-            color_type="hex",
+            color_type=ColorType.hex,
         ),
-        "wezterm": BuildDirective(
+        "wezterm": BuildConfig(
             template="wezterm.toml",
             context_type="palette",
             output_path=Path("wezterm/{name}.toml"),
-            color_type="hex",
+            color_type=ColorType.hex,
         ),
-        "starship": BuildDirective(
+        "starship": BuildConfig(
             template="starship.toml",
             context_type="config",
             output_path=Path("starship/starship.toml"),
-            color_type="hex",
+            color_type=ColorType.hex,
         ),
-        "info": BuildDirective(
+        "info": BuildConfig(
             template="palette_info.json",
             context_type="palette",
             output_path=Path("info/{name}.json"),
-            color_type="info",
+            color_type=ColorType.info,
         ),
-        "html_samples": BuildDirective(
+        "html_samples": BuildConfig(
             template="palette.html",
             context_type="palette",
             output_path=Path("html_samples/{name}.html"),
-            color_type="css",
+            color_type=ColorType.css,
         ),
     }
 
 
 class Config(BaseNode):
-    """An instance containing the color definitions and expanded info
-    from within this module.
+    """App configuration.
+
+    Contains information about which app theme files to generate and where
+    to write the build artifacts.
     """
 
     build_dir: Path = Path("./build")
     """Directory containing built theme files."""
     cache_dir: Path = Cache.default_dir
     """Application cache directory."""
-    directives: dict[str, BuildDirective] = Field(
-        default_factory=default_build_directives,
+    cache_in_memory: bool = False
+    builds: dict[str, BuildConfig] = Field(
+        default_factory=default_builds,
         exclude=True,
     )
     """Build directives specifying how and which theme files are
     generated."""
-    palettes: dict[str, Palette] = Palettes.to_dict()
+    palettes: dict[str, Palette] = Field(default_factory=default_palettes)
     """Palette definitions."""
     misc: dict = misc
 
-    def to(self, color_type: ColorType):
+    def to(self, color_type: ColorType) -> Self:
+        """Transform the ColorFields to the specified type.
+
+        Use to render themes that require the entire context (e.g., all palettes),
+        but where specific color representations (e.g., hex)
+        are required.
+
+        Returns:
+            A new Config instance whose ColorFields match the input type.
+
+        """
         return self.__class__(
             build_dir=self.build_dir,
             cache_dir=self.cache_dir,
-            directives=self.directives,
+            builds=self.builds,
             palettes={k: p.to(color_type) for k, p in self.palettes.items()},
             misc=self.misc,
         )
 
     def hex(self) -> Self:
-        return self.to("hex")
+        """Convert palette ColorField values to their hex representation.
+
+        Returns:
+            A new Config instance with color hex codes for ColorField values.
+
+        """
+        return self.to(ColorType.hex)
 
     def css(self) -> Self:
-        return self.to("css")
+        """Convert palette ColorField values to their css representation.
+
+        Returns:
+            A new Config instance with color css strings for ColorField values.
+
+        """
+        return self.to(ColorType.css)
