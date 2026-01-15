@@ -26,14 +26,14 @@ def test_clear(tmp_path):
     assert not cache._db_file.exists()
 
 
-def test_add_in_memory(tmp_path):
-    with Cache(in_memory=True) as cache:
-        path = tmp_path / "test.txt"
+def test_add_in_memory():
+    with Cache(cache_dir=None) as cache:
+        path = "test.txt"
         cache.add(path, "123")
         assert cache.get_hash(path) == "123"
 
 
 def test_exit_with_error():
     with pytest.raises(ValueError):
-        with Cache(in_memory=True):
+        with Cache(None):
             raise ValueError("bomb")

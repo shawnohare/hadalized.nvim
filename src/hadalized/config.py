@@ -383,10 +383,12 @@ class Config(BaseNode):
 
     build_dir: Path = Path("./build")
     """Directory containing built theme files."""
-    cache_dir: Path = Cache.default_dir
+    cache_dir: Path | None = Cache.default_dir
+    """Application cache directory. Set to `None` to use an in-memory cache."""
     template_fs_dir: Path = Path("./templates")
-    """Application cache directory."""
-    cache_in_memory: bool = False
+    """Directory where templates will be searched for. If a template is not
+    found in this directory, it will be loaded from those defined in the
+    package."""
     builds: dict[str, BuildConfig] = Field(
         default_factory=BuildConfig.defaults,
         exclude=True,

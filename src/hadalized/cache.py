@@ -18,20 +18,19 @@ class CacheDB:
 
     default_dir: ClassVar[Path] = xdg_base_dirs.xdg_cache_home() / "hadalized"
 
-    def __init__(self, cache_dir: Path = default_dir, *, in_memory: bool = False):
+    def __init__(self, cache_dir: Path | None = default_dir):
         """Create a new instance.
 
         Args:
             cache_dir: Where to store the database file.
-            in_memory (keyword only): Whether the database should be entirely
-                in memory. No file is created or stored in this case. Useful
-                to avoid cleanup when testing.
+               If `None` is provided, an in-memory database
+               will be used.
 
         """
-        self.cache_dir: Path = cache_dir
-        self.in_memory: bool = in_memory
-        self._db_file: Path = cache_dir / "cache.db"
-        if not in_memory:
+        self.cache_dir: Path = cache_dir or self.default_dir
+        self.in_memory: bool = cache_dir is None
+        self._db_file: Path = self.cache_dir / "cache.db"
+        if not self.in_memory:
             self.cache_dir.mkdir(parents=True, exist_ok=True)
         self._conn: sqlite3.Connection
 
@@ -88,7 +87,7 @@ class Cache(CacheDB):
                 CREATE TABLE IF NOT EXISTS
                 builds(path TEXT PRIMARY KEY, hash TEXT)""")
 
-    def add(self, path: Path, digest: str):
+    def add(self, path: str | Path, digest: str):
         """Add a (path, hash hexdigest) to the database.
 
         Used after a file is successfully generated to store a proxy for
@@ -104,7 +103,7 @@ class Cache(CacheDB):
                 },
             )
 
-    def delete(self, path: Path):
+    def delete(self, path: str | Path):
         """Remove a cache entry."""
         with self._conn:
             self._conn.execute(
@@ -112,7 +111,7 @@ class Cache(CacheDB):
                 [str(path)],
             )
 
-    def get_hash(self, path: Path) -> str | None:
+    def get_hash(self, path: str | Path) -> str | None:
         """Get a build digest for the input path.
 
         Returns:

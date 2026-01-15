@@ -125,7 +125,7 @@ class ThemeWriter:
         """
         config = config or Config()
         self.config: Config = config
-        self.cache = Cache(cache_dir=config.cache_dir, in_memory=config.cache_in_memory)
+        self.cache = Cache(cache_dir=config.cache_dir)
         self.build_dir: Path = self.config.build_dir
         self.palettes = list(self.config.palettes.values())
 
