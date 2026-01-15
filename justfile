@@ -1,7 +1,7 @@
 gen:
     @echo "Generating templates"
     uv run --exact hadalized
-    cp ./build/neovim/* colors/
+    # cp ./build/neovim/* colors/
 
 venv:
     source .venv/bin/activate

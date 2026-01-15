@@ -15,6 +15,7 @@ def config(tmp_path) -> Config:
     return Config(
         build_dir=tmp_path,
         cache_dir=None,
+        copy_dir=tmp_path / "copies",
         template_fs_dir=Path(__file__).parent,
     )
 

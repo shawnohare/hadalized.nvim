@@ -319,6 +319,10 @@ class BuildConfig(BaseNode):
     """Template filename."""
     output_path: Path
     """Output path template relative to a build directory."""
+    copy_to: Path | None = None
+    """Indicates if the built file should be copied to another directory.
+    Typically relative the parent of the underlying build directory.
+    """
     context_type: Literal["palette", "config"]
     """The underlying context type to pass to the template. Currently two
     modes are supported.
@@ -331,6 +335,8 @@ class BuildConfig(BaseNode):
     color_type: ColorType
     """How each Palette should be transformed when presented as context
     to the template."""
+    skip: bool = False
+    """If set to True, skip the directive."""
 
     @staticmethod
     def defaults() -> dict[str, BuildConfig]:
@@ -345,6 +351,7 @@ class BuildConfig(BaseNode):
                 template="neovim.lua",
                 context_type="palette",
                 output_path=Path("neovim/{name}.lua"),
+                copy_to=Path("colors/{name}.lua"),
                 color_type=ColorType.hex,
             ),
             "wezterm": BuildConfig(
@@ -385,6 +392,10 @@ class Config(BaseNode):
     """Directory containing built theme files."""
     cache_dir: Path | None = Cache.default_dir
     """Application cache directory. Set to `None` to use an in-memory cache."""
+    copy_dir: Path | None = Path("./")
+    """A copy dir prefix. If set, any files built with a `copy_to` directive
+    will be placed in this directory. When set to None, no files will be
+    copied."""
     template_fs_dir: Path = Path("./templates")
     """Directory where templates will be searched for. If a template is not
     found in this directory, it will be loaded from those defined in the

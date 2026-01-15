@@ -1,6 +1,6 @@
 """Base container for all model classes."""
 
-from typing import ClassVar
+from typing import ClassVar, Self
 
 from pydantic import BaseModel, ConfigDict, PrivateAttr
 
@@ -64,3 +64,13 @@ class BaseNode(BaseModel):
         if self._bytes is None:
             self._bytes = self.model_dump_json().encode()
         return self._bytes
+
+    def replace(self, **kwargs) -> Self:
+        """Create a new instance with input arguments merged in.
+
+        Returns:
+            A new instance.
+
+        """
+        new_kwargs = self.model_dump() | kwargs
+        return self.__class__.model_validate(new_kwargs)

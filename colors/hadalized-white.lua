@@ -1,4 +1,4 @@
--- Generated neovom colorscheme.
+-- Auto-generated neovim colorscheme.
 -- WARNING: Do not edit by hand.
 
 -- By setting our module to nil, we clear lua's cache,

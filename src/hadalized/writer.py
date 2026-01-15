@@ -1,5 +1,6 @@
 """Render templates and write outputs."""
 
+import shutil
 from contextlib import suppress
 from functools import cache
 from hashlib import blake2b
@@ -145,19 +146,31 @@ class ThemeWriter:
             context_nodes = [self.config]
         written: list[Path] = []
         for node in context_nodes:
-            path = target_dir / config.output_path.name.format(**node.model_dump())
+            dump = node.model_dump()
+            path = target_dir / config.output_path.name.format(**dump)
             context = node.to(config.color_type)
 
             # Check whether we can skip generating the file.
             digest = template.hash(context)
-            if path.exists() and self.cache.get_hash(path) == digest:
+            if not path.exists() or self.cache.get_hash(path) != digest:
+                logger.info(f"Writing {path}")
+                path.write_text(template.render(context))
+                self.cache.add(path, digest)
+                written.append(path)
+            else:
                 logger.info(f"Already generated {path}")
-                continue
 
-            logger.info(f"Writing {path}")
-            path.write_text(template.render(context))
-            self.cache.add(path, digest)
-            written.append(path)
+            # Copy files if necessary.
+            if config.copy_to is not None and self.config.copy_dir is not None:
+                copy_dir = self.config.copy_dir / config.copy_to.parent
+                copy_path = copy_dir / config.copy_to.name.format(**dump)
+                if not copy_path.exists():
+                    copy_dir.mkdir(parents=True, exist_ok=True)
+                    logger.info(f"Copying {path} to {copy_path}")
+                    shutil.copy(path, copy_path)
+                else:
+                    logger.info(f"Already copied {copy_path}")
+
         return written
 
     def run(self) -> list[Path]:
