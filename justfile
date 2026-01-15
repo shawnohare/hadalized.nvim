@@ -1,6 +1,6 @@
 gen:
     @echo "Generating templates"
-    uv run hadalized
+    uv run --exact hadalized
     cp ./build/neovim/* colors/
 
 venv:
@@ -15,16 +15,16 @@ ed:
     source .venv/bin/activate && nvim src/hadalized/config.py
 
 fmt:
-    uv run ruff format src/ tests/
-    uv run ruff check --fix src/ tests/
+    uv run --exact ruff format src/ tests/
+    uv run --exact ruff check --fix src/ tests/
     # uv run ruff check --ignore=S --fix tests/
 
 check:
-    uv run ruff check src/ tests/
-    uv run ty check src/ tests/
+    uv run --exact ruff check src/ tests/
+    uv run --exact ty check src/ tests/
 
 test:
-    uv run pytest
+    uv run --exact pytest
 
 clear_cache:
-    uv run python bin/clear_cache.py
+    uv run --exact python bin/clear_cache.py

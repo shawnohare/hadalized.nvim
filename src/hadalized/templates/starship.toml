@@ -212,13 +212,13 @@ vimcmd_visual_symbol = "[❮](bold fg:yellow)"
 
 [cmd_duration]
 show_milliseconds = true
-format = " in $duration "
+format = "  $duration "
 style = "bg:violet"
 disabled = false
 show_notifications = true
 min_time_to_notify = 45000
 
-# {% for palette in context.palettes.values() %}
+{% for palette in context.palettes.values() %}
 [palettes."{{palette.name}}"]
 name = "{{ palette.name }}"
 gamut = "{{ palette.gamut }}"

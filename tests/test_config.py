@@ -1,5 +1,19 @@
-from hadalized.config import Config
+from hadalized.config import Config, TerminalConfig
 
 
 def test_config_defaults():
-    assert Config()
+    conf = Config()
+    assert conf.builds
+    assert conf.palettes
+
+
+# @pytest.mark.parametrize(
+#         "idx",
+#         list(range(1,17))
+# )
+def test_terminal_config_ansi():
+    conf: TerminalConfig = TerminalConfig()
+    for idx in range(1, 7):
+        assert conf.ansi.get_name(idx)
+        assert conf.ansi.get_name(idx + 8)
+    assert len(conf.ansi.pairing) == 6

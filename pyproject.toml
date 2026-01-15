@@ -1,7 +1,7 @@
 [project]
 name = "hadalized"
 version = "0.1.0"
-description = "Hadalized theme builder"
+description = "Hadalized theme builder."
 readme = "README.md"
 authors = [
     { name = "Shawn O'Hare", email = "shawn@shawnohare.com" }
@@ -20,7 +20,7 @@ dependencies = [
 hadalized = "hadalized:writer.run"
 
 [build-system]
-requires = ["uv_build>=0.9.18,<0.10.0"]
+requires = ["uv_build>=0.9.25,<0.10.0"]
 build-backend = "uv_build"
 
 [dependency-groups]
@@ -33,7 +33,8 @@ dev = [
 ]
 
 [tool.pytest.ini_options]
-addopts = "--cov src -vvv -ra -q"
+# add --cov-report=html to also get html
+addopts = "--cov-report=term-missing --cov=src -vvv -ra -q"
 testpaths = [
     "tests",
 ]

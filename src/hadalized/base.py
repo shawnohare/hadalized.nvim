@@ -2,12 +2,11 @@
 
 from typing import ClassVar
 
-import luadata
 from pydantic import BaseModel, ConfigDict, PrivateAttr
 
 
 class BaseNode(BaseModel):
-    """An extension of the base model to give some dict like semantics."""
+    """An extension of pydantic.BaseModel that all model classes inherit."""
 
     model_config: ClassVar[ConfigDict] = ConfigDict(
         frozen=True,
@@ -30,8 +29,7 @@ class BaseNode(BaseModel):
             The field specified by the input key.
 
         """
-        key = key.replace("-", "_")
-        return getattr(self, key)
+        return getattr(self, key.replace("-", "_"))
 
     def model_dump_lua(self) -> str:
         """Dump the model as a lua table.
@@ -40,17 +38,20 @@ class BaseNode(BaseModel):
             A human readable lua table string.
 
         """
+        import luadata
+
         # TODO: Unclear if we want to import luadata just for this
         return luadata.serialize(self.model_dump(mode="json"), indent="  ")
 
     def __hash__(self) -> int:
         """Make an instance hashable for use in cache and dict lookups.
 
+        Defined for type checking purposes. Frozen models are hashable.
+
         Returns:
             The BaseModel hash.
 
         """
-        # Defined for type checking purposes. Frozen models are hashable.
         return hash(super())
 
     def encode(self) -> bytes:

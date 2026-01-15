@@ -1,0 +1,10 @@
+[palettes."{{context.name}}"]
+name  = "{{context.name}}"
+mode  = "{{context.mode}}"
+gamut = "{{context.gamut}}"
+
+
+[palettes."{{context.name}}".hue]
+{% for key, val in context.hue -%}
+"{{key}}" = "{{val}}"
+{% endfor -%}
