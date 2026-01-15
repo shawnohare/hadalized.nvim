@@ -1,0 +1,1903 @@
+"""
+https://bottosson.github.io/posts/oklab/ for general information explaining
+the oklab space. Exerpts below.
+
+A color in Oklab is represented with three coordinates, similar to how CIELAB
+works, but with better perceptual properties. Oklab uses a D65 whitepoint,
+since this is what sRGB and other common color spaces use.
+The three coordinates are:
+
+L – perceived lightness
+a – how green/red the color is
+b – how blue/yellow the color is
+
+For many operations, Lab-coordinates can be used directly, but they can also
+be transformed into polar form, with the coordinates lightness, chroma and hue.
+
+LAB <-> LCh
+
+    C = sqrt(a^2 + b^2)
+
+    h∘ = atan2(b, a)
+
+From C, and h∘ the coordinates a, b can be computed like this:
+    a = C cos(h∘)
+    b = C sin(h∘)
+
+Given a vector v in XYZ coordinates, with M_1 and M_2 below, the XYZ -> Lab
+transformation is
+    M_2((M_1v)^{1/3})
+That is first the XYZ coordinates are converted to "approximate cone responses"
+(lms), then the cubed root of each vector element taken, then the Lab
+transform via M_2.
+
+"""
+import math
+import sys
+from pprint import pprint
+from typing import Callable, ClassVar, NamedTuple, Self
+
+
+# ---------------------------------------------------------------------------
+# Typedefs
+# ---------------------------------------------------------------------------
+type ScalarFunc = Callable[[float], float]
+type Vector3dPlus = tuple[float, float, float, *tuple[float | None, ...]]
+"""A tuple with at least 3 floats."""
+
+type Vector2d = tuple[float, float]
+type Vector3d = tuple[float, float, float]
+type VectorNd = tuple[float, ...]
+
+type Matrix3d = tuple[
+    Vector3dPlus,
+    Vector3dPlus,
+    Vector3dPlus,
+]
+
+
+type Matrix3x2 = tuple[
+    Vector2d,
+    Vector2d,
+    Vector2d,
+]
+"""Linar transformations from R^2 -> R^3"""
+
+type Matrix3x3 = tuple[
+    Vector3d,
+    Vector3d,
+    Vector3d,
+]
+"""Linar transformations from R^3 -> R^3"""
+# ---------------------------------------------------------------------------
+# basic helper utils
+# ---------------------------------------------------------------------------
+
+def _hex(val: int) -> str:
+    return hex(val)[2:].lower()
+
+
+def _iround(val: float) -> int:
+    """Integer rounding."""
+    ret = int(val)
+    if (val - ret) >= 0.5:
+        ret += 1
+    return ret
+
+
+def to_byte(val: float) -> int:
+    """Map the unit interval to the nearest 8 bit integer."""
+    val = 255*max(val, 0)
+    ret = int(val)
+    if (val - ret) >= 0.5:
+        ret += 1
+    return min(255, ret)
+
+
+
+def _ceil(f, num_digits=0):
+    f = math.ceil(f * 10**num_digits) / 10.0**num_digits
+    return float(format(f, "." + str(num_digits) + "f"))
+
+
+def _floor(f, num_digits=0):
+    f = math.floor(f * 10**num_digits) / 10.0**num_digits
+    return float(format(f, "." + str(num_digits) + "f"))
+
+
+
+def dot(v: Vector3dPlus, w: Vector3dPlus)-> float:
+    """Dot product of two vectors in R^3."""
+    return v[0]*w[0] + v[1]*w[1] + v[2]*w[2]
+
+
+def square(val: float) -> float:
+    """Squarethe input."""
+    return val**2
+
+
+def cube(val: float) -> float:
+    """Cube the input."""
+    return math.pow(val, 3)
+
+def square3d(val: Vector3d) -> Vector3d:
+    """Square each coordinate in a vector in R^3."""
+    return (val[0]**2, val[1]**2, val[2]**2)
+
+def cube3d(val: Vector3d) -> Vector3d:
+    """Cube each coordinate in a vector in R^3."""
+    return (val[0]**3, val[1]**3, val[2]**3)
+
+
+def hue_to_ab(hue: float) -> tuple[float, float]:
+    """Map cylindrical hue oklch value to an OKLAB (a, b) coordinate
+    on the unit circle."""
+    return (
+        math.cos(math.radians(hue)),
+        math.sin(math.radians(hue)),
+    )
+
+
+def dotprod(v: VectorNd, w: VectorNd) -> float:
+    """Take the dot produce of two vectors in R^n."""
+    match len(v):
+        case 3:
+            out = v[0]*w[0] + v[1]*w[1] + v[2]*w[2]
+        case 2:
+            out = v[0]*w[0] + v[1]*w[1]
+        case _:
+            out = sum(map(lambda x: x[0]*x[1], zip(v, w)))
+    return out
+
+
+def dot2d(v: Vector2d, w: Vector2d) -> float:
+    """Dot product in R^3"""
+    return v[0]*w[0] + v[1]*w[1]
+
+
+def dot3d(v: Vector3d, w: Vector3d) -> float:
+    """Dot product in R^3"""
+    return v[0]*w[0] + v[1]*w[1] + v[2]*w[2]
+
+
+def linear_trans_2d_to_3d(M: Matrix3x2, v: Vector2d) -> Vector3d:
+    """Linear transformation from R^2 -> R^3."""
+    return (
+        dot2d(M[0], v),
+        dot2d(M[1], v),
+        dot2d(M[2], v),
+    )
+
+
+def linear_trans_3d_to_3d(M: Matrix3x3, v: Vector3d) -> Vector3d:
+    """Linear transformation from R^3 -> R^3."""
+    return (
+        dot3d(M[0], v),
+        dot3d(M[1], v),
+        dot3d(M[2], v),
+    )
+
+
+def vmap(func: ScalarFunc, vector: VectorNd) -> VectorNd:
+    """Map a scalar function across each element of the vector.
+    """
+    return tuple(map(func, vector))
+
+def vmul3d(v: Vector3d, w: Vector3d) -> Vector3d:
+    return (
+        v[0]*w[0],
+        v[1]*w[1],
+        v[2]*w[2],
+    )
+
+
+def vadd3d(v: Vector3d, w: Vector3d) -> Vector3d:
+    return (
+        v[0]+w[0],
+        v[1]+w[1],
+        v[2]+w[2],
+    )
+
+
+def vmap2d(func: ScalarFunc, vector: Vector2d) -> Vector2d:
+    """Map a scalar function across each element of the vector.
+    """
+    return (
+        func(vector[0]),
+        func(vector[1]),
+    )
+
+def vmap3d(func: ScalarFunc, vector: Vector3d) -> Vector3d:
+    """Map a scalar function across each element of the vector.
+    """
+    return (
+        func(vector[0]),
+        func(vector[1]),
+        func(vector[2]),
+    )
+
+def smul3d(scalar: float, vector: Vector3d) -> Vector3d:
+    """Multiple a scalar value to a vector in R^3."""
+    return (scalar*vector[0], scalar*vector[1], scalar*vector[2])
+
+
+# ---------------------------------------------------------------------------
+# functional rewrite
+# ---------------------------------------------------------------------------
+
+# Usually when percentage values have a numeric equivalent in CSS, 100% is
+# equal to the number 1. This is not the case for all of the oklch
+# component values. Here, 100% is equal to 0.4 for the C value.
+
+class Vector(NamedTuple):
+    """Base class for color vectors together with an optional alpha channel."""
+    x: float
+    y: float
+    z: float
+    alpha: float | None = None
+
+    @classmethod
+    def cast(cls, val: "Vector") -> Self:
+        """Typecast between subclasses."""
+        return cls(val.x, val.y, val.z, val.alpha)
+
+    def map(self, func: ScalarFunc) -> Self:
+        """Map a scalar function across each element of the vector.
+        The alpha channel stays the same.
+        """
+        return self.__class__(
+            func(self.x),
+            func(self.y),
+            func(self.z),
+            self.alpha,
+        )
+
+    # def dot(self, vec: Vector3d) -> Self:
+    #     """Take the dot product of two vectors. The alpha channel remains
+    #     unchanged.
+    #     """
+    #     return self.__class__(
+    #         self[0]*vec[0],
+    #         self[1]*vec[1],
+    #         self[2]*vec[2],
+    #         self.alpha
+    #     )
+    #
+
+    def T(self, M: Matrix3d) -> Self:
+        """Apply a linear transformation M(v) where v is the instance.
+        Equivalent to vM^T when v is viewed as a row vector.
+
+        The alpha channel stays the same.
+        """
+        return self.__class__(
+            dot(M[0], self),
+            dot(M[1], self),
+            dot(M[2], self),
+            self.alpha,
+        )
+
+
+
+
+
+
+def _lrgb_to_srgb(val: float) -> float:
+    """Map linear RGB to standard RGB. The inverse of the SRGB transfer."""
+    if val >= 0.0031308:
+        ret = (1.055 * math.pow(val, 5 / 12)) - 0.055
+    else:
+        ret = 12.92 * val
+    return ret
+
+
+def _srgb_to_lrgb(val: float):
+    """Map a Standard RGB channel to linear RGB.
+
+    Also known as the "transfer" or "gamma" function.
+    Cf: https://en.wikipedia.org/wiki/SRGB
+
+    Args:
+        val: A scalar value representing a color channel in the unit interval.
+
+    Returns:
+        A linear intensity.
+
+    """
+    if val >= 0.04045:
+        ret = math.pow((val + 0.055) / 1.055, 2.4)
+    else:
+        ret = val / 12.92
+    return ret
+
+
+class Oklab(Vector):
+
+    @property
+    def lightness(self) -> float:
+        """Lightness."""
+        return self.x
+
+    @property
+    def a(self) -> float:
+        return self.y
+
+    @property
+    def b(self) -> float:
+        return self.z
+
+
+class Oklch(Vector):
+
+    @property
+    def lightness(self) -> float:
+        """Lightness."""
+        return self.x
+
+    @property
+    def chroma(self) -> float:
+        """Chroma. Similar to saturation. 0.4 represents 100%."""
+        return self.y
+
+    @property
+    def hue(self) -> float:
+        """Hue as degree measurement in [0, 360.]"""
+        return self.z
+
+    def normalized_ab(self) -> tuple[float, float]:
+        """Get normalized a, b values that are provided in the conversion
+        to OKLab or in gamut clipping functions.
+        """
+        a = math.cos(math.radians(self.hue))
+        b = math.sin(math.radians(self.hue))
+        return (a, b)
+
+    @classmethod
+    def parse(cls, val: str) -> Self:
+        val, _, alpha = val.strip("oklch(").strip(")").partition("/")
+        comps: list[str] = val.strip().split(" ")
+        alpha = alpha.strip()
+        l_str = comps[0]
+        if l_str .endswith("%"):
+            lightness = float(l_str[:-1]) / 100
+        else:
+            lightness = float(l_str)
+        return cls(
+            lightness,
+            float(comps[1]),
+            float(comps[2]),
+            float(alpha) if alpha else None
+        )
+
+    @property
+    def hex(self) -> str:
+        return oklch_to_hex(self)
+
+    def __str__(self) -> str:
+        if self.alpha is not None:
+            post = f" / {self.alpha}"
+        else:
+            post = ""
+        return f"oklch({self.lightness} {self.chroma} {self.hue}{post})"
+
+    @property
+    def css(self) -> str:
+        return str(self)
+
+
+
+class Rgb(Vector):
+
+    @property
+    def red(self) -> float:
+        return self.x
+
+    @property
+    def green(self) -> float:
+        """Chroma. Similar to saturation. 0.4 represents 100%."""
+        return self.y
+
+    @property
+    def blue(self) -> float:
+        """Hue as degree measurement in [0, 360.]"""
+        return self.z
+
+    @property
+    def hex(self) -> str:
+        return rgb_to_hex(self)
+
+
+
+
+class M:
+    """Container for linear transformations used to convert from OK to RGB."""
+
+    lab_to_lms: ClassVar[Matrix3d] = (
+        (1, +0.3963377774, +0.2158037573),
+        (1, -0.1055613458, -0.0638541728),
+        (1, -0.0894841775, -1.2914855480),
+    )
+    """M_2^-1. First transformation applied to OKLAB coordinates."""
+
+    lms_to_rgb: ClassVar[Matrix3d] = (
+       (4.0767416621,  -3.3077115913,  0.2309699292),
+       (-1.2684380046,  2.6097574011, -0.3413193965),
+       (-0.0041960863, -0.7034186147,  1.7076147010),
+    )
+    """M_{xyz_to_srgb}M_1^{-1}
+    Second transformation applied to OKLAB coordinates."""
+
+    rgb_to_lms: ClassVar[Matrix3d] = (
+        (+0.4122214708, 0.5363325363, 0.0514459929),
+        (+0.2119034982, 0.6806995451, 0.1073969566),
+        (+0.0883024619, 0.2817188376, 0.6299787005),
+    )
+    """Must be (M_{xyz_to_rgb}M_1^{-1})^{-1} = M_1M_{xyz_to_rgb}^{-1}
+    First transformation applied to RGB coordinates."""
+
+    lms_to_lab: ClassVar[Matrix3d] = (
+        (0.2104542553, 0.7936177850, -0.0040720468),
+        (1.9779984951, -2.4285922050, 0.4505937099),
+        (0.0259040371, 0.7827717662, -0.8086757660),
+    )
+    """M_2 in original paper. Second transformation applied to RGB coordinates."""
+
+    xyz_to_lms: Matrix3d = (
+        (0.8189330101, 0.3618667424, -0.1288597137),
+        (0.0329845436, 0.9293118715, +0.0361456387),
+        (0.0482003018, 0.2643662691, +0.6338517070),
+    )
+    """M_1 in original oklab definition."""
+
+    lms_to_xyz: Matrix3d = (
+        (1.22701, -0.5578, 0.281256),
+        (-0.0405802, 1.11226, -0.0716767),
+        (-0.0763813, -0.421482,  1.58616),
+    )
+    """M_1^{-1}, the inverse of M_1. Precision issue?"""
+
+    xyz_to_rgb: Matrix3d = (
+        (3.24061, -1.5376, -0.498486),
+        (-0.969136, 1.87604, 0.041436),
+        (0.0556693, -0.203778, 1.05749),
+    )
+
+    rgb_to_xyz: Matrix3d = (
+        (0.412437, 0.357629, 0.180404),
+        (0.212634, 0.715156, 0.0722104),
+        (0.0192626, 0.118984, 0.950053),
+    )
+    """Inverse of M_{xyz_to_rgb}. Precision issue?"""
+
+
+
+
+
+def oklch_to_oklab(val: Oklch) -> Oklab:
+    (a, b), c = (val.normalized_ab(), val.chroma)
+    return Oklab(val.lightness, a * c, b * c, val.alpha)
+
+
+def oklab_to_linear_rgb(val: Vector) -> Vector:
+    return Rgb.cast(
+        val.T(M.lab_to_lms)
+        .map(cube)
+        .T(M.lms_to_rgb)
+        # .map(_lrgb_to_srgb)
+        # .map(to_byte)
+    )
+
+def oklab_to_rgb(val: Vector) -> Rgb:
+    return Rgb.cast(
+        val.T(M.lab_to_lms)
+        .map(cube)
+        .T(M.lms_to_rgb)
+        .map(_lrgb_to_srgb)
+        .map(to_byte)
+    )
+
+    # NOTE: original change
+    # _l, a, b = val
+    # l3 = math.pow(_l + 0.3963377774 * a + 0.2158037573 * b, 3)
+    # m3 = math.pow(_l - 0.1055613458 * a - 0.0638541728 * b, 3)
+    # s3 = math.pow(_l - 0.0894841775 * a - 1.2914855480 * b, 3)
+    #
+    #
+    # tr = _srgb_transfer_int
+    #
+    # return Rgb(
+    #     red=_srgb_transfer_int(
+    #         +4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3
+    #     ),
+    #     green=_srgb_transfer_int(
+    #         -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3
+    #     ),
+    #     blue=_srgb_transfer_int(
+    #         -0.0041960863 * l3 - 0.7034186147 * m3 + 1.7076147010 * s3
+    #     ),
+    # )
+
+
+def oklab_to_oklch(val: Vector) -> Oklch:
+    lightness, a, b, alpha = val
+    return Oklch(
+        lightness,
+        math.sqrt(a**2 + b**2),
+        math.degrees(math.atan2(b, a)) % 360,
+        alpha,
+    )
+
+
+
+def rgb_to_oklab(val: Vector) -> Oklab:
+    """Map from RGB to OKLAB."""
+    return Oklab.cast(
+        val.map(lambda x: _srgb_to_lrgb(x / 255))
+        .T(M.rgb_to_lms)
+        .map(math.cbrt)
+        .T(M.lms_to_lab)
+    )
+    # Original
+    # red = _srgb_transfer_inverse(val.red / 255)
+    # green = _srgb_transfer_inverse(val.green / 255)
+    # blue = _srgb_transfer_inverse(val.blue / 255)
+    # exp = 1 / 3
+    #
+    # l_ = math.pow(
+    #     0.4122214708 * red + 0.5363325363 * green + 0.0514459929 * blue,
+    #     exp,
+    # )
+    # m_ = math.pow(
+    #     0.2119034982 * red + 0.6806995451 * green + 0.1073969566 * blue,
+    #     exp,
+    # )
+    # s_ = math.pow(
+    #     0.0883024619 * red + 0.2817188376 * green + 0.6299787005 * blue,
+    #     exp,
+    # )
+    #
+    # return Oklab(
+    #     0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_,
+    #     1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_,
+    #     0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_,
+    # )
+
+
+def rgb_to_hex(val: Vector) -> str:
+    r, g, b, alpha = val
+    code = f"#{r:02x}{g:02x}{b:02x}"
+    if alpha is not None:
+        code += f"{to_byte(alpha):02x}"
+    return code
+
+
+
+def oklch_to_rgb(val: Oklch) -> Rgb:
+    return oklab_to_rgb(oklch_to_oklab(val))
+
+def oklch_to_hex(val: Oklch) -> str:
+    return rgb_to_hex(oklab_to_rgb(oklch_to_oklab(val)))
+
+
+def hex_to_oklch(code: str) -> Oklch:
+    """Map"""
+    rgb = parse_hex(code)
+    return oklab_to_oklch(rgb_to_oklab(rgb))
+
+
+def hex_to_oklch_css(code: str) -> str:
+    """Map"""
+    return oklab_to_oklch(rgb_to_oklab(parse_hex(code))).css
+
+def parse_hex(code: str) -> Rgb:
+    if code.startswith("#"):
+        code = code[1:]
+    if code.startswith("0x"):
+        code = code[2:]
+    return Rgb(
+        int(code[0:2], 16),
+        int(code[2:4], 16),
+        int(code[4:6], 16),
+        alpha=int(code[-2:], 16) / 255 if len(code) == 8 else None,
+   )
+
+
+def run_test():
+    """Test case consists of an oklch (user defined) and a hex value computed.
+    """
+    tests = [
+        {
+            "desc": "chroma massively out of bounds",
+            "oklch": "oklch(0.6 0.50 25)",
+            "hex": "#ef0028",
+            "oklch_in_srgb": "oklch(60% 0.2433 25)",
+            "hex_in_srgb": "#ef0028",
+            "hex_to_oklch_color_picker": "oklch(60% 0.2432 25)",
+            "hex_in_srgb_to_oklch_color_picker": "oklch(60% 0.2432 25)",
+        },
+        {
+            "desc": "def in srgb",
+            "oklch": "oklch(0.6 0.1 25)",
+            "hex": "#b46762",
+            "oklch_in_srgb": "oklch(0.6 0.1 25)",
+            "hex_in_srgb": "#b46762",
+            "hex_to_oklch_color_picker": "oklch(59.9% 0.0998 24.4)",
+            "hex_in_srgb_to_oklch_color_picker": "oklch(59.9% 0.0998 24.4)",
+        },
+        {
+            "desc": "harmonized red 500 in p3",
+            "level": "500",
+            "hue": "Red",
+            "oklch": "oklch(0.73 0.21 20)",
+            "hex": "#ff5f6d",
+            "oklch_in_srgb": "oklch(0.73 0.1661 20)",
+            "hex_in_srgb": "#ff777b",
+            "hex_to_oklch_color_picker": "oklch(69.7% 0.194 18.6)",
+            "hex_in_srgb_to_oklch_color_picker": "oklch(73.1% 0.1661 20.3)",
+        },
+    ]
+    import json
+    for num, case in enumerate(tests):
+        oklch = Oklch.parse(case["oklch"])
+        oklch_in_srgb = Oklch.parse(case["oklch_in_srgb"])
+        expected_hex = case["hex"]
+        actual_hex = oklch_to_hex(oklch)
+        text = f"""case {num}
+{json.dumps(case, indent=4)}
+Defined color = {oklch}
+actual hex == expected hex: {actual_hex == expected_hex}
+{actual_hex=}, {expected_hex=}
+hex to oklch via fun = {hex_to_oklch(expected_hex)}
+-------------------------------------------------------------"""
+        print(text)
+
+
+if __name__ == "__main__":
+    run_test()
+
+
+
+# ---------------------------------------------------------------------------
+# Original mess
+# ---------------------------------------------------------------------------
+#
+# class Color:
+#
+#     # These return a dummy color just so to eliminate an annoying warning.
+#     def to_RGB(self) -> "RGB":
+#         return RGB(0, 0, 0)
+#
+#     def to_HEX(self) -> "HEX":
+#         return HEX("#000000")
+#
+#     def to_OKLAB(self) -> "OKLAB":
+#         return OKLAB(0, 0, 0)
+#
+#     def to_OKLCH(self) -> "OKLCH":
+#         return OKLCH(0, 0, 0)
+#
+#     def is_in_gamut(self) -> bool:
+#         return self.to_RGB().is_in_gamut()
+#
+#     def __str__(self):
+#         return ""
+#
+#     # Checks that arg is color
+#     @staticmethod
+#     def _is_color(arg):
+#         if not isinstance(arg, Color):
+#             raise ValueError(f"Expected color, received '{type(arg)}'!")
+#
+#     # Checks that two colors are close
+#     def is_close(self, other):
+#         return self.to_HEX().hex_code == other.to_HEX().hex_code
+#
+#     # Addition gives the midpoint of the two colors in OKLAB space
+#     def __add__(self, other):
+#         self._is_color(other)
+#
+#         return self.to_OKLAB() + other.to_OKLAB()
+#
+#     # Negation gives the complement in OKLAB space
+#     def __neg__(self):
+#         return self.to_OKLAB().__neg__()
+#
+#     # Subtraction gives the midpoint of self and complement of other
+#     def __sub__(self, other):
+#         self._is_color(other)
+#
+#         return self.to_OKLAB() - other.to_OKLAB()
+#
+#     # Pipe operator yields the euclidean distance between two colors
+#     def __or__(self, other):
+#         self._is_color(other)
+#
+#         # Convert both colors to oklab:
+#         self = self.to_OKLAB()
+#         other = other.to_OKLAB()
+#
+#         return math.pow(
+#             (self.l - other.l) ** 2 + (self.a - other.a) ** 2 + (self.b - other.b) ** 2,
+#             0.5,
+#         )
+#
+#
+#
+# ###############################################################################
+# #
+# # Original license for:
+# #   - RGB.to_OKLAB()
+# #   - RGB._srgb_transfer_function()
+# #   - RGB._srgb_transfer_function_inv()
+# #   - OKLAB.to_RGB()
+# #
+# #   Copyright (c) 2021 Björn Ottosson
+# #
+# #   Permission is hereby granted, free of charge, to any person obtaining a
+# #   copy of this software and associated documentation files (the "Software"),
+# #   to deal in the Software without restriction, including without limitation
+# #   the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# #   and/or sell copies of the Software, and to permit persons to whom the
+# #   Software is furnished to do so, subject to the following conditions:
+# #
+# #       The above copyright notice and this permission notice shall be
+# #       included in all copies or substantial portions of the Software.
+# #
+# #       THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# #       EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# #       MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# #       IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# #       CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# #       TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# #       SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+# #
+# ###############################################################################
+#
+#
+# # RGB colors represented as triplets
+# class RGB(Color):
+#
+#     def __init__(self, red: int, green: int, blue: int):
+#         self.r = red
+#         self.g = green
+#         self.b = blue
+#
+#     def __repr__(self) -> str:
+#         return f"rgb({self.r}, {self.g}, {self.b})"
+#
+#     def is_close(self, other):
+#         return super().is_close(other)
+#
+#     # Return type for addition and subtraction is type of first operand
+#     def __add__(self, other):
+#         return super().__add__(other).to_RGB()
+#
+#     def __neg__(self):
+#         return super().__neg__().to_RGB()
+#
+#     def __sub__(self, other):
+#         return super().__sub__(other).to_RGB()
+#
+#     def __or__(self, other):
+#         return super().__or__(other)
+#
+#     # Type Conversions
+#     def to_RGB(self) -> Self:
+#         return self
+#
+#     def to_HEX(self):
+#         return HEX(
+#             "#{:0>2}{:0>2}{:0>2}".format(_hex(self.r), _hex(self.g), _hex(self.b))
+#         )
+#
+#     # Functions for converting to linear RGB from standard RGB and vice versa
+#     @staticmethod
+#     def _srgb_transfer(val: float):
+#         """Convert linear RGB to standard RGB."""
+#         if val >= 0.0031308:
+#             ret = (1.055) * math.pow(val, 1.0 / 2.4) - 0.055
+#         else:
+#             ret = 12.92 * val
+#         return ret
+#
+#     @staticmethod
+#     def _srgb_transfer_inverse(val: float):
+#         if val >= 0.04045:
+#             ret = math.pow((val + 0.055) / (1 + 0.055), 2.4)
+#         else:
+#             ret = val / 12.92
+#         return ret
+#
+#     def to_OKLAB(self):
+#         """Map from RGB to OKLAB."""
+#         red = self._srgb_transfer_inverse(self.r / 255)
+#         green = self._srgb_transfer_inverse(self.g / 255)
+#         blue = self._srgb_transfer_inverse(self.b / 255)
+#         exp = 1 / 3
+#
+#         l_ = math.pow(
+#             0.4122214708 * red + 0.5363325363 * green + 0.0514459929 * blue,
+#             exp,
+#         )
+#         m_ = math.pow(
+#             0.2119034982 * red + 0.6806995451 * green + 0.1073969566 * blue,
+#             exp,
+#         )
+#         s_ = math.pow(
+#             0.0883024619 * red + 0.2817188376 * green + 0.6299787005 * blue,
+#             exp,
+#         )
+#
+#
+#         return OKLAB(
+#             0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_,
+#             1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_,
+#             0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_,
+#         )
+#
+#     def to_OKLCH(self):
+#         return self.to_OKLAB().to_OKLCH()
+#
+#     # Check whether the color is in-gamut
+#     def is_in_gamut(self):
+#         return max(self.r, self.g, self.b) <= 255 and min(self.r, self.g, self.b) >= 0
+#
+#
+# # RGB colors represented as hex code
+# class HEX(Color):
+#     def __init__(self, hex_code):
+#         if not hex_code[0] == "#":
+#             hex_code = "#" + hex_code
+#         self.hex_code = hex_code.upper()
+#
+#     def __str__(self):
+#         return self.hex_code
+#
+#     def is_close(self, other):
+#         return super().is_close(other)
+#
+#     # Return type for addition and subtraction is type of first operand, unless
+#     #   the result is an invalid color, as this could result in a mangled hex
+#     #   code which is ambiguous. Therefore, these are left as RGB.
+#     # The below function sorts this out:
+#     @staticmethod
+#     def __get_valid_hex_or_rgb(color):
+#         if color.is_in_gamut():
+#             return color.to_HEX()
+#         else:
+#             return color.to_RGB()
+#
+#     def __add__(self, other):
+#         return self.__get_valid_hex_or_rgb(super().__add__(other))
+#
+#     def __neg__(self):
+#         return self.__get_valid_hex_or_rgb(super().__neg__())
+#
+#     def __sub__(self, other):
+#         return self.__get_valid_hex_or_rgb(super().__sub__(other))
+#
+#     def __or__(self, other):
+#         return super().__or__(other)
+#
+#     # Type Conversions
+#     def to_RGB(self):
+#         return RGB(
+#             int(self.hex_code[1:3], 16),
+#             int(self.hex_code[3:5], 16),
+#             int(self.hex_code[5:7], 16),
+#         )
+#
+#     def to_HEX(self):
+#         return self
+#
+#     def to_OKLAB(self):
+#         return self.to_RGB().to_OKLAB()
+#
+#     def to_OKLCH(self):
+#         return self.to_RGB().to_OKLCH()
+#
+#     # Check whether the color is in-gamut
+#     def is_in_gamut(self):
+#         return super().is_in_gamut()
+#
+#
+# # OKLAB colors represented as triplets
+# class OKLAB(Color):
+#     def __init__(self, l, a, b):
+#         self.l = l
+#         self.a = a
+#         self.b = b
+#
+#     def __str__(self):
+#         return f"oklab({self.l}, {self.a}, {self.b})"
+#
+#     def is_close(self, other):
+#         return super().is_close(other)
+#
+#     # Return type for addition and subtraction is type of first operand
+#     def __add__(self, other):
+#         l = 0.5 * (self.l + other.l)
+#         a = 0.5 * (self.a + other.a)
+#         b = 0.5 * (self.b + other.b)
+#
+#         return OKLAB(l, a, b)
+#
+#     def __neg__(self):
+#         return OKLAB(1 - self.l, -self.a, -self.b)
+#
+#     def __sub__(self, other):
+#         return self + other.__neg__()
+#
+#     def __or__(self, other):
+#         return super().__or__(other)
+#
+#     # Type Conversions
+#     def to_RGB(self):
+#         """OKLAB to RGB transform."""
+#         _l, a, b = self.l, self.a, self.b
+#         l3 = math.pow(_l + 0.3963377774 * a + 0.2158037573 * b, 3)
+#         m3 = math.pow(_l - 0.1055613458 * a - 0.0638541728 * b, 3)
+#         s3 = math.pow(_l - 0.0894841775 * a - 1.2914855480 * b, 3)
+#
+#
+#         return RGB(
+#             _iround(
+#                 RGB._srgb_transfer(
+#                     +4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3
+#                 )
+#                 * 255
+#             ),
+#             _iround(
+#                 RGB._srgb_transfer(
+#                     -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3
+#                 )
+#                 * 255
+#             ),
+#             _iround(
+#                 RGB._srgb_transfer(
+#                     -0.0041960863 * l3 - 0.7034186147 * m3 + 1.7076147010 * s3
+#                 )
+#                 * 255
+#             ),
+#         )
+#
+#     def to_HEX(self):
+#         return self.to_RGB().to_HEX()
+#
+#     def to_OKLAB(self):
+#         return self
+#
+#     def to_OKLCH(self):
+#         c = math.sqrt(self.a**2 + self.b**2)
+#         h = math.degrees(math.atan2(self.b, self.a))
+#         if h < 0:
+#             h += 360
+#
+#         return OKLCH(self.l, c, h)
+#
+#     def is_in_gamut(self):
+#         return super().is_in_gamut()
+#
+#
+# class OKLCH(Color):
+#
+#     def __init__(self, lightness: float, chroma: float, hue: float):
+#         self.l = lightness
+#         self.c = chroma
+#         self.h = hue
+#
+#     def __repr__(self) -> str:
+#         return "oklch({self.l} {self.c} {self.h})"
+#
+#     def is_close(self, other):
+#         return super().is_close(other)
+#
+#     # Return type for addition and subtraction is type of first operand
+#     def __add__(self, other):
+#         return super().__add__(other).to_OKLCH()
+#
+#     def __neg__(self):
+#         return super().__neg__().to_OKLCH()
+#
+#     def __sub__(self, other):
+#         return super().__sub__(other).to_OKLCH()
+#
+#     def __or__(self, other):
+#         return super().__or__(other)
+#
+#     # Type Conversions
+#     def to_RGB(self):
+#         return self.to_OKLAB().to_RGB()
+#
+#     def to_HEX(self):
+#         return self.to_RGB().to_HEX()
+#
+#     @staticmethod
+#     def _get_normalized_ab(hue: float):
+#         a = math.cos(math.radians(hue))
+#         b = math.sin(math.radians(hue))
+#
+#         return a, b
+#
+#     def to_OKLAB(self):
+#         a, b = self._get_normalized_ab(self.h)
+#         return OKLAB(self.l, a * self.c, b * self.c)
+#
+#     def to_OKLCH(self):
+#         return self
+#
+#     # Check whether the color is in-gamut
+#     def is_in_gamut(self):
+#         return super().is_in_gamut()
+
+#     # Returns a css string which rounds in such a way as to guarantee an
+#     # in-gamut color (presuming the original color was in-gamut, of course)
+#     def css_string(self):
+#         # Find which way is safe to round l
+#         cusp = find_cusp(hue=self.h)
+#         if self.l > cusp.l:
+#             li = _floor(self.l, 4)
+#         else:
+#             li = _ceil(self.l, 4)
+#
+#         # Always safe to floor c
+#         c = _floor(self.c, 3)
+#
+#         # Doesn't matter how h is rounded; it can go directly in format string
+#         return "oklch({:.2%} {:.3f} {:.2f})".format(li, c, self.h)
+#
+#
+#
+#
+
+# ----------------------------------------------------------------------------
+# # Several of the below functions are sourced from Björn Ottosson's blog posts
+# #   which originally defined the OKLAB & OKLCH color spaces. For full
+# #   information on how these functions work, you should read those posts. Other
+# #   than translation, I have made only minimal changes to them.
+# #
+# # The original code can be found at:
+# # https://bottosson.github.io/posts/gamutclipping/
+# #
+# ----------------------------------------------------------------------------
+# ###############################################################################
+# #
+# #   Copyright (c) 2021 Björn Ottosson
+# #
+# #   Permission is hereby granted, free of charge, to any person obtaining a
+# #   copy of this software and associated documentation files (the "Software"),
+# #   to deal in the Software without restriction, including without limitation
+# #   the rights to use, copy, modify, merge, publish, distribute, sublicense,
+# #   and/or sell copies of the Software, and to permit persons to whom the
+# #   Software is furnished to do so, subject to the following conditions:
+# #
+# #       The above copyright notice and this permission notice shall be
+# #       included in all copies or substantial portions of the Software.
+# #
+# #       THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+# #       EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+# #       MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+# #       IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
+# #       CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
+# #       TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# #       SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+# #
+# ###############################################################################
+#
+M_ab_to_lms: Matrix3x2 = (
+    (0.3963377774,  +0.2158037573),
+    (-0.1055613458, -0.0638541728),
+    (-0.0894841775, -1.2914855480),
+)
+
+def _max_saturation(a: float, b: float):
+    """Determine the maximum saturation provided the Lab (a, b)-coordinates
+    on the unit circle.
+    Max saturation will be when one of r, g or b goes below zero.
+    """
+    if a == 0 and b == 0:
+        return 0
+
+    k_lms: Vector3d = linear_trans_2d_to_3d(M_ab_to_lms, (a, b))
+    # original
+    # k_l = +0.3963377774 * a + 0.2158037573 * b
+    # k_m = -0.1055613458 * a - 0.0638541728 * b
+    # k_s = -0.0894841775 * a - 1.2914855480 * b
+
+    # Approximate max saturation using a polynomial whose coefficients
+    # depend on which component goes below zero first.
+    w_lms: Vector3d
+    if (-1.88170328 * a - 0.80936493 * b) > 1:
+        # Red component
+        k0 = +1.19086277
+        k1 = +1.76576728
+        k2 = +0.59662641
+        k3 = +0.75515197
+        k4 = +0.56771245
+        w_lms = (+4.0767416621, -3.3077115913, +0.2309699292)
+    elif (1.81444104 * a - 1.19445276 * b) > 1:
+        # Green component
+        k0 = +0.73956515
+        k1 = -0.45954404
+        k2 = +0.08285427
+        k3 = +0.12541070
+        k4 = +0.14503204
+        w_lms = (-1.2684380046, +2.6097574011,  -0.3413193965)
+    else:
+        # Blue component
+        k0 = +1.35733652
+        k1 = -0.00915799
+        k2 = -1.15130210
+        k3 = -0.50559606
+        k4 = +0.00692167
+        w_lms =  (-0.0041960863, -0.7034186147, 1.7076147010)
+    S = k0 + (k1 * a) + (k2 * b) + (k3 * a**2) + (k4 * a * b)
+
+
+
+    # Apply Halley's method to get closer. Typically error is less than 10e6,
+    # except for some blue hues where dS/dh is close to infinite.
+    # Between one and three iterations steps should suffice.
+    for _ in range(3):
+        lms_: Vector3d = vmap3d(lambda x: S*x + 1, k_lms)
+        # lms_2: Vector3d = square3d(lms_)
+        # lms_3: Vector3d = cube3d(lms_)
+        # l_ = 1 + S * k_l
+        # m_ = 1 + S * k_m
+        # s_ = 1 + S * k_s
+
+
+        # lms_**3
+        # original
+        # l3 = l_ * l_ * l_
+        # m3 = m_ * m_ * m_
+        # s3 = s_ * s_ * s_
+
+        # original
+        # l_dS = 3 * k_l * (l_ * l_)
+        # m_dS = 3 * k_m * (m_ * m_)
+        # s_dS = 3 * k_s * (s_ * s_)
+        # 3(k_lms*lms^2)
+        lms_dS: Vector3d = smul3d(3, vmul3d(k_lms, square3d(lms_)))
+
+        # original
+        # l_dS2 = 6 * (k_l * k_l) * l_
+        # m_dS2 = 6 * (k_m * k_m) * m_
+        # s_dS2 = 6 * (k_s * k_s) * s_
+        lms_dS2: Vector3d = smul3d(6, vmul3d(square3d(k_lms), lms_))
+
+
+        # f = (wl, ws, wm).lms_3
+        # f1 = (wl, ws, wm).dS
+        # f2 = (wl, ws, wm).dS2
+        f = dot3d(w_lms, cube3d(lms_))
+        f1 = dot3d(w_lms, lms_dS)
+        f2 = dot3d(w_lms, lms_dS2)
+        # original
+        # f = (wl * l3) + (wm * m3) + (ws * s3)
+        # f1 = (wl * l_dS) + wm * m_dS + (ws * s_dS)
+        # f2 = (wl * l_dS2) + (wm * m_dS2) + (ws * s_dS2)
+
+        S = S - (f * f1) / (f1**2 - (0.5 * f * f2))
+    return S
+
+
+def find_cusp(hue: float) -> Oklch:
+    a, b = hue_to_ab(hue)
+    S_cusp = _max_saturation(a, b)
+    lrgb = oklab_to_linear_rgb(Oklab(1, S_cusp * a, S_cusp * b))[:3]
+    L_cusp = math.cbrt(1 / max(lrgb))
+    return Oklch(L_cusp, L_cusp * S_cusp, hue)
+    # C_cusp = L_cusp * S_cusp
+
+    # Convert to linear sRGB to find the first point where at least one of r,g,
+    #   or b >= 1:
+    # rgb_at_max = max(oklab_to_linear_rgb(Oklab(1, S_cusp * a, S_cusp * b))[:3])
+    # L_cusp = math.cbrt(1 / rgb_at_max[:3]))
+    # # original: it's just oklab_to_linear_srgb
+    # r = _srgb_transfer_inverse(rgb_at_max.red / 255)
+    # g = RGB._srgb_transfer_inverse(rgb_at_max.g / 255)
+    # b = RGB._srgb_transfer_inverse(rgb_at_max.b / 255)
+    # L_cusp = math.pow(1.0 / max(rgb_at_max.r, rgb_at_max.g, rgb_at_max.b), 1 / 3)
+    # C_cusp = L_cusp * S_cusp
+    #
+    # return OKLCH(L_cusp, C_cusp, hue)
+
+
+# class GamutIntersectors:
+#     """A collection of functions that map define lines of intersection in
+#     the (l, c, h=h1) oklch plane P_h1 for a fixed hue h1. Given a point
+#     (l1, c1) in P_h1 the problem is to find a corresponding point (l0, c0) in
+#     P_h1, perhaps depending on (l1, c1), and a value t such that the
+#     point (l_t, c_t) = t(l1, c1) + (1-t)(l0, c0) is on the gamut's roughly
+#     triangular surface.
+#
+#     a given point (L1, C1) in the oklch
+#     plane a fixed hue h1"""
+
+# wip reworking of original version that was more a translation from blog post
+# def _find_gamut_intersection(
+#     L1, C1, color=None, hue=None, L0=None, method="hue_dependent"
+# ):
+#     # L = L0 * (1 - t) + t * L1
+#     # C = t * C1
+#     # a and b must be normalized so a^2 + b^2 == 1
+#     # I've similarly made this function more flexible for my own ease of use, even
+#     #   if it is not intended to be user-facing.
+#     # The minimum information required is L1, C1, and some way of specifying hue.
+#     #   L0 is usually not required, since it can be inferred from the method;
+#     #   however, an option is given to provide an explicit L0 with method 'manual'.
+#     # Finds intersection of the line defined by
+#     #   L = L0 * (1 - t) + t * L1;
+#     #   C = t * C1;
+#     col = "oklch(0.86 0.2 25)"
+#     col = "oklch(0.86 0.0744 25)"
+#
+#
+#     # Either color or hue may be provided, but exactly one is required.
+#     assert (color is None) ^ (hue is None), (
+#         "Exactly one of color or hue must be provided!"
+#     )
+#
+#     if hue is not None:
+#         assert isinstance(hue, (float, int)), f"Expected number, received {type(hue)}!"
+#
+#     else:
+#         assert isinstance(color, Color), (
+#             f"Expected color, received {type(color)}!"
+#         )
+#         if not isinstance(color, OKLCH):
+#             color = color.to_OKLCH()
+#         hue = color.h
+#
+#     # a and b must be normalized so a^2 + b^2 == 1
+#     a, b = OKLCH._get_normalized_ab(hue)
+#
+#     # Find the cusp of the gamut triangle
+#     if abs(hue - 264) >= 1:
+#         cusp = find_cusp(hue=hue)
+#     else:
+#         # This handles a strange case with blues where it can converge
+#         #   out-of-gamut, resulting in an infinite loop.
+#         cusp = HEX("#023BFB").to_OKLCH()
+#
+#     # Manual method allows for an explicit L0 value.
+#     if method == "manual":
+#         if L0 is None:
+#             raise ValueError("L0 must be explicitly provided with method 'manual'.")
+#     else:
+#         if L0 is not None:
+#             raise ValueError("L0 cannot be set explicitly unless using method 'manual'!")
+#
+#         # The other methods specify how L0 should be set.
+#         # Method 'hue_dependent' moves the color towards the point
+#         #   (cusp.l, 0, hue) until it intersects the gamut, which is default.
+#         if method == "hue_dependent":
+#             L0 = cusp.l
+#
+#         # Method 'hue_independent' moves the color towards medium grey.
+#         elif method == "hue_independent":
+#             L0 = 0.5
+#
+#         # Method 'preserve_lightness' does not alter lightness as long as it's
+#         #   a valid value.
+#         elif method == "preserve_lightness":
+#             L0 = min(1, max(0, L1))
+#
+#         else:
+#             raise ValueError(f"Unknown method: '{method}'!")
+#
+#     # Find the intersection for upper and lower half separately
+#     if ((L1 - L0) * cusp.c - (cusp.l - L0) * C1) <= 0.0:
+#         # Lower half
+#
+#         t = cusp.c * L0 / (C1 * cusp.l + cusp.c * (L0 - L1))
+#         output = OKLCH(L0 * (1 - t) + t * L1, t * C1, hue)
+#     else:
+#         # Upper half
+#
+#         # First intersect with triangle
+#         t = cusp.c * (L0 - 1.0) / (C1 * (cusp.l - 1.0) + cusp.c * (L0 - L1))
+#
+#         # Then one step Halley's method
+#         dL = L1 - L0
+#         dC = C1
+#
+#         k_l = +0.3963377774 * a + 0.2158037573 * b
+#         k_m = -0.1055613458 * a - 0.0638541728 * b
+#         k_s = -0.0894841775 * a - 1.2914855480 * b
+#
+#         l_dt = dL + dC * k_l
+#         m_dt = dL + dC * k_m
+#         s_dt = dL + dC * k_s
+#
+#         # If higher accuracy is required, 2 or 3 iterations of the following
+#         # block can be used:
+#         output = OKLCH(L0 * (1 - t) + t * L1, t * C1, hue)
+#         while not output.is_in_gamut():
+#             L = L0 * (1.0 - t) + t * L1
+#             C = t * C1
+#
+#             l_ = L + C * k_l
+#             m_ = L + C * k_m
+#             s_ = L + C * k_s
+#
+#             l3 = l_ * l_ * l_
+#             m3 = m_ * m_ * m_
+#             s3 = s_ * s_ * s_
+#
+#             ldt = 3 * l_dt * l_ * l_
+#             mdt = 3 * m_dt * m_ * m_
+#             sdt = 3 * s_dt * s_ * s_
+#
+#             ldt2 = 6 * l_dt * l_dt * l_
+#             mdt2 = 6 * m_dt * m_dt * m_
+#             sdt2 = 6 * s_dt * s_dt * s_
+#
+#             r = 4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3 - 1
+#             r1 = 4.0767416621 * ldt - 3.3077115913 * mdt + 0.2309699292 * sdt
+#             r2 = 4.0767416621 * ldt2 - 3.3077115913 * mdt2 + 0.2309699292 * sdt2
+#
+#             u_r = r1 / (r1 * r1 - 0.5 * r * r2)
+#             t_r = -r * u_r
+#
+#             g = -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3 - 1
+#             g1 = -1.2684380046 * ldt + 2.6097574011 * mdt - 0.3413193965 * sdt
+#             g2 = -1.2684380046 * ldt2 + 2.6097574011 * mdt2 - 0.3413193965 * sdt2
+#
+#             u_g = g1 / (g1 * g1 - 0.5 * g * g2)
+#             t_g = -g * u_g
+#
+#             b = -0.0041960863 * l3 - 0.7034186147 * m3 + 1.7076147010 * s3 - 1
+#             b1 = -0.0041960863 * ldt - 0.7034186147 * mdt + 1.7076147010 * sdt
+#             b2 = -0.0041960863 * ldt2 - 0.7034186147 * mdt2 + 1.7076147010 * sdt2
+#
+#             u_b = b1 / (b1 * b1 - 0.5 * b * b2)
+#             t_b = -b * u_b
+#
+#             t_r = t_r if u_r >= 0.0 else sys.float_info.max
+#             t_g = t_g if u_g >= 0.0 else sys.float_info.max
+#             t_b = t_b if u_b >= 0.0 else sys.float_info.max
+#
+#             t += min(t_r, t_g, t_b)
+#             output = OKLCH(L0 * (1 - t) + t * L1, t * C1, hue)
+#
+#     return output
+
+# def _original_find_gamut_intersection(
+#     L1, C1, color=None, hue=None, L0=None, method="hue_dependent"
+# ):
+#     # L = L0 * (1 - t) + t * L1
+#     # C = t * C1
+#     # a and b must be normalized so a^2 + b^2 == 1
+#     # I've similarly made this function more flexible for my own ease of use, even
+#     #   if it is not intended to be user-facing.
+#     # The minimum information required is L1, C1, and some way of specifying hue.
+#     #   L0 is usually not required, since it can be inferred from the method;
+#     #   however, an option is given to provide an explicit L0 with method 'manual'.
+#     # Finds intersection of the line defined by
+#     #   L = L0 * (1 - t) + t * L1;
+#     #   C = t * C1;
+#
+#     # Either color or hue may be provided, but exactly one is required.
+#     assert (color is None) ^ (hue is None), (
+#         "Exactly one of color or hue must be provided!"
+#     )
+#
+#     if hue is not None:
+#         assert isinstance(hue, (float, int)), f"Expected number, received {type(hue)}!"
+#
+#     else:
+#         assert isinstance(color, Color), (
+#             f"Expected color, received {type(color)}!"
+#         )
+#         if not isinstance(color, OKLCH):
+#             color = color.to_OKLCH()
+#         hue = color.h
+#
+#     # a and b must be normalized so a^2 + b^2 == 1
+#     a, b = OKLCH._get_normalized_ab(hue)
+#
+#     # Find the cusp of the gamut triangle
+#     if abs(hue - 264) >= 1:
+#         cusp = find_cusp(hue=hue)
+#     else:
+#         # This handles a strange case with blues where it can converge
+#         #   out-of-gamut, resulting in an infinite loop.
+#         cusp = HEX("#023BFB").to_OKLCH()
+#
+#     # Manual method allows for an explicit L0 value.
+#     if method == "manual":
+#         if L0 is None:
+#             raise ValueError("L0 must be explicitly provided with method 'manual'.")
+#     else:
+#         if L0 is not None:
+#             raise ValueError("L0 cannot be set explicitly unless using method 'manual'!")
+#
+#         # The other methods specify how L0 should be set.
+#         # Method 'hue_dependent' moves the color towards the point
+#         #   (cusp.l, 0, hue) until it intersects the gamut, which is default.
+#         if method == "hue_dependent":
+#             L0 = cusp.l
+#
+#         # Method 'hue_independent' moves the color towards medium grey.
+#         elif method == "hue_independent":
+#             L0 = 0.5
+#
+#         # Method 'preserve_lightness' does not alter lightness as long as it's
+#         #   a valid value.
+#         elif method == "preserve_lightness":
+#             L0 = min(1, max(0, L1))
+#
+#         else:
+#             raise ValueError(f"Unknown method: '{method}'!")
+#
+#     # Find the intersection for upper and lower half separately
+#     if ((L1 - L0) * cusp.c - (cusp.l - L0) * C1) <= 0.0:
+#         # Lower half
+#
+#         t = cusp.c * L0 / (C1 * cusp.l + cusp.c * (L0 - L1))
+#         output = OKLCH(L0 * (1 - t) + t * L1, t * C1, hue)
+#     else:
+#         # Upper half
+#
+#         # First intersect with triangle
+#         t = cusp.c * (L0 - 1.0) / (C1 * (cusp.l - 1.0) + cusp.c * (L0 - L1))
+#
+#         # Then one step Halley's method
+#         dL = L1 - L0
+#         dC = C1
+#
+#         k_l = +0.3963377774 * a + 0.2158037573 * b
+#         k_m = -0.1055613458 * a - 0.0638541728 * b
+#         k_s = -0.0894841775 * a - 1.2914855480 * b
+#
+#         l_dt = dL + dC * k_l
+#         m_dt = dL + dC * k_m
+#         s_dt = dL + dC * k_s
+#
+#         # If higher accuracy is required, 2 or 3 iterations of the following
+#         # block can be used:
+#         output = OKLCH(L0 * (1 - t) + t * L1, t * C1, hue)
+#         while not output.is_in_gamut():
+#             L = L0 * (1.0 - t) + t * L1
+#             C = t * C1
+#
+#             l_ = L + C * k_l
+#             m_ = L + C * k_m
+#             s_ = L + C * k_s
+#
+#             l3 = l_ * l_ * l_
+#             m3 = m_ * m_ * m_
+#             s3 = s_ * s_ * s_
+#
+#             ldt = 3 * l_dt * l_ * l_
+#             mdt = 3 * m_dt * m_ * m_
+#             sdt = 3 * s_dt * s_ * s_
+#
+#             ldt2 = 6 * l_dt * l_dt * l_
+#             mdt2 = 6 * m_dt * m_dt * m_
+#             sdt2 = 6 * s_dt * s_dt * s_
+#
+#             r = 4.0767416621 * l3 - 3.3077115913 * m3 + 0.2309699292 * s3 - 1
+#             r1 = 4.0767416621 * ldt - 3.3077115913 * mdt + 0.2309699292 * sdt
+#             r2 = 4.0767416621 * ldt2 - 3.3077115913 * mdt2 + 0.2309699292 * sdt2
+#
+#             u_r = r1 / (r1 * r1 - 0.5 * r * r2)
+#             t_r = -r * u_r
+#
+#             g = -1.2684380046 * l3 + 2.6097574011 * m3 - 0.3413193965 * s3 - 1
+#             g1 = -1.2684380046 * ldt + 2.6097574011 * mdt - 0.3413193965 * sdt
+#             g2 = -1.2684380046 * ldt2 + 2.6097574011 * mdt2 - 0.3413193965 * sdt2
+#
+#             u_g = g1 / (g1 * g1 - 0.5 * g * g2)
+#             t_g = -g * u_g
+#
+#             b = -0.0041960863 * l3 - 0.7034186147 * m3 + 1.7076147010 * s3 - 1
+#             b1 = -0.0041960863 * ldt - 0.7034186147 * mdt + 1.7076147010 * sdt
+#             b2 = -0.0041960863 * ldt2 - 0.7034186147 * mdt2 + 1.7076147010 * sdt2
+#
+#             u_b = b1 / (b1 * b1 - 0.5 * b * b2)
+#             t_b = -b * u_b
+#
+#             t_r = t_r if u_r >= 0.0 else sys.float_info.max
+#             t_g = t_g if u_g >= 0.0 else sys.float_info.max
+#             t_b = t_b if u_b >= 0.0 else sys.float_info.max
+#
+#             t += min(t_r, t_g, t_b)
+#             output = OKLCH(L0 * (1 - t) + t * L1, t * C1, hue)
+#
+#     return output
+#
+#
+# ###############################################################################
+# #
+# # The following two functions find the intersections of the line defined by:
+# #   L = color.l * (1 - t1) + t1 * L1
+# #   C = color.c * (1 - t1) + t1 * C1
+# # where either L1 == color.l or C1 == color.c. These are useful points for
+# #   performing lightening or saturating operations within a given hue.
+# #
+# # This differs from the above function in the C term, as for our purposes C0
+# #   may not be equal to 0. This adds an additional unknown, but when
+# #   considering the additional constraints:
+# #       (L, C) = (0, 0) * (1 - t2) + t2 * (L_cusp, C_cusp); (lower half)
+# #           OR
+# #       (L, C) = (L_cusp, C_cusp) * (1 - t2) + t2 * (1, 0); (upper half)
+# #   we end up with five unknowns and five functions nonetheless.
+# #
+# ###############################################################################
+# #
+# # For the first of our two functions, we take some color with chroma color.c
+# #   which is less than the maximum possible in-gamut chroma for the given
+# #   lightness color.l and hue color.h. This can be used with the trivially
+# #   found minimum chroma of 0 to perform relative operations on a color's
+# #   chroma.
+# # Therefore, this function solves for chroma C given L1 == color.l:
+# # => L = color.l
+# # then in the lower half case:
+# #   (color.l, C) = t2 * (L_cusp, C_cusp)
+# #   => t2 = (color.l, C) / (L_cusp, C_cusp) where (L_cusp, C_cusp) != 0
+# #   => C / C_cusp = color.l / L_cusp
+# #   => C = C_cusp * (color.l / L_cusp)
+# # and in the upper half case:
+# #   (color.l, C) = (L_cusp, C_cusp) * (1 - t2) + t2 * (1, 0)
+# #   => (color.l, C) - (L_cusp, C_cusp) = t2 * ((1, 0) - (L_cusp, C_cusp))
+# #   => t2 = ((color.l, C) - (L_cusp, C_cusp)) / (1 - L_cusp, -C_cusp)
+# #       where L_cusp != 1 && C_cusp != 0
+# #   => (C - C_cusp) / C_cusp = (L_cusp - color.l) / (1 - L_cusp)
+# #   => C = C_cusp * (L_cusp - color.l) / (1 - L_cusp) + C_cusp
+# #           = C_cusp * (1 + (L_cusp - color.l) / (1 - L_cusp))
+# #           = C_cusp * (1 - color.l) / (1 - L_cusp)
+# #
+# ###############################################################################
+# def _find_chroma_max(color):
+#     # First, get the cusp
+#     cusp = find_cusp(color=color)
+#
+#     # Next, we consider whether our lightness places us in the upper or lower
+#     #   half:
+#     if color.l <= cusp.l:
+#         # Lower half
+#         C = cusp.c * (color.l / cusp.l)
+#     else:
+#         # Upper half
+#         C = cusp.c * (1 - color.l) / (1 - cusp.l)
+#
+#         # Correct for the concavity of the upper half.
+#         C = _find_gamut_intersection(
+#             color.l, C, color=color, method="preserve_lightness"
+#         ).c
+#
+#     return C
+#
+#
+# ###############################################################################
+# #
+# # For the second of our two functions, we take some color with lightness
+# #   color.l which is between the minimum and maximum possible in-gamut
+# #   lightness for the given chroma color.c and hue color.h. These can be used
+# #   to perform relative operations on a color's lightness.
+# # Therefore, this function solves for lightness L given C1 == color.c:
+# # => C = color.c
+# # then in the lower half case:
+# #   (L, color.c) = t2 * (L_cusp, C_cusp)
+# #   => t2 = (L, color.c) / (L_cusp, C_cusp) where (L_cusp, C_cusp) != 0
+# #   => L / L_cusp = color.c / C_cusp
+# #   => L = L_cusp * (color.c / C_cusp)
+# # and in the upper half case:
+# #   (L, color.c) = (L_cusp, C_cusp) * (1 - t2) + t2 * (1, 0)
+# #   => (L, color.c) - (L_cusp, C_cusp) = t2 * ((1, 0) - (L_cusp, C_cusp))
+# #   => t2 = ((L, color.c) - (L_cusp, C_cusp)) / (1 - L_cusp, -C_cusp)
+# #           where L_cusp != 1 && C_cusp != 0
+# #   => (L - L_cusp) / (1 - L_cusp) = (C_cusp - color.c) / C_cusp
+# #                                   = 1 - color.c / C_cusp
+# #   => L = (1 - L_cusp) * (1 - color.c / C_cusp) + L_cusp
+# #   => L = 1 - (1 - L_cusp) * (color.c / C_cusp)
+# #
+# # Since the lightness intersects at two points, we are interested in both the
+# #   lower half and the upper half.
+# #
+# ###############################################################################
+# def _find_lightness_bounds(color):
+#     # First, get the cusp
+#     cusp = find_cusp(color=color)
+#
+#     # Lower half
+#     L1 = cusp.l * (color.c / cusp.c)
+#
+#     # Upper half
+#     L2 = 1 - (1 - cusp.l) * (color.c / cusp.c)
+#
+#     # Correct for the concavity of the upper half.
+#     # By manually setting L0 to an arbitrarily large negative number, we can
+#     #   easily approximate moving horizontally.
+#     L2 = _find_gamut_intersection(L2, color.c, color=color, method="manual", L0=-1000).l
+#
+#     return (L1, L2)
+#
+#
+# # A simple lerp
+# def _lerp(t, a, b):
+#     return a * (1 - t) + b * t
+#
+#
+# ###############################################################################
+# #
+# # Public Functions
+# #
+# ###############################################################################
+# #
+# # All of the below functions implement a similar function header and type
+# #   checking process so that users are able to specify the necessary
+# #   information in whatever format is convenient to them, without compromising
+# #   the stability of the code.
+# # Generally speaking, a function which requires lightness, hue, or chroma can
+# #   receive either explicit values for each, or a color object with the
+# #   desired properties. A color object need not be OKLCH, and thus is the
+# #   intended way to pass RGB/HEX  Many of the functions essentially
+# #   exist to tweak one of the characteristics of an OKLCH color by
+# #   interpolating within certain bounds, and when that is the case the first
+# #   argument is always the parameter for that lerp. Furthermore, a method can
+# #   often be specified between relative, which operates from the provided
+# #   color to the extremum in-gamut color for the given axis, and absolute,
+# #   which only considers the extrema.
+# #
+# ###############################################################################
+#
+#
+# # Type-checking used for all of the below:
+# def __get_OKLCH_if_color(arg):
+#     Color._is_color(arg)
+#     return arg.to_OKLCH()
+#
+#
+# # Lerps the chroma for the given color. Negative t dechromatizes if the method
+# #   is relative
+# def chromatize(t, color=None, hue=None, lightness=None, method="relative"):
+#     assert (color is None) ^ (hue is None), (
+#         "Exactly one of color or hue must be provided!"
+#     )
+#
+#     if hue is not None:
+#         if not isinstance(hue, (float, int)):
+#             raise ValueError(f"Expected number, received {type(lightness)}!")
+#
+#         assert lightness is not None, "Lightness must be specified with explicit hue!"
+#         if not isinstance(lightness, (float, int)):
+#             raise ValueError(f"Expected number, received {type(lightness)}!")
+#
+#         assert method == "absolute", (
+#             "Explicit hue can only be specified with method 'relative'!"
+#         )
+#         # Generate a color object with the given parameters
+#         color = OKLCH(lightness, 0.0, hue)
+#
+#     else:
+#         color = __get_OKLCH_if_color(color)
+#
+#     # Find max chroma
+#     max = _find_chroma_max(color)
+#
+#     if method == "relative":
+#         if t < -1 or t > 1:
+#             raise ValueError("t should be in the range [-1,1] for method 'relative'!")
+#
+#         # Interpolate between current c and maximum
+#         if t >= 0:
+#             C = _lerp(t, color.c, max)
+#
+#         # Negative t means we interpolate towards the minimum (0) instead
+#         else:
+#             C = _lerp(-t, color.c, 0)
+#
+#     elif method == "absolute":
+#         if t < 0 or t > 1:
+#             raise ValueError("t should be in the range [0,1] for method 'absolute'!")
+#
+#         # In absolute mode we interpolate between minimum (0) and max
+#         C = _lerp(t, 0, max)
+#
+#     else:
+#         raise ValueError(f"""Unknown method: '{method}'!
+# Valid methods are 'relative' and 'absolute'.""")
+#
+#     ret = OKLCH(color.l, C, color.h)
+#     # Make sure that the color is in-gamut
+#     if ret.is_in_gamut():
+#         return ret
+#     else:
+#         # Clip it into gamut
+#         return gamut_clip_preserve_lightness(ret)
+#
+#
+# # Simply reverses the direction of chromatize
+# def dechromatize(t, color=None, hue=None, lightness=None, method="relative"):
+#     # Negate t and chromatize
+#     if method == "relative":
+#         return chromatize(-t, color=color, hue=hue, lightness=lightness)
+#
+#     # Reverse t and chromatize
+#     elif method == "absolute":
+#         return chromatize(
+#             1 - t, color=color, hue=hue, lightness=lightness, method="absolute"
+#         )
+#
+#     else:
+#         raise ValueError(f"""Unknown method: '{method}'!
+# Valid methods are 'relative' and 'absolute'.""")
+#
+#
+# # Chromatize, while technically more correct, is not a very appealing name, so
+# #   detone and tone are provided as aliases.
+# def detone(t, color=None, hue=None, lightness=None, method="relative"):
+#     return chromatize(t, color=color, hue=hue, lightness=lightness, method=method)
+#
+#
+# def tone(t, color=None, hue=None, lightness=None, method="relative"):
+#     return dechromatize(t, color=color, hue=hue, lightness=lightness, method=method)
+#
+#
+# # Lerps the lightness for the given color. Negative t darkens if the method is
+# #   relative
+# def lighten(t, color=None, hue=None, chroma=None, method="relative"):
+#     assert (color is None) ^ (hue is None), (
+#         "Exactly one of color or hue must be provided!"
+#     )
+#
+#     if hue is not None:
+#         if not isinstance(hue, (float, int)):
+#             raise ValueError(f"Expected number, received {type(chroma)}!")
+#
+#         assert chroma is not None, "Lightness must be specified with explicit hue!"
+#         if not isinstance(chroma, (float, int)):
+#             raise ValueError(f"Expected number, received {type(chroma)}!")
+#
+#         assert method == "absolute", (
+#             "Explicit hue can only be specified with method 'relative'!"
+#         )
+#         # Generate a color object with the given parameters
+#         color = OKLCH(0.5, chroma, hue)
+#
+#     else:
+#         color = __get_OKLCH_if_color(color)
+#
+#     # Find the min and max lightness
+#     bounds = _find_lightness_bounds(color)
+#
+#     if method == "relative":
+#         if t < -1 or t > 1:
+#             raise ValueError("t should be in the range [-1,1] for method 'relative'!")
+#
+#         # Interpolate between current l and maximum
+#         if t >= 0:
+#             L = _lerp(t, color.l, bounds[1])
+#
+#         # Negative t means we interpolate towards the minimum instead
+#         else:
+#             L = _lerp(-t, color.l, bounds[0])
+#
+#     elif method == "absolute":
+#         if t < 0 or t > 1:
+#             raise ValueError("t should be in the range [0,1] for method 'absolute'!")
+#
+#         # In absolute mode we interpolate between minimum and max
+#         L = _lerp(t, bounds[0], bounds[1])
+#
+#     else:
+#         raise ValueError(f"""Unknown method: '{method}'!
+# Valid methods are 'relative' and 'absolute'.""")
+#
+#     ret = OKLCH(L, color.c, color.h)
+#     # Make sure that the color is in-gamut
+#     if ret.is_in_gamut():
+#         return ret
+#     else:
+#         # Clip it into gamut
+#         return _find_gamut_intersection(L, color.c, hue=color.h)
+#
+#
+# # Simply reverses the direction of chromatize
+# def darken(t, color=None, hue=None, chroma=None, method="relative"):
+#     # Negate t and lighten
+#     if method == "relative":
+#         return lighten(-t, color=color, hue=hue, chroma=chroma)
+#
+#     # Reverse t and lighten
+#     elif method == "absolute":
+#         return lighten(1 - t, color=color, hue=hue, chroma=chroma, method="absolute")
+#
+#     else:
+#         raise ValueError(f"""Unknown method: '{method}'!
+# Valid methods are 'relative' and 'absolute'.""")
+#
+#
+# # Linearly interpolate between two colors
+# # Hue path is determined by method parameter
+# def interpolate(t, color1, color2, method="shortest"):
+#     color1 = __get_OKLCH_if_color(color1)
+#     color2 = __get_OKLCH_if_color(color2)
+#
+#     # Get the lerped parameters
+#     li = _lerp(t, color1.l, color2.l)
+#     ch = _lerp(t, color1.c, color2.c)
+#
+#     # Hue path is determined by method
+#     if method == "shortest":
+#         # Ensures hue takes the shortest path
+#         if color2.h - color1.h > 180:
+#             h = _lerp(t, color1.h + 360, color2.h)
+#         elif color2.h - color1.h < -180:
+#             h = _lerp(t, color1.h, color2.h + 360)
+#         else:
+#             h = _lerp(t, color1.h, color2.h)
+#     elif method == "longest":
+#         # Ensures hue takes the longest path
+#         if 0 < color2.h - color1.h < 180:
+#             h = _lerp(t, color1.h + 360, color2.h)
+#         elif -180 < color2.h - color1.h <= 0:
+#             h = _lerp(t, color1.h, color2.h + 360)
+#         else:
+#             h = _lerp(t, color1.h, color2.h)
+#     elif method == "increasing":
+#         # Ensures hue is strictly increasing
+#         if color2.h < color1.h:
+#             h = _lerp(t, color1.h, color2.h + 360)
+#         else:
+#             h = _lerp(t, color1.h, color2.h)
+#     elif method == "decreasing":
+#         # Ensures hue is strictly decreasing
+#         if color1.h < color2.h:
+#             h = _lerp(t, color1.h + 360, color2.h)
+#         else:
+#             h = _lerp(t, color1.h, color2.h)
+#     elif method == "use_OKLAB":
+#         color1 = color1.to_OKLAB()
+#         color2 = color2.to_OKLAB()
+#
+#         a = _lerp(t, color1.a, color2.a)
+#         b = _lerp(t, color1.b, color2.b)
+#         result = OKLAB(li, a, b).to_OKLCH()
+#
+#         ch = result.c
+#         h = result.h
+#     else:
+#         raise ValueError(f"""Unknown method '{method}'! Valid methods are:
+# 'shortest', 'longest', 'increasing', 'decreasing', and 'use_OKLAB'.""")
+#
+#     ret = OKLCH(li, ch, h)
+#     # Make sure that the color is in-gamut
+#     if ret.is_in_gamut():
+#         return ret
+#     else:
+#         # Clip it into gamut
+#         return gamut_clip_preserve_lightness(ret)
+#
+#
+# # Gamut clipping:
+# def gamut_clip_hue_dependent(color):
+#     _color = __get_OKLCH_if_color(color)
+#     if color.is_in_gamut():
+#         return color
+#
+#     return _find_gamut_intersection(_color.l, _color.c, color=_color)
+#
+#
+# def gamut_clip_hue_independent(color):
+#     _color = __get_OKLCH_if_color(color)
+#     if color.is_in_gamut():
+#         return color
+#
+#     return _find_gamut_intersection(
+#         _color.l, _color.c, color=_color, method="hue_dependent"
+#     )
+#
+#
+# def gamut_clip_preserve_lightness(color):
+#     _color = __get_OKLCH_if_color(color)
+#     if color.is_in_gamut():
+#         return color
+#
+#     return _find_gamut_intersection(
+#         _color.l, _color.c, color=_color, method="preserve_lightness"
+#     )

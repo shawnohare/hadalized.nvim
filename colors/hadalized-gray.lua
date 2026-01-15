@@ -17,8 +17,8 @@
 
 ---@type Palette
 local palette = {
-  name = "hadalized",
-  desc = "Main dark theme with blueish solarized inspired backgrounds.",
+  name = "hadalized-gray",
+  desc = "Dark theme variant with more grayish backgrounds.",
   mode = "dark",
   gamut = "srgb",
   hue = {
@@ -64,20 +64,20 @@ local palette = {
     rose = "#ff9cbf",
   },
   base = {
-    bg = "#00090e",
-    bg1 = "#000c12",
-    bg2 = "#021015",
-    bg3 = "#04191f",
-    bg4 = "#10252c",
-    bg5 = "#18323a",
-    bg6 = "#253f47",
+    bg = "#060808",
+    bg1 = "#070a0a",
+    bg2 = "#0b0e0f",
+    bg3 = "#141718",
+    bg4 = "#1f2223",
+    bg5 = "#2b2e30",
+    bg6 = "#383b3c",
     hidden = "#4f5759",
     subfg = "#98a0a3",
     fg = "#bebeba",
     emph = "#cececa",
-    op2 = "#c0beb0",
-    op1 = "#d0cec0",
-    op = "#e1dfd0",
+    op2 = "#bebeba",
+    op1 = "#cececa",
+    op = "#dfdeda",
   },
   web = {
     pink = "#ffc0cb",
