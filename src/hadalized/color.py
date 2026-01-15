@@ -9,9 +9,6 @@ from pydantic import PrivateAttr
 
 from hadalized.base import BaseNode
 
-# TODO: tests
-# 122, 152, 157, 167-172, 213, 217, 251
-
 type ColorField = ColorInfo | GamutInfo | str
 """A field value containing either full ColorInfo for every gamut,
 gamut specific color info, or a string representation of a color."""

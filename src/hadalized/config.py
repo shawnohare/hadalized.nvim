@@ -384,6 +384,7 @@ class Config(BaseNode):
     build_dir: Path = Path("./build")
     """Directory containing built theme files."""
     cache_dir: Path = Cache.default_dir
+    template_fs_dir: Path = Path("./templates")
     """Application cache directory."""
     cache_in_memory: bool = False
     builds: dict[str, BuildConfig] = Field(

@@ -18,11 +18,6 @@
 
 ---Base named relative to theme.
 ---@class (exact) BaseMap
----@field black     string Monochromatic.
----@field darkgray  string Monochromatic.
----@field gray      string Monochromatic.
----@field lightgray string Monochromatic.
----@field white     string Monochromatic.
 ---@field bg        string Main background.
 ---@field bg1     string Main background variant (non-focused).
 ---@field bg2       string Secondary background (status line, virtual).
@@ -47,6 +42,7 @@
 ---@field bright  HueMap The bright hue group.
 ---@field hl      HueMap The bright hue group.
 ---@field base    BaseMap Foregrounds and backgrounds.
+---@field web     table<string, string>
 
 
 -- Class below is more for easy documentation. Use vim.api.keyset.highlight

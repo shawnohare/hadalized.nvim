@@ -5,6 +5,7 @@ local M = {}
 ---@param conf Config
 ---@return table<string, vim.api.keyset.highlight>
 function M.make(palette, conf)
+    local web = palette.web
     local b = palette.base
     -- local bright = palette.bright
     local h = palette.hue
@@ -22,7 +23,7 @@ function M.make(palette, conf)
         Conceal = { fg=b.hidden }, -- placeholder characters substituted for concealed text (see 'conceallevel')
         Conditional = { fg=h.orange}, --  if, then, else, endif, switch, etp.
         Constant = { fg=h.magenta }, -- (preferred) any constant
-        CurSearch = { bg=hl.red, fg=b.black},
+        CurSearch = { bg=hl.red, fg=web.offblack},
         -- NOTE: Cursor seems to be overriden by what wezterm sets.
         Cursor = { bg=b.bg6, fg=b.emph }, -- character under the cursor
         lCursor = { bg=b.bg6, fg=h.red}, -- character under the cursor
@@ -58,7 +59,7 @@ function M.make(palette, conf)
         Function = { fg=h.blue}, -- function name (also: methods for classes)
         Identifier = { fg=h.yellow}, -- (preferred) any variable name
         Ignore = { fg=b.hidden }, -- (preferred) left blank, hidden  |hl-Ignore|
-        IncSearch = { bg=hl.blue, fg=b.black}, -- 'incsearch' highlighting; also used for the text replaced with ":s///c"
+        IncSearch = { bg=hl.blue, fg=web.offblack}, -- 'incsearch' highlighting; also used for the text replaced with ":s///c"
         Include = { fg=h.red, bold=conf.bold}, --  preprocessor #include
         Italic = { fg=nil, bg=nil, italic=conf.italic },
         Keyword = { fg=h.violet }, --  any other keyword
@@ -89,7 +90,7 @@ function M.make(palette, conf)
         Question = { fg=h.green }, -- |hit-enter| prompt and yes/no questions
         QuickFixLine = { }, -- Current |quickfix| item in the quickfix window. Combined with |hl-CursorLine| when the cursor is there.
         Repeat = { fg=h.orange }, --   for, do, while, etp.
-        Search = { bg=hl.yellow, fg=b.black }, -- Last search pattern highlighting (see 'hlsearch').  Also used for similar items that need to stand out.
+        Search = { bg=hl.yellow, fg=web.offblack }, -- Last search pattern highlighting (see 'hlsearch').  Also used for similar items that need to stand out.
         SignColumn = { bg=b.bg}, -- column where |signs| are displayed
         Special = { fg=h.red }, -- (preferred) any special symbol
         SpecialChar = { fg=h.red, bold=conf.bold }, --  special character in a constant
@@ -118,7 +119,7 @@ function M.make(palette, conf)
         Strikethrough = { strikethrough=true },
         String = { fg=h.cyan }, --   a string constant: "this is a string"
         Structure = { fg=h.green}, --  struct, union, enum, etp.
-        Substitute = { fg=b.black, bg=hl.yellow, italic=conf.italic}, -- |:substitute| replacement text highlighting
+        Substitute = { fg=web.offblack, bg=hl.yellow, italic=conf.italic}, -- |:substitute| replacement text highlighting
         Swap = { reverse=true },
         TabLine = { }, -- tab pages line, not active tab page label
         TabLineFill = { }, -- tab pages line, where there are no labels

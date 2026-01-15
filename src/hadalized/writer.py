@@ -1,6 +1,7 @@
 """Render templates and write outputs."""
 
 from contextlib import suppress
+from functools import cache
 from hashlib import blake2b
 from pathlib import Path
 from typing import TYPE_CHECKING, ClassVar
@@ -25,6 +26,21 @@ if TYPE_CHECKING:
     from hadalized.base import BaseNode
 
 
+@cache
+def get_fs_env(path: Path = Path("./templates")) -> Environment:
+    """Template environment that reads from a relative directory.
+
+    Returns:
+        A jinja2.Environment with a filesystem loader.
+
+    """
+    return Environment(
+        loader=FileSystemLoader(searchpath=path),
+        undefined=StrictUndefined,
+        autoescape=select_autoescape("html", "xml"),
+    )
+
+
 class Template:
     """Renders and writes templates."""
 
@@ -34,16 +50,13 @@ class Template:
         # autoescape=True,
         autoescape=select_autoescape("html", "xml"),
     )
-    _fs_env: ClassVar[Environment] = Environment(
-        loader=FileSystemLoader(searchpath="./templates"),
-        undefined=StrictUndefined,
-        autoescape=select_autoescape("html", "xml"),
-    )
+    _default_fs_env: ClassVar[Environment] = get_fs_env()
 
-    def __init__(self, name: str):
+    def __init__(self, name: str, fs_dir: Path | None = None):
         """Load template with the specified name."""
+        fs_env = get_fs_env(fs_dir) if fs_dir else self._default_fs_env
         try:
-            template = self._fs_env.get_template(name)
+            template = fs_env.get_template(name)
         except TemplateNotFound:
             template = self._package_env.get_template(name)
         self._template: JinjaTemplate = template
@@ -123,7 +136,7 @@ class ThemeWriter:
             A list of file paths that were generated.
 
         """
-        template = Template(config.template)
+        template = Template(config.template, self.config.template_fs_dir)
         target_dir = self.config.build_dir / config.output_path.parent
         target_dir.mkdir(parents=True, exist_ok=True)
         if config.context_type == "palette":

@@ -1,3 +1,5 @@
+import pytest
+
 from hadalized.cache import Cache
 
 
@@ -29,3 +31,9 @@ def test_add_in_memory(tmp_path):
         path = tmp_path / "test.txt"
         cache.add(path, "123")
         assert cache.get_hash(path) == "123"
+
+
+def test_exit_with_error():
+    with pytest.raises(ValueError):
+        with Cache(in_memory=True):
+            raise ValueError("bomb")

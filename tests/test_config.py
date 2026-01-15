@@ -1,10 +1,12 @@
 from hadalized.config import Config, TerminalConfig
 
 
-def test_config_defaults():
+def test_config_methods():
     conf = Config()
     assert conf.builds
     assert conf.palettes
+    assert conf.hex()
+    assert conf.css()
 
 
 # @pytest.mark.parametrize(

@@ -80,7 +80,7 @@ class PaletteColors(BaseNode):
     """Static named colors."""
 
 
-class Palette(PaletteMeta, PaletteColors):
+class Palette(PaletteColors, PaletteMeta):
     """A collection of hues and bases.
 
     The primary data structure used to render an application theme template.

@@ -1,3 +1,4 @@
+from pathlib import Path
 from typing import TYPE_CHECKING
 import pytest
 
@@ -11,7 +12,11 @@ _config = Config()
 
 @pytest.fixture
 def config(tmp_path) -> Config:
-    return Config(build_dir=tmp_path, cache_in_memory=True)
+    return Config(
+        build_dir=tmp_path,
+        template_fs_dir=Path(__file__).parent,
+        cache_in_memory=True,
+    )
 
 
 @pytest.fixture

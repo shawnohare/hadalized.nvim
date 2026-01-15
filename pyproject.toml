@@ -81,6 +81,10 @@ select = [
     "UP",       # Warn if certain things can changed due to newer Python versions
     "W",        # PyCodeStyle warnings
 ]
+ignore = [
+    "D203",  # Conflicts with google style docstrings and D211
+    "D213",  # Conflicts with google style docstrings and D212
+]
 
 [tool.ruff.format]
 preview = true
