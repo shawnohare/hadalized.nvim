@@ -1,0 +1,15 @@
+
+{% for pal_key, pal in context.palettes.items() -%}
+[palettes."{{pal_key}}"]
+name = "{{ pal.name }}"
+desc = "{{ pal.desc }}"
+gamut = "{{ pal.gamut }}"
+mode = "{{ pal.mode }}"
+
+{% for cmap_key, cmap in pal.colors -%}
+[palettes."{{pal_key}}"."{{cmap_key}}"]
+{% for color_name, color in cmap -%}
+"{{color_name}}" = "{{color.}}"
+{% endfor -%}
+{% endfor -%}
+{% endfor -%}

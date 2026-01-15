@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Palette Colors for Palette {{context.name}}</title>
+</head>
+
+<style>
+.box {
+  display: inline-block;
+  width: 60px;
+  height: 60px;
+  border: 1px solid rgba(0, 0, 0, .2);
+}
+</style>
+
+<h1>Palette Metadata for {{context.name}}</h1>
+<ul>
+    <li>name  = {{context.name}}</li>
+    <li>desc  = {{context.desc}}</li>
+    <li>mode  = {{context.mode}}</li>
+    <li>gamut = {{context.gamut}}</li>
+</ul>
+
+<h1>Hues</h1>
+<ul>
+    {% for hue_name, code in context.hue -%}
+    <li><div class="box" style="background: {{code}}"></div> {{hue_name}}</li>
+    {% endfor %}
+</ul>
+
+<h1>Bases</h1>
+<ul>
+    {% for hue_name, code in context.base -%}
+    <li><div class="box" style="background: {{code}}"></div> {{hue_name}}</li>
+    {% endfor %}
+</ul>
+
+<h1>Highlights</h1>
+<ul>
+    {% for hue_name, code in context.hl -%}
+    <li><div class="box" style="background: {{code}}"></div> {{hue_name}}</li>
+    {% endfor %}
+</ul>
+
+<h1>Brights</h1>
+<ul>
+    {% for hue_name, code in context.bright -%}
+    <li><div class="box" style="background: {{code}}"></div> {{hue_name}}</li>
+    {% endfor %}
+</ul>

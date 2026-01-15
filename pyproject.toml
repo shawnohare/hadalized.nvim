@@ -1,0 +1,90 @@
+[project]
+name = "hadalized"
+version = "0.1.0"
+description = "Hadalized theme builder."
+readme = "README.md"
+authors = [
+    { name = "Shawn O'Hare", email = "shawn@shawnohare.com" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "coloraide>=6.2",
+    "jinja2>=3.1.6",
+    "loguru>=0.7.3",
+    "luadata>=1.0.5",
+    "pydantic>=2.12.5",
+    "xdg-base-dirs>=6.0.2",
+]
+
+[project.scripts]
+hadalized = "hadalized:writer.run"
+
+[build-system]
+requires = ["uv_build>=0.9.25,<0.10.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "ipython>=9.8.0",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.14.10",
+    "ty>=0.0.8",
+]
+
+[tool.pytest.ini_options]
+# add --cov-report=html to also get html
+addopts = "--cov-report=term-missing --cov=src -vvv -ra -q"
+testpaths = [
+    "tests",
+]
+
+[tool.ruff.lint]
+# select = ["ALL"]
+preview = true
+select = [
+    "A",        # detect shadowed builtins
+    "B",        # flake bugbear
+    "BLE",      # disallow catch-all exceptions
+    "C4",       # Catch incorrect use of comprehensions, dict, list, etc
+    "C90",      # mccabe complexity checks
+    "D",        # Docstring style
+    "DOC",      # Docstring linting
+    "DTZ",      # require strict timezone manipulation with datetime
+    "E",        # PyCodeStyle errors
+    "F",        # Pyflakes rules
+    "FA",       # Enforce from __future__ import annotations
+    "FBT",      # detect boolean traps
+    "FURB",     # refurb
+    "I",        # Sort imports properly
+    "ICN",      # Use common import conventions
+    "ISC",      # Good use of string concatenation
+    "N",        # enforce naming conventions, e.g. ClassName vs function_name
+    "NPY",      # Some numpy-specific things"COM", # enforce trailing comma rules
+    "PERF",     # performance linting
+    "PLE",      # pylint errors
+    "PLR",      # pylint refactor
+    "PLW",      # pylint warnings
+    "PT",       # pytest style
+    "PTH",      # Use pathlib instead of os.path
+    "PYI",      # Some typing annotation checks
+    "PIE",      # Some unnecessary operators
+    "Q",        # quotes
+    "RET",      # Good return practices
+    "RUF",      # Ruff specific rules
+    "S",        # disallow things like "exec"; also restricts "assert"
+    "SIM",      # Common simplification rules
+    "TC",       # Enforce importing certain types in a TYPE_CHECKING block
+    # "TD",       # Be diligent with TODO comments
+    "TID",      # Some good import practices
+    # "TRY",      # exception style
+    "UP",       # Warn if certain things can changed due to newer Python versions
+    "W",        # PyCodeStyle warnings
+]
+ignore = [
+    "D203",  # Conflicts with google style docstrings and D211
+    "D213",  # Conflicts with google style docstrings and D212
+]
+
+[tool.ruff.format]
+preview = true
