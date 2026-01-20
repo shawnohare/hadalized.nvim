@@ -1,4 +1,4 @@
--- Auto-generated neovim colorscheme.
+-- Auto-generated from hadalized v{{context.package_version}}
 -- WARNING: Do not edit by hand.
 
 -- By setting our module to nil, we clear lua's cache,

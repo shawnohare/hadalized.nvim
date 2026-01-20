@@ -5,7 +5,7 @@ from contextlib import suppress
 from shutil import rmtree
 from typing import TYPE_CHECKING, Self
 
-import xdg_base_dirs
+import xdg_base_dirs as xdg
 from loguru import logger
 
 if TYPE_CHECKING:
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 class CacheDB:
     """Base class for cache layers that utilize a sqlite db."""
 
-    default_dir: ClassVar[Path] = xdg_base_dirs.xdg_cache_home() / "hadalized"
+    default_dir: ClassVar[Path] = xdg.xdg_cache_home() / "hadalized"
 
     def __init__(self, cache_dir: Path | None = default_dir):
         """Create a new instance.
