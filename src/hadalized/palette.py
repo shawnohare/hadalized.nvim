@@ -60,6 +60,8 @@ class PaletteMeta(BaseNode):
 
     name: str
     desc: str
+    version: str = "2.0.2"
+    """Version of the palette color definitions."""
     mode: Literal["dark", "light"]
     """Whether the theme is dark or light mode."""
     gamut: Literal["srgb", "display-p3"] = "srgb"
@@ -96,7 +98,11 @@ class Palette(PaletteColors, PaletteMeta):
         """Palette metadata."""
         if self._meta is None:
             self._meta = PaletteMeta(
-                name=self.name, desc=self.desc, mode=self.mode, gamut=self.gamut
+                name=self.name,
+                desc=self.desc,
+                version=self.version,
+                mode=self.mode,
+                gamut=self.gamut,
             )
         return self._meta
 
