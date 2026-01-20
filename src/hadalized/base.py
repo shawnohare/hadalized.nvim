@@ -1,5 +1,6 @@
 """Base container for all model classes."""
 
+from importlib.metadata import version
 from typing import ClassVar, Self
 
 from pydantic import BaseModel, ConfigDict, PrivateAttr
@@ -11,6 +12,8 @@ class BaseNode(BaseModel):
     model_config: ClassVar[ConfigDict] = ConfigDict(
         frozen=True,
     )
+    package_version: str = version("hadalized")
+    _dumped: dict | None = PrivateAttr(None)
     _bytes: bytes | None = PrivateAttr(None)
 
     def __len__(self) -> int:
@@ -30,6 +33,13 @@ class BaseNode(BaseModel):
 
         """
         return getattr(self, key.replace("-", "_"))
+
+    @property
+    def data(self) -> dict:
+        """Cached model dump."""
+        if self._dumped is None:
+            self._dumped = self.model_dump()
+        return self._dumped
 
     def model_dump_lua(self) -> str:
         """Dump the model as a lua table.

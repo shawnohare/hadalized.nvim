@@ -3,6 +3,7 @@
 from pathlib import Path
 from typing import Literal, Self
 
+import xdg_base_dirs as xdg
 from pydantic import Field, PrivateAttr
 
 from hadalized.cache import Cache
@@ -359,6 +360,7 @@ class BuildConfig(BaseNode):
                 context_type="palette",
                 output_path=Path("wezterm/{name}.toml"),
                 color_type=ColorType.hex,
+                copy_to=xdg.xdg_config_home() / "wezterm" / "{name}.toml",
             ),
             "starship": BuildConfig(
                 template="starship.toml",
@@ -392,10 +394,10 @@ class Config(BaseNode):
     """Directory containing built theme files."""
     cache_dir: Path | None = Cache.default_dir
     """Application cache directory. Set to `None` to use an in-memory cache."""
-    copy_dir: Path | None = Path("./")
-    """A copy dir prefix. If set, any files built with a `copy_to` directive
-    will be placed in this directory. When set to None, no files will be
-    copied."""
+    copy_files: bool = True
+    """If set, any files built with a `copy_to` directive will be copied."""
+    copy_dir: Path | None = None
+    """Prefix dir for copies. Typically set in debug / test situations."""
     template_fs_dir: Path = Path("./templates")
     """Directory where templates will be searched for. If a template is not
     found in this directory, it will be loaded from those defined in the

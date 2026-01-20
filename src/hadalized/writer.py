@@ -97,19 +97,6 @@ class Template:
             self._bytes = data
         return self._bytes
 
-    def hash(self, context: BaseNode) -> str:
-        """Compute a proxy for the hash of a rendered template.
-
-        Returns:
-            A hash hexdigest of the raw template and the context that would be
-            used to render it. This hash is different from a hash of the rendered
-            template, but is invariant with respect to it. In other words,
-            if the output file bytes change then so too will this hash.
-
-        """
-        data = self.encode() + b":::" + context.encode()
-        return blake2b(data, digest_size=32).hexdigest()
-
 
 class ThemeWriter:
     """Generate application theme files."""
@@ -130,44 +117,69 @@ class ThemeWriter:
         self.build_dir: Path = self.config.build_dir
         self.palettes = list(self.config.palettes.values())
 
-    def build(self, config: BuildConfig) -> list[Path]:
+    @staticmethod
+    def _fmt_path(path: str | Path, context: BaseNode) -> Path:
+        return Path(str(path).format(**context.data))
+
+    @staticmethod
+    def _hash(template: Template, context: BaseNode) -> str:
+        data = template.encode() + b":::" + context.encode()
+        return blake2b(data, digest_size=32).hexdigest()
+
+    def _should_generate(self, path: Path, digest: str) -> bool:
+        """Check whether a file should be generated.
+
+        Returns:
+            True if the file should be generated again due to template changes,
+            context changes, or non-existence of target file.
+
+        """
+        return not path.exists() or self.cache.get_hash(path) != digest
+
+    def build(self, build_config: BuildConfig) -> list[Path]:
         """Generate color theme files for a specific app.
 
         Returns:
             A list of file paths that were generated.
 
         """
-        template = Template(config.template, self.config.template_fs_dir)
-        target_dir = self.config.build_dir / config.output_path.parent
-        target_dir.mkdir(parents=True, exist_ok=True)
-        if config.context_type == "palette":
+        config = self.config
+        template = Template(build_config.template, config.template_fs_dir)
+        written: list[Path] = []
+        if build_config.context_type == "palette":
             context_nodes = self.palettes
         else:
-            context_nodes = [self.config]
-        written: list[Path] = []
+            context_nodes = [config]
+
         for node in context_nodes:
-            dump = node.model_dump()
-            path = target_dir / config.output_path.name.format(**dump)
-            context = node.to(config.color_type)
+            path: Path = config.build_dir / self._fmt_path(
+                build_config.output_path, node
+            )
+            path.parent.mkdir(parents=True, exist_ok=True)
+            context = node.to(build_config.color_type)
+            digest = self._hash(template, context)
 
             # Check whether we can skip generating the file.
-            digest = template.hash(context)
-            if not path.exists() or self.cache.get_hash(path) != digest:
+            if self._should_generate(path, digest):
                 logger.info(f"Writing {path}")
-                path.write_text(template.render(context))
+                path.write_text(template.render(context), encoding="utf-8")
                 self.cache.add(path, digest)
                 written.append(path)
             else:
                 logger.info(f"Already generated {path}")
 
             # Copy files if necessary.
-            if config.copy_to is not None and self.config.copy_dir is not None:
-                copy_dir = self.config.copy_dir / config.copy_to.parent
-                copy_path = copy_dir / config.copy_to.name.format(**dump)
-                if not copy_path.exists():
-                    copy_dir.mkdir(parents=True, exist_ok=True)
+            if build_config.copy_to is not None and config.copy_files:
+                copy_path: Path = self._fmt_path(build_config.copy_to, node)
+                if config.copy_dir is not None:
+                    if copy_path.is_absolute():
+                        copy_path = copy_path.relative_to("/")
+                    copy_path = config.copy_dir / copy_path
+                if self._should_generate(copy_path, digest):
+                    copy_path.parent.mkdir(parents=True, exist_ok=True)
                     logger.info(f"Copying {path} to {copy_path}")
                     shutil.copy(path, copy_path)
+                    self.cache.add(copy_path, digest)
                 else:
                     logger.info(f"Already copied {copy_path}")
 

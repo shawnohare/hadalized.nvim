@@ -4,7 +4,6 @@ from hadalized.config import Config
 from hadalized.writer import ThemeWriter, run
 
 
-
 def test_theme_writer_run(config: Config):
     """Tests the main ThemeWriter.run"""
     with ThemeWriter(config) as writer:
