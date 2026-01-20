@@ -5,6 +5,8 @@ from typing import ClassVar, Self
 
 from pydantic import BaseModel, ConfigDict, PrivateAttr
 
+_version = version("hadalized")
+
 
 class BaseNode(BaseModel):
     """An extension of pydantic.BaseModel that all model classes inherit."""
@@ -12,9 +14,14 @@ class BaseNode(BaseModel):
     model_config: ClassVar[ConfigDict] = ConfigDict(
         frozen=True,
     )
-    package_version: str = version("hadalized")
+
     _dumped: dict | None = PrivateAttr(None)
     _bytes: bytes | None = PrivateAttr(None)
+
+    @property
+    def package_version(self) -> str:
+        """The hadalized package version."""
+        return _version
 
     def __len__(self) -> int:
         """Length.

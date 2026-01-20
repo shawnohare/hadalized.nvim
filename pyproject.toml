@@ -1,6 +1,6 @@
 [project]
 name = "hadalized"
-version = "0.2.0"
+version = "0.2.1"
 description = "Hadalized theme builder."
 readme = "README.md"
 authors = [

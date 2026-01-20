@@ -1,4 +1,4 @@
--- Auto-generated from hadalized v0.2.0
+-- Auto-generated from hadalized v0.2.1
 -- WARNING: Do not edit by hand.
 
 -- By setting our module to nil, we clear lua's cache,
@@ -17,13 +17,12 @@
 
 ---@type Palette
 local palette = {
-  package_version = "0.2.0",
   name = "hadalized-gray",
   desc = "Dark theme variant with more grayish backgrounds.",
+  version = "2.0.2",
   mode = "dark",
   gamut = "srgb",
   hue = {
-    package_version = "0.2.0",
     red = "#d94543",
     orange = "#d0750a",
     yellow = "#b0a03c",
@@ -38,7 +37,6 @@ local palette = {
     rose = "#d2849c",
   },
   bright = {
-    package_version = "0.2.0",
     red = "#fa5654",
     orange = "#fa8f00",
     yellow = "#dcbd00",
@@ -53,7 +51,6 @@ local palette = {
     rose = "#ff8eb8",
   },
   hl = {
-    package_version = "0.2.0",
     red = "#f8a49d",
     orange = "#ffbe8a",
     yellow = "#ffef96",
@@ -68,7 +65,6 @@ local palette = {
     rose = "#ff9cbf",
   },
   base = {
-    package_version = "0.2.0",
     bg = "#060808",
     bg1 = "#070a0a",
     bg2 = "#0b0e0f",
@@ -85,7 +81,6 @@ local palette = {
     op = "#dfdeda",
   },
   web = {
-    package_version = "0.2.0",
     pink = "#ffc0cb",
     lightpink = "#ffb6c1",
     snow = "#fffafa",

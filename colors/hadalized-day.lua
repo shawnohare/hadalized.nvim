@@ -1,4 +1,4 @@
--- Auto-generated from hadalized v0.2.0
+-- Auto-generated from hadalized v0.2.1
 -- WARNING: Do not edit by hand.
 
 -- By setting our module to nil, we clear lua's cache,
@@ -17,13 +17,12 @@
 
 ---@type Palette
 local palette = {
-  package_version = "0.2.0",
   name = "hadalized-day",
   desc = "Light theme variant with sunny backgrounds.",
+  version = "2.0.2",
   mode = "light",
   gamut = "srgb",
   hue = {
-    package_version = "0.2.0",
     red = "#c73335",
     orange = "#d0750a",
     yellow = "#a0902a",
@@ -38,7 +37,6 @@ local palette = {
     rose = "#b96d85",
   },
   bright = {
-    package_version = "0.2.0",
     red = "#fa5654",
     orange = "#fa8f00",
     yellow = "#dcbd00",
@@ -53,7 +51,6 @@ local palette = {
     rose = "#ff8eb8",
   },
   hl = {
-    package_version = "0.2.0",
     red = "#f8a49d",
     orange = "#ffbe8a",
     yellow = "#ffef96",
@@ -68,7 +65,6 @@ local palette = {
     rose = "#ff9cbf",
   },
   base = {
-    package_version = "0.2.0",
     bg = "#fffef6",
     bg1 = "#fdfcf5",
     bg2 = "#f1efe0",
@@ -85,7 +81,6 @@ local palette = {
     op = "#00090e",
   },
   web = {
-    package_version = "0.2.0",
     pink = "#ffc0cb",
     lightpink = "#ffb6c1",
     snow = "#fffafa",
