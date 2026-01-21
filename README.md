@@ -26,7 +26,8 @@ return {
 ## Theme generation
 
 The palettes defined in [colors/*](./colors) are generated using the
-`hadalized` theme builder python application.
+[hadalized](https://github.com/shawnohare/hadalized) theme builder python
+application.
 
 To generate all theme files, assuming `uv` and `just` are installed
 
