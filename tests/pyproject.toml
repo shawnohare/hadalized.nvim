@@ -1,4 +1,0 @@
-[tool.ruff.lint]
-ignore = [
-    "S",       # Ignore asserts in tests
-]

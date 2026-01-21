@@ -1,1 +1,0 @@
-{{context.model_dump_json(indent=4)}}

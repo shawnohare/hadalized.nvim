@@ -25,20 +25,18 @@ return {
 
 ## Theme generation
 
-The underlying color palettes are defined as oklch values in the included
-python [hadalized.config](./src/hadalized/config.py) module. The `hadalied`
-python package generates themes for various applications, which can be
-copied to their respective application config folders (or dotfiles repo)
-manually. As the python application is generated
-
+The palettes defined in [colors/*](./colors) are generated using the
+`hadalized` theme builder python application.
 
 To generate all theme files, assuming `uv` and `just` are installed
 
 ```sh
+git clone https://github.com/shawnohare/hadalized
 just
 ```
+This will invoke the `hadalized` application and copy the built neovim
+files into `./colors`.
 
-Generated themes are placed in `./build`.
 
 ### Overriding configuration defaults
 
