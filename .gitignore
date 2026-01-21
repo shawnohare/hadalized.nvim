@@ -1,5 +1,8 @@
+# hadalized specific
+hadalized/
 *.db
 tmp
+
 # Compiled Lua sources
 luac.out
 
