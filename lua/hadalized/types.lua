@@ -33,6 +33,15 @@
 ---@field op1       string Foreground or opposite mode secondary bg.
 ---@field op        string Opposite mode main bg.
 
+
+--- Grayscale colors.
+---@class (exact) Grayscale
+---@field black       string Grayscale black.
+---@field darkgray    string Grayscale darker gray.
+---@field neutralgray string Grayscale gray / neutral gray.
+---@field lightgray   string Grayscale light gray.
+---@field white       string Grayscale white.
+
 ---@class (exact) Palette
 ---@field name    string The palette name / variant.
 ---@field desc    string? Brief description about the theme.
@@ -42,7 +51,7 @@
 ---@field bright  HueMap The bright hue group.
 ---@field hl      HueMap The bright hue group.
 ---@field base    BaseMap Foregrounds and backgrounds.
----@field web     table<string, string>
+---@field gs      Grayscale Named grayscale colors.
 
 
 -- Class below is more for easy documentation. Use vim.api.keyset.highlight
