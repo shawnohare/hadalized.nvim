@@ -1,15 +1,11 @@
 local M = {}
 
 ---Produce a theme table from which highlights are set.
----@param palette Palette
+---@param p Palette
 ---@param conf Config
 ---@return table<string, vim.api.keyset.highlight>
-function M.make(palette, conf)
-    local web = palette.web
-    local b = palette.base
-    -- local bright = palette.bright
-    local h = palette.hue
-    local hl = palette.hl
+function M.make(p, conf)
+    local h = p.hue
     ---@type table<string, vim.api.keyset.highlight>
     return {
         Boolean = {
@@ -18,15 +14,15 @@ function M.make(palette, conf)
             --  a boolean constant: TRUE, false
         },
         Character = { fg=h.cyan }, --  a character constant: 'c'
-        ColorColumn = { bg=b.bg2 }, -- used for the columns set with 'colorcolumn'
-        Comment = { fg=b.subfg }, -- any comment
-        Conceal = { fg=b.hidden }, -- placeholder characters substituted for concealed text (see 'conceallevel')
+        ColorColumn = { bg=p.base.bg2 }, -- used for the columns set with 'colorcolumn'
+        Comment = { fg=p.base.subfg }, -- any comment
+        Conceal = { fg=p.base.hidden }, -- placeholder characters substituted for concealed text (see 'conceallevel')
         Conditional = { fg=h.orange}, --  if, then, else, endif, switch, etp.
         Constant = { fg=h.magenta }, -- (preferred) any constant
-        CurSearch = { bg=hl.red, fg=web.offblack},
+        CurSearch = { bg=p.hl.red, fg=p.gs.black},
         -- NOTE: Cursor seems to be overriden by what wezterm sets.
-        Cursor = { bg=b.bg6, fg=b.emph }, -- character under the cursor
-        lCursor = { bg=b.bg6, fg=h.red}, -- character under the cursor
+        Cursor = { bg=p.base.bg6, fg=p.base.emph }, -- character under the cursor
+        lCursor = { bg=p.base.bg6, fg=h.red}, -- character under the cursor
         CursorColumn = { }, -- Screen-column at the cursor, when 'cursorcolumn' is set.
         CursorIM = { }, -- like Cursor, but used when in IME mode |CursorIM|
         CursorLine = {
@@ -35,8 +31,8 @@ function M.make(palette, conf)
             -- Low-priority if foreground (ctermfg OR guifg) is not set.
         },
         CursorLineNr = {
-            bg=b.bg5,
-            fg=b.op,
+            bg=p.base.bg5,
+            fg=p.base.op,
             -- bold=conf.bold,
             -- reverse = true,
             -- Like LineNr when 'cursorline' or 'relativenumber' is set for the cursor line.
@@ -49,49 +45,49 @@ function M.make(palette, conf)
         DiffDelete = { fg=h.red }, -- diff mode: Deleted line |diff.txt|
         DiffText = { fg=h.blue, underline=conf.underline}, -- diff mode: Changed text within a changed line |diff.txt|
         Directory = { fg=h.blue, bold=conf.bold}, -- directory names (and other special names in listings)
-        EndOfBuffer = { fg=b.subfg }, -- filler lines (~) after the end of the buffer.  By default, this is highlighted like |hl-NonText|.
+        EndOfBuffer = { fg=p.base.subfg }, -- filler lines (~) after the end of the buffer.  By default, this is highlighted like |hl-NonText|.
         Error = { fg=h.red }, -- (preferred) any erroneous construct
         ErrorMsg = { fg=h.red, bold=conf.bold}, -- error messages on the command line
         Exception = { fg=h.magenta }, --  try, catch, throw
         Float = { fg=h.violet }, --    a floating point constant: 2.3e10
         FoldColumn = { }, -- 'foldcolumn'
-        Folded = { bg=b.bg3 }, -- line used for closed folds
+        Folded = { bg=p.base.bg3 }, -- line used for closed folds
         Function = { fg=h.blue}, -- function name (also: methods for classes)
         Identifier = { fg=h.yellow}, -- (preferred) any variable name
-        Ignore = { fg=b.hidden }, -- (preferred) left blank, hidden  |hl-Ignore|
-        IncSearch = { bg=hl.blue, fg=web.offblack}, -- 'incsearch' highlighting; also used for the text replaced with ":s///c"
+        Ignore = { fg=p.base.hidden }, -- (preferred) left blank, hidden  |hl-Ignore|
+        IncSearch = { bg=p.hl.blue, fg=p.gs.black}, -- 'incsearch' highlighting; also used for the text replaced with ":s///c"
         Include = { fg=h.red, bold=conf.bold}, --  preprocessor #include
         Italic = { fg=nil, bg=nil, italic=conf.italic },
         Keyword = { fg=h.violet }, --  any other keyword
         Label = { fg=h.green }, --    case, default, etp.
-        LineNr = { bg=b.bg2, fg=b.subfg}, -- Line number for ":number" and ":#" commands, and when 'number' or 'relativenumber' option is set.
+        LineNr = { bg=p.base.bg2, fg=p.base.subfg}, -- Line number for ":number" and ":#" commands, and when 'number' or 'relativenumber' option is set.
         Macro = { fg=h.violet, italic=conf.italic }, --   preprocessor #define
         MatchParen = { fg=h.red, bold=conf.bold }, -- The character under the cursor or just before it, if it is a paired bracket, and its match. |pi_paren.txt|
         ModeMsg = { fg=h.orange, bold=conf.bold }, -- 'showmode' message (e.g., "-- INSERT -- ")
         MoreMsg = { fg=h.green }, -- |more-prompt|
-        MsgArea = { bg=b.bg2 }, -- Area for messages and cmdline
+        MsgArea = { bg=p.base.bg2 }, -- Area for messages and cmdline
         MsgSeparator = { }, -- Separator for scrolled messages, `msgsep` flag of 'display'
-        NonText = { fg=b.hidden }, -- '@' at the end of the window, characters from 'showbreak' and other characters that do not really exist in the text (e.g., ">" displayed when a double-wide character doesn't fit at the end of the line). See also |hl-EndOfBuffer|.
-        Normal = { fg=b.fg, bg=b.bg }, -- normal text
-        NormalFloat = { fg=b.fg, bg=b.bg2}, -- Normal text in floating windows.
+        NonText = { fg=p.base.hidden }, -- '@' at the end of the window, characters from 'showbreak' and other characters that do not really exist in the text (e.g., ">" displayed when a double-wide character doesn't fit at the end of the line). See also |hl-EndOfBuffer|.
+        Normal = { fg=p.base.fg, bg=p.base.bg }, -- normal text
+        NormalFloat = { fg=p.base.fg, bg=p.base.bg2}, -- Normal text in floating windows.
         NormalNC = {
-            fg=b.fg,
-            bg=b.bg1,
+            fg=p.base.fg,
+            bg=p.base.bg1,
              -- normal text in non-current windows
         },
         Number = { fg=h.violet }, --   a number constant: 234, 0xff
         Operator = { fg=h.azure }, -- "sizeof", "+", "*", etp.
-        Pmenu = { bg=b.bg2 }, -- Popup menu: normal item.
+        Pmenu = { bg=p.base.bg2 }, -- Popup menu: normal item.
         PmenuSbar = { }, -- Popup menu: scrollbar.
-        PmenuSel = { bg=b.bg3 }, -- Popup menu: selected item.
+        PmenuSel = { bg=p.base.bg3 }, -- Popup menu: selected item.
         PmenuThumb = { }, -- Popup menu: Thumb of the scrollbar.
         PreCondit = { fg=h.magenta }, --  preprocessor #if, #else, #endif, etp.
         PreProc = { fg=h.orange }, -- (preferred) generic Preprocessor
         Question = { fg=h.green }, -- |hit-enter| prompt and yes/no questions
         QuickFixLine = { }, -- Current |quickfix| item in the quickfix window. Combined with |hl-CursorLine| when the cursor is there.
         Repeat = { fg=h.orange }, --   for, do, while, etp.
-        Search = { bg=hl.yellow, fg=web.offblack }, -- Last search pattern highlighting (see 'hlsearch').  Also used for similar items that need to stand out.
-        SignColumn = { bg=b.bg}, -- column where |signs| are displayed
+        Search = { bg=p.hl.yellow, fg=p.gs.black }, -- Last search pattern highlighting (see 'hlsearch').  Also used for similar items that need to stand out.
+        SignColumn = { bg=p.base.bg}, -- column where |signs| are displayed
         Special = { fg=h.red }, -- (preferred) any special symbol
         SpecialChar = { fg=h.red, bold=conf.bold }, --  special character in a constant
         SpecialComment = { fg=h.orange }, -- special things inside a comment
@@ -103,14 +99,14 @@ function M.make(palette, conf)
         Standout = { standout=true },
         Statement = { fg=h.yellow }, -- (preferred) any statement
         StatusLine = {
-            bg=b.bg2,
-            fg=b.fg,
+            bg=p.base.bg2,
+            fg=p.base.fg,
             -- status line of current window
         },
         StatusLineNC = {
-            bg=b.bg3,
+            bg=p.base.bg3,
             -- bg=h.red,
-            fg=b.hidden,
+            fg=p.base.hidden,
             -- status lines of not-current windows
             -- NOTE: if this is equal to -- "StatusLine" then Vim will use
             -- "^^^" in the current window status line.
@@ -119,23 +115,23 @@ function M.make(palette, conf)
         Strikethrough = { strikethrough=true },
         String = { fg=h.cyan }, --   a string constant: "this is a string"
         Structure = { fg=h.green}, --  struct, union, enum, etp.
-        Substitute = { fg=web.offblack, bg=hl.yellow, italic=conf.italic}, -- |:substitute| replacement text highlighting
+        Substitute = { fg=p.gs.black, bg=p.hl.yellow, italic=conf.italic}, -- |:substitute| replacement text highlighting
         Swap = { reverse=true },
         TabLine = { }, -- tab pages line, not active tab page label
         TabLineFill = { }, -- tab pages line, where there are no labels
         TabLineSel = { }, -- tab pages line, active tab page label
         Tag = { fg=h.blue, underline=true}, --    you can use CTRL-] on this
-        TermCursor = { fg=b.op1 }, -- cursor in a focused terminal
+        TermCursor = { fg=p.base.op1 }, -- cursor in a focused terminal
         TermCursorNC = { }, -- cursor in an unfocused terminal
-        Title = { fg=b.fg }, -- titles for output from ":set all", ":autocmd" etp.
+        Title = { fg=p.base.fg }, -- titles for output from ":set all", ":autocmd" etp.
         Todo = { fg=h.yellow, bold=conf.bold }, -- (preferred) anything that needs extra attention; mostly the keywords TODO FIXME and XXX
         Type = { fg=h.yellow }, -- (preferred) int, long, char, etp.
         Typedef = { fg=h.violet }, --  A typedef
-        VertSplit = { fg=b.bg6 }, -- the column separating vertically split windows
-        Visual = { bg=b.bg3 }, -- Visual mode selection
-        VisualNOS = { bg=b.bg3 }, -- Visual mode selection when vim is "Not Owning the Selection".
+        VertSplit = { fg=p.base.bg6 }, -- the column separating vertically split windows
+        Visual = { bg=p.base.bg3 }, -- Visual mode selection
+        VisualNOS = { bg=p.base.bg3 }, -- Visual mode selection when vim is "Not Owning the Selection".
         WarningMsg = { fg=h.red }, -- warning messages
-        Whitespace = { fg=b.subfg}, -- "nbsp", "space", "tab" and "trail" in 'listchars'
+        Whitespace = { fg=p.base.subfg}, -- "nbsp", "space", "tab" and "trail" in 'listchars'
         WildMenu = { }, -- current match in 'wildmenu' completion
         -- -------------------------------------------------------------------
         -- Treesitter Groups
@@ -161,7 +157,7 @@ function M.make(palette, conf)
         ["@diff.plus"] = { fg=h.green },
         ["@diff.minus"] = { fg=h.red },
         ["@diff.delta"] = { fg=h.yellow },
-        ['@emphasis'] = { fg=b.fg, italic=conf.italic},    -- For text to be represented with emphasis.
+        ['@emphasis'] = { fg=p.base.fg, italic=conf.italic},    -- For text to be represented with emphasis.
         ['@environment'] = { fg=h.violet }, -- text environments in markup languages, e.g.,egin in LaTeX.
         ['@environment.name'] = { fg=h.yellow }, -- e.g., theorem inegin                               {theorem} block in LaTeX.
         ['@error'] = { fg=h.red },
@@ -242,15 +238,15 @@ function M.make(palette, conf)
         ['@tag.builtin'] = { fg=h.magenta, bold=conf.bold },    -- Tags like html tag names.
         ['@tag.attribute'] = { fg=h.magenta },    -- html tag attribute
         ['@tag.delimter'] = { link='Delimiter' },    -- Tag delimiter like `<` `>` `/`
-        ['@text'] = { fg=b.fg },    -- For strings considered text in a markup language.
-        ['@text.reference'] = { fg=b.subfg }, -- footnote, citations, etp.
-        ['@title'] = { fg=b.emph },    -- Text that is part of a title.
+        ['@text'] = { fg=p.base.fg },    -- For strings considered text in a markup language.
+        ['@text.reference'] = { fg=p.base.subfg }, -- footnote, citations, etp.
+        ['@title'] = { fg=p.base.emph },    -- Text that is part of a title.
         ['@type'] = { link='Type' },    -- For types.
         ['@type.builtin'] = { fg=h.yellow, italic=conf.italic},
         ['@type.definition'] = { link = "Typedef" },  -- typedef
         ['@underline'] = { underline=true },
         ['@uri'] = { fg=h.blue, underline=true },
-        ['@variable'] = { fg=b.fg},    -- Any variable name that does not have another highlight.
+        ['@variable'] = { fg=p.base.fg},    -- Any variable name that does not have another highlight.
         ['@variable.builtin'] = { fg=h.orange, italic=conf.italic},    -- Variable names that are defined by the languages, like `this` or `self`.
         ["@variable.parameter"] = { fg=h.orange},          -- parameters of a function
         ["@variable.parameter.builtin"] = { fg=h.magenta, italic=conf.italic },  -- special parameters (e.g. `_`, `it`)
